@@ -1,0 +1,121 @@
+package cl.textilcircular.view
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+
+@Composable
+fun MainScreen() {
+
+    var opcionSeleccionada by remember {
+        mutableIntStateOf(0)
+    }
+
+    Scaffold(
+
+        bottomBar = {
+
+            NavigationBar {
+
+                NavigationBarItem(
+                    selected = opcionSeleccionada == 0,
+                    onClick = {
+                        opcionSeleccionada = 0
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Inicio"
+                        )
+                    },
+                    label = {
+                        Text("Inicio")
+                    }
+                )
+
+                NavigationBarItem(
+                    selected = opcionSeleccionada == 1,
+                    onClick = {
+                        opcionSeleccionada = 1
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.List,
+                            contentDescription = "Catálogo"
+                        )
+                    },
+                    label = {
+                        Text("Catálogo")
+                    }
+                )
+
+                NavigationBarItem(
+                    selected = opcionSeleccionada == 2,
+                    onClick = {
+                        opcionSeleccionada = 2
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Email,
+                            contentDescription = "Mensajes"
+                        )
+                    },
+                    label = {
+                        Text("Mensajes")
+                    }
+                )
+
+                NavigationBarItem(
+                    selected = opcionSeleccionada == 3,
+                    onClick = {
+                        opcionSeleccionada = 3
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Perfil"
+                        )
+                    },
+                    label = {
+                        Text("Perfil")
+                    }
+                )
+            }
+        }
+
+    ) { paddingValues ->
+
+        when (opcionSeleccionada) {
+
+            0 -> PantallaInicio(
+                modifier = Modifier.padding(paddingValues)
+            )
+
+            1 -> PantallaCatalogo(
+                modifier = Modifier.padding(paddingValues)
+            )
+
+            2 -> PantallaMensajes(
+                modifier = Modifier.padding(paddingValues)
+            )
+
+            3 -> PantallaPerfil(
+                modifier = Modifier.padding(paddingValues)
+            )
+        }
+    }
+}
