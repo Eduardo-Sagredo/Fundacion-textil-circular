@@ -7,8 +7,10 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,70 +31,120 @@ fun MainScreen() {
 
         bottomBar = {
 
-            NavigationBar {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.background
+            ) {
 
+                // INICIO
                 NavigationBarItem(
                     selected = opcionSeleccionada == 0,
+
                     onClick = {
                         opcionSeleccionada = 0
                     },
+
                     icon = {
                         Icon(
                             imageVector = Icons.Default.Home,
                             contentDescription = "Inicio"
                         )
                     },
+
                     label = {
                         Text("Inicio")
-                    }
+                    },
+
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        indicatorColor = MaterialTheme.colorScheme.secondary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
+                        unselectedTextColor = MaterialTheme.colorScheme.onBackground
+                    )
                 )
 
+                // CATÁLOGO
                 NavigationBarItem(
                     selected = opcionSeleccionada == 1,
+
                     onClick = {
                         opcionSeleccionada = 1
                     },
+
                     icon = {
                         Icon(
                             imageVector = Icons.Default.List,
                             contentDescription = "Catálogo"
                         )
                     },
+
                     label = {
                         Text("Catálogo")
-                    }
+                    },
+
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        indicatorColor = MaterialTheme.colorScheme.secondary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
+                        unselectedTextColor = MaterialTheme.colorScheme.onBackground
+                    )
                 )
 
+                // MENSAJES
                 NavigationBarItem(
                     selected = opcionSeleccionada == 2,
+
                     onClick = {
                         opcionSeleccionada = 2
                     },
+
                     icon = {
                         Icon(
                             imageVector = Icons.Default.Email,
                             contentDescription = "Mensajes"
                         )
                     },
+
                     label = {
                         Text("Mensajes")
-                    }
+                    },
+
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        indicatorColor = MaterialTheme.colorScheme.secondary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
+                        unselectedTextColor = MaterialTheme.colorScheme.onBackground
+                    )
                 )
 
+                // PERFIL
                 NavigationBarItem(
                     selected = opcionSeleccionada == 3,
+
                     onClick = {
                         opcionSeleccionada = 3
                     },
+
                     icon = {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Perfil"
                         )
                     },
+
                     label = {
                         Text("Perfil")
-                    }
+                    },
+
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        indicatorColor = MaterialTheme.colorScheme.secondary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
+                        unselectedTextColor = MaterialTheme.colorScheme.onBackground
+                    )
                 )
             }
         }
