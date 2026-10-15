@@ -43,10 +43,12 @@ fun PantallaCuentaEnRevision(
 
     val dao =
         remember(context) {
+
             TextilDatabase
                 .getDatabase(context)
                 .emprendedoraDao()
         }
+
 
     val cuenta by dao
         .observarPorCorreo(correo)
@@ -54,50 +56,72 @@ fun PantallaCuentaEnRevision(
             initial = null
         )
 
+
     val estado =
         cuenta
             ?.estado
             ?.uppercase()
             ?: "PENDIENTE"
 
+
     val colorEstado: Color =
         when (estado) {
 
-            "APROBADA" ->
+            "APROBADA" -> {
                 TurquesaTextil
+            }
 
-            "RECHAZADA" ->
+            "RECHAZADA" -> {
                 RojoErrorTextil
+            }
 
-            else ->
+            else -> {
                 AmarilloTextil
+            }
         }
+
 
     val titulo =
         when (estado) {
 
-            "APROBADA" ->
+            "APROBADA" -> {
                 "APROBADA"
+            }
 
-            "RECHAZADA" ->
+            "RECHAZADA" -> {
                 "RECHAZADA"
+            }
 
-            else ->
+            else -> {
                 "EN REVISIÓN"
+            }
         }
+
 
     val mensaje =
         when (estado) {
 
-            "APROBADA" ->
+            "APROBADA" -> {
                 "Tu cuenta fue aprobada. Ya puedes iniciar sesión."
+            }
 
-            "RECHAZADA" ->
+            "RECHAZADA" -> {
                 "Tu solicitud fue rechazada por la administración."
+            }
 
-            else ->
+            else -> {
                 "Tu registro fue enviado correctamente."
+            }
         }
+
+
+    val motivoRechazo =
+        cuenta
+            ?.motivoRechazo
+            ?.takeIf {
+                it.isNotBlank()
+            }
+            ?: "No se indicó un motivo."
 
 
     Column(
@@ -105,158 +129,246 @@ fun PantallaCuentaEnRevision(
             .fillMaxSize()
             .background(NegroTextil)
             .padding(24.dp),
+
         horizontalAlignment =
             Alignment.CenterHorizontally
     ) {
+
 
         Spacer(
             modifier =
                 Modifier.height(80.dp)
         )
 
+
         Text(
             text = "CUENTA",
-            color = BlancoTextil,
+
+            color =
+                BlancoTextil,
+
             style =
-                MaterialTheme.typography.headlineLarge,
+                MaterialTheme
+                    .typography
+                    .headlineLarge,
+
             textAlign =
                 TextAlign.Center
         )
 
+
         Text(
             text = titulo,
-            color = colorEstado,
+
+            color =
+                colorEstado,
+
             style =
-                MaterialTheme.typography.headlineLarge,
+                MaterialTheme
+                    .typography
+                    .headlineLarge,
+
             textAlign =
                 TextAlign.Center
         )
+
 
         Spacer(
             modifier =
                 Modifier.height(30.dp)
         )
 
+
         Text(
             text = mensaje,
+
             color =
                 BlancoTextil,
+
             style =
-                MaterialTheme.typography.titleMedium,
+                MaterialTheme
+                    .typography
+                    .titleMedium,
+
             textAlign =
                 TextAlign.Center
         )
 
-        if (estado == "PENDIENTE") {
+
+        if (
+            estado ==
+            "PENDIENTE"
+        ) {
 
             Spacer(
                 modifier =
                     Modifier.height(16.dp)
             )
 
+
             Text(
                 text =
                     "La información de tu cuenta será revisada antes de habilitar tu acceso a Textil Circular.",
+
                 color =
                     BlancoTextil,
+
                 style =
-                    MaterialTheme.typography.bodyLarge,
+                    MaterialTheme
+                        .typography
+                        .bodyLarge,
+
                 textAlign =
                     TextAlign.Center
             )
         }
+
 
         Spacer(
             modifier =
                 Modifier.height(32.dp)
         )
 
+
         Surface(
             modifier =
                 Modifier.fillMaxWidth(),
+
             shape =
-                RoundedCornerShape(12.dp),
+                RoundedCornerShape(
+                    12.dp
+                ),
+
             color =
                 colorEstado
         ) {
 
+
             Column(
                 modifier =
-                    Modifier.padding(20.dp),
+                    Modifier.padding(
+                        20.dp
+                    ),
+
                 horizontalAlignment =
                     Alignment.CenterHorizontally
             ) {
 
+
                 Text(
                     text =
                         "ESTADO DE LA CUENTA",
+
                     color =
                         NegroTextil,
+
                     style =
-                        MaterialTheme.typography.labelLarge,
+                        MaterialTheme
+                            .typography
+                            .labelLarge,
+
                     fontWeight =
                         FontWeight.Bold
                 )
 
+
                 Spacer(
                     modifier =
-                        Modifier.height(10.dp)
+                        Modifier.height(
+                            10.dp
+                        )
                 )
+
 
                 Text(
                     text =
                         when (estado) {
 
-                            "APROBADA" ->
+                            "APROBADA" -> {
                                 "Cuenta activa"
+                            }
 
-                            "RECHAZADA" ->
+                            "RECHAZADA" -> {
                                 "Solicitud rechazada"
+                            }
 
-                            else ->
+                            else -> {
                                 "Pendiente de validación"
+                            }
                         },
+
                     color =
                         NegroTextil,
+
                     style =
-                        MaterialTheme.typography.titleMedium,
+                        MaterialTheme
+                            .typography
+                            .titleMedium,
+
                     fontWeight =
                         FontWeight.Bold,
+
                     textAlign =
                         TextAlign.Center
                 )
+
+
+                // MOTIVO DEL RECHAZO
 
                 if (
                     estado ==
                     "RECHAZADA"
                 ) {
 
+
                     Spacer(
                         modifier =
-                            Modifier.height(20.dp)
+                            Modifier.height(
+                                22.dp
+                            )
                     )
+
 
                     Text(
                         text =
                             "Motivo del rechazo:",
+
                         color =
                             NegroTextil,
+
+                        style =
+                            MaterialTheme
+                                .typography
+                                .bodyLarge,
+
                         fontWeight =
-                            FontWeight.Bold
+                            FontWeight.Bold,
+
+                        textAlign =
+                            TextAlign.Center
                     )
+
 
                     Spacer(
                         modifier =
-                            Modifier.height(8.dp)
+                            Modifier.height(
+                                8.dp
+                            )
                     )
+
 
                     Text(
                         text =
-                            cuenta
-                                ?.motivoRechazo
-                                ?: "No se indicó un motivo.",
+                            motivoRechazo,
+
                         color =
                             NegroTextil,
+
+                        style =
+                            MaterialTheme
+                                .typography
+                                .bodyLarge,
+
                         textAlign =
                             TextAlign.Center
                     )
@@ -264,25 +376,34 @@ fun PantallaCuentaEnRevision(
             }
         }
 
+
         Spacer(
             modifier =
                 Modifier.height(40.dp)
         )
 
+
         Button(
             onClick =
                 onVolverInicioSesion,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+
             colors =
-                ButtonDefaults.buttonColors(
-                    containerColor =
-                        TurquesaTextil,
-                    contentColor =
-                        NegroTextil
-                )
+                ButtonDefaults
+                    .buttonColors(
+
+                        containerColor =
+                            TurquesaTextil,
+
+                        contentColor =
+                            NegroTextil
+                    )
         ) {
+
 
             Text(
                 text =
@@ -290,12 +411,18 @@ fun PantallaCuentaEnRevision(
                         estado ==
                         "APROBADA"
                     ) {
+
                         "IR A INICIAR SESIÓN"
+
                     } else {
+
                         "VOLVER A INICIAR SESIÓN"
                     },
+
                 style =
-                    MaterialTheme.typography.labelLarge
+                    MaterialTheme
+                        .typography
+                        .labelLarge
             )
         }
     }

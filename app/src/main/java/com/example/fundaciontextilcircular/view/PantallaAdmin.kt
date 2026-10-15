@@ -48,38 +48,44 @@ fun PantallaAdmin(
     onCerrarSesion: () -> Unit = {}
 ) {
 
-    val context =
-        LocalContext.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
-    val scope =
-        rememberCoroutineScope()
+    val dao = remember(context) {
+        TextilDatabase
+            .getDatabase(context)
+            .emprendedoraDao()
+    }
 
-    val dao =
-        remember(context) {
 
-            TextilDatabase
-                .getDatabase(context)
-                .emprendedoraDao()
-        }
+    // CUENTAS PENDIENTES
 
-    val pendientes by
-    dao.obtenerPendientes()
+    val pendientes by dao
+        .obtenerPendientes()
         .collectAsState(
             initial = emptyList()
         )
 
-    val activas by
-    dao.obtenerAprobadas()
+
+    // CUENTAS ACTIVAS
+
+    val activas by dao
+        .obtenerAprobadas()
         .collectAsState(
             initial = emptyList()
         )
 
-    val rechazadas by
-    dao.obtenerRechazadas()
+
+    // CUENTAS RECHAZADAS
+
+    val rechazadas by dao
+        .obtenerRechazadas()
         .collectAsState(
             initial = emptyList()
         )
 
+
+    // CUENTA QUE SE QUIERE RECHAZAR
 
     var solicitudARechazar by remember {
         mutableStateOf<EmprendedoraEntity?>(
@@ -87,9 +93,15 @@ fun PantallaAdmin(
         )
     }
 
+
+    // MOTIVO ESCRITO POR EL ADMIN
+
     var motivoRechazo by remember {
         mutableStateOf("")
     }
+
+
+    // CUENTA QUE SE QUIERE ELIMINAR
 
     var cuentaAEliminar by remember {
         mutableStateOf<EmprendedoraEntity?>(
@@ -106,57 +118,53 @@ fun PantallaAdmin(
     ) {
 
         Spacer(
-            modifier =
-                Modifier.height(30.dp)
+            modifier = Modifier.height(30.dp)
         )
 
+
         Text(
-            text =
-                "ADMINISTRACIÓN",
-            color =
-                TurquesaTextil,
+            text = "ADMINISTRACIÓN",
+            color = TurquesaTextil,
             style =
                 MaterialTheme.typography.headlineLarge
         )
 
+
         Spacer(
-            modifier =
-                Modifier.height(8.dp)
+            modifier = Modifier.height(8.dp)
         )
 
+
         Text(
-            text =
-                "Gestión de cuentas",
-            color =
-                BlancoTextil,
+            text = "Gestión de cuentas",
+            color = BlancoTextil,
             style =
                 MaterialTheme.typography.titleMedium
         )
 
+
         Spacer(
-            modifier =
-                Modifier.height(20.dp)
+            modifier = Modifier.height(20.dp)
         )
 
+
         LazyColumn(
-            modifier =
-                Modifier.weight(1f),
+            modifier = Modifier.weight(1f),
             verticalArrangement =
-                Arrangement.spacedBy(
-                    16.dp
-                )
+                Arrangement.spacedBy(16.dp)
         ) {
 
 
-            // PENDIENTES
+            // =============================
+            // SOLICITUDES PENDIENTES
+            // =============================
 
             item {
 
                 Text(
                     text =
                         "SOLICITUDES PENDIENTES (${pendientes.size})",
-                    color =
-                        AmarilloTextil,
+                    color = AmarilloTextil,
                     style =
                         MaterialTheme.typography.titleMedium
                 )
@@ -170,24 +178,21 @@ fun PantallaAdmin(
                     Text(
                         text =
                             "No hay cuentas pendientes.",
-                        color =
-                            BlancoTextil
+                        color = BlancoTextil
                     )
                 }
 
             } else {
 
                 items(
-                    items =
-                        pendientes,
+                    items = pendientes,
                     key = {
                         "pendiente_${it.rut}"
                     }
                 ) { cuenta ->
 
                     TarjetaSolicitud(
-                        solicitud =
-                            cuenta,
+                        solicitud = cuenta,
 
                         onAprobar = {
 
@@ -221,15 +226,16 @@ fun PantallaAdmin(
             }
 
 
-            // ACTIVAS
+            // =============================
+            // CUENTAS ACTIVAS
+            // =============================
 
             item {
 
                 Text(
                     text =
                         "CUENTAS ACTIVAS (${activas.size})",
-                    color =
-                        TurquesaTextil,
+                    color = TurquesaTextil,
                     style =
                         MaterialTheme.typography.titleMedium
                 )
@@ -243,24 +249,21 @@ fun PantallaAdmin(
                     Text(
                         text =
                             "No hay cuentas activas.",
-                        color =
-                            BlancoTextil
+                        color = BlancoTextil
                     )
                 }
 
             } else {
 
                 items(
-                    items =
-                        activas,
+                    items = activas,
                     key = {
                         "activa_${it.rut}"
                     }
                 ) { cuenta ->
 
                     TarjetaCuentaActiva(
-                        cuenta =
-                            cuenta,
+                        cuenta = cuenta,
 
                         onEliminar = {
 
@@ -281,15 +284,16 @@ fun PantallaAdmin(
             }
 
 
-            // RECHAZADAS
+            // =============================
+            // CUENTAS RECHAZADAS
+            // =============================
 
             item {
 
                 Text(
                     text =
                         "CUENTAS RECHAZADAS (${rechazadas.size})",
-                    color =
-                        RojoErrorTextil,
+                    color = RojoErrorTextil,
                     style =
                         MaterialTheme.typography.titleMedium
                 )
@@ -303,24 +307,21 @@ fun PantallaAdmin(
                     Text(
                         text =
                             "No hay cuentas rechazadas.",
-                        color =
-                            BlancoTextil
+                        color = BlancoTextil
                     )
                 }
 
             } else {
 
                 items(
-                    items =
-                        rechazadas,
+                    items = rechazadas,
                     key = {
                         "rechazada_${it.rut}"
                     }
                 ) { cuenta ->
 
                     TarjetaCuentaRechazada(
-                        cuenta =
-                            cuenta,
+                        cuenta = cuenta,
 
                         onEliminar = {
 
@@ -334,33 +335,32 @@ fun PantallaAdmin(
 
 
         Spacer(
-            modifier =
-                Modifier.height(16.dp)
+            modifier = Modifier.height(16.dp)
         )
 
+
         OutlinedButton(
-            onClick =
-                onCerrarSesion,
+            onClick = onCerrarSesion,
             modifier =
                 Modifier.fillMaxWidth()
         ) {
 
             Text(
-                text =
-                    "CERRAR SESIÓN",
-                color =
-                    BlancoTextil
+                text = "CERRAR SESIÓN",
+                color = BlancoTextil
             )
         }
     }
 
 
-    // RECHAZAR
+    // =================================
+    // DIÁLOGO RECHAZAR CUENTA
+    // =================================
 
-    solicitudARechazar?.let {
-            cuenta ->
+    solicitudARechazar?.let { cuenta ->
 
         AlertDialog(
+
             onDismissRequest = {
 
                 solicitudARechazar =
@@ -373,7 +373,8 @@ fun PantallaAdmin(
             title = {
 
                 Text(
-                    "Rechazar solicitud"
+                    text =
+                        "Rechazar solicitud"
                 )
             },
 
@@ -382,27 +383,34 @@ fun PantallaAdmin(
                 Column {
 
                     Text(
-                        "Indica el motivo del rechazo."
+                        text =
+                            "Indica el motivo del rechazo."
                     )
+
 
                     Spacer(
                         modifier =
-                            Modifier.height(
-                                12.dp
-                            )
+                            Modifier.height(12.dp)
                     )
+
 
                     OutlinedTextField(
                         value =
                             motivoRechazo,
+
                         onValueChange = {
                             motivoRechazo =
                                 it
                         },
+
                         modifier =
                             Modifier.fillMaxWidth(),
+
                         label = {
-                            Text("Motivo")
+
+                            Text(
+                                "Motivo"
+                            )
                         }
                     )
                 }
@@ -413,39 +421,59 @@ fun PantallaAdmin(
                 Button(
                     onClick = {
 
-                        if (
+                        // GUARDAMOS PRIMERO EL TEXTO
+                        // EN UNA VARIABLE NORMAL
+
+                        val motivo =
                             motivoRechazo
-                                .isNotBlank()
+                                .trim()
+
+
+                        if (
+                            motivo.isNotBlank()
                         ) {
 
                             scope.launch {
 
+                                // GUARDAMOS EN ROOM
+
                                 dao.rechazarCuenta(
                                     rut =
                                         cuenta.rut,
+
                                     motivo =
-                                        motivoRechazo
-                                            .trim()
+                                        motivo
                                 )
+
+
+                                // RECIÉN DESPUÉS
+                                // LIMPIAMOS EL CAMPO
+
+                                solicitudARechazar =
+                                    null
+
+                                motivoRechazo =
+                                    ""
                             }
-
-                            solicitudARechazar =
-                                null
-
-                            motivoRechazo =
-                                ""
                         }
                     },
+
                     colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor =
-                                RojoErrorTextil,
-                            contentColor =
-                                BlancoTextil
-                        )
+                        ButtonDefaults
+                            .buttonColors(
+
+                                containerColor =
+                                    RojoErrorTextil,
+
+                                contentColor =
+                                    BlancoTextil
+                            )
                 ) {
 
-                    Text("RECHAZAR")
+                    Text(
+                        text =
+                            "RECHAZAR"
+                    )
                 }
             },
 
@@ -462,19 +490,24 @@ fun PantallaAdmin(
                     }
                 ) {
 
-                    Text("Cancelar")
+                    Text(
+                        text =
+                            "Cancelar"
+                    )
                 }
             }
         )
     }
 
 
-    // ELIMINAR
+    // =================================
+    // DIÁLOGO ELIMINAR CUENTA
+    // =================================
 
-    cuentaAEliminar?.let {
-            cuenta ->
+    cuentaAEliminar?.let { cuenta ->
 
         AlertDialog(
+
             onDismissRequest = {
 
                 cuentaAEliminar =
@@ -484,14 +517,16 @@ fun PantallaAdmin(
             title = {
 
                 Text(
-                    "Eliminar cuenta"
+                    text =
+                        "Eliminar cuenta"
                 )
             },
 
             text = {
 
                 Text(
-                    "¿Estás seguro de que deseas eliminar la cuenta de ${cuenta.nombre}? Esta acción no se puede deshacer."
+                    text =
+                        "¿Estás seguro de que deseas eliminar la cuenta de ${cuenta.nombre}? Esta acción no se puede deshacer."
                 )
             },
 
@@ -505,21 +540,28 @@ fun PantallaAdmin(
                             dao.eliminarCuenta(
                                 cuenta.rut
                             )
-                        }
 
-                        cuentaAEliminar =
-                            null
+                            cuentaAEliminar =
+                                null
+                        }
                     },
+
                     colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor =
-                                RojoErrorTextil,
-                            contentColor =
-                                BlancoTextil
-                        )
+                        ButtonDefaults
+                            .buttonColors(
+
+                                containerColor =
+                                    RojoErrorTextil,
+
+                                contentColor =
+                                    BlancoTextil
+                            )
                 ) {
 
-                    Text("ELIMINAR")
+                    Text(
+                        text =
+                            "ELIMINAR"
+                    )
                 }
             },
 
@@ -533,13 +575,20 @@ fun PantallaAdmin(
                     }
                 ) {
 
-                    Text("Cancelar")
+                    Text(
+                        text =
+                            "Cancelar"
+                    )
                 }
             }
         )
     }
 }
 
+
+// =====================================
+// TARJETA SOLICITUD PENDIENTE
+// =====================================
 
 @Composable
 fun TarjetaSolicitud(
@@ -551,13 +600,21 @@ fun TarjetaSolicitud(
     Card(
         modifier =
             Modifier.fillMaxWidth(),
+
         shape =
-            RoundedCornerShape(12.dp),
+            RoundedCornerShape(
+                12.dp
+            ),
+
         colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    Color(0xFF1E1E1E)
-            )
+            CardDefaults
+                .cardColors(
+
+                    containerColor =
+                        Color(
+                            0xFF1E1E1E
+                        )
+                )
     ) {
 
         Column(
@@ -570,70 +627,103 @@ fun TarjetaSolicitud(
                     solicitud
             )
 
+
             Spacer(
                 modifier =
                     Modifier.height(12.dp)
             )
 
+
             Text(
                 text =
                     "Estado: PENDIENTE",
+
                 color =
-                    AmarilloTextil
+                    AmarilloTextil,
+
+                style =
+                    MaterialTheme
+                        .typography
+                        .labelLarge
             )
+
 
             Spacer(
                 modifier =
                     Modifier.height(18.dp)
             )
 
+
             Row(
                 modifier =
                     Modifier.fillMaxWidth(),
+
                 horizontalArrangement =
                     Arrangement.spacedBy(
                         10.dp
                     )
             ) {
 
+
                 Button(
                     onClick =
                         onAprobar,
+
                     modifier =
                         Modifier.weight(1f),
+
                     colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor =
-                                TurquesaTextil,
-                            contentColor =
-                                NegroTextil
-                        )
+                        ButtonDefaults
+                            .buttonColors(
+
+                                containerColor =
+                                    TurquesaTextil,
+
+                                contentColor =
+                                    NegroTextil
+                            )
                 ) {
 
-                    Text("APROBAR")
+                    Text(
+                        text =
+                            "APROBAR"
+                    )
                 }
+
 
                 Button(
                     onClick =
                         onRechazar,
+
                     modifier =
                         Modifier.weight(1f),
+
                     colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor =
-                                RojoErrorTextil,
-                            contentColor =
-                                BlancoTextil
-                        )
+                        ButtonDefaults
+                            .buttonColors(
+
+                                containerColor =
+                                    RojoErrorTextil,
+
+                                contentColor =
+                                    BlancoTextil
+                            )
                 ) {
 
-                    Text("RECHAZAR")
+                    Text(
+                        text =
+                            "RECHAZAR"
+                    )
                 }
             }
         }
     }
 }
 
+
+// =====================================
+// TARJETA CUENTA ACTIVA
+// =====================================
 
 @Composable
 fun TarjetaCuentaActiva(
@@ -644,13 +734,21 @@ fun TarjetaCuentaActiva(
     Card(
         modifier =
             Modifier.fillMaxWidth(),
+
         shape =
-            RoundedCornerShape(12.dp),
+            RoundedCornerShape(
+                12.dp
+            ),
+
         colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    Color(0xFF1E1E1E)
-            )
+            CardDefaults
+                .cardColors(
+
+                    containerColor =
+                        Color(
+                            0xFF1E1E1E
+                        )
+                )
     ) {
 
         Column(
@@ -663,45 +761,65 @@ fun TarjetaCuentaActiva(
                     cuenta
             )
 
+
             Spacer(
                 modifier =
                     Modifier.height(12.dp)
             )
 
+
             Text(
                 text =
                     "Estado: ACTIVA",
+
                 color =
-                    TurquesaTextil
+                    TurquesaTextil,
+
+                style =
+                    MaterialTheme
+                        .typography
+                        .labelLarge
             )
+
 
             Spacer(
                 modifier =
                     Modifier.height(18.dp)
             )
 
+
             Button(
                 onClick =
                     onEliminar,
+
                 modifier =
                     Modifier.fillMaxWidth(),
+
                 colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor =
-                            RojoErrorTextil,
-                        contentColor =
-                            BlancoTextil
-                    )
+                    ButtonDefaults
+                        .buttonColors(
+
+                            containerColor =
+                                RojoErrorTextil,
+
+                            contentColor =
+                                BlancoTextil
+                        )
             ) {
 
                 Text(
-                    "ELIMINAR CUENTA"
+                    text =
+                        "ELIMINAR CUENTA"
                 )
             }
         }
     }
 }
 
+
+// =====================================
+// TARJETA CUENTA RECHAZADA
+// =====================================
 
 @Composable
 fun TarjetaCuentaRechazada(
@@ -712,13 +830,21 @@ fun TarjetaCuentaRechazada(
     Card(
         modifier =
             Modifier.fillMaxWidth(),
+
         shape =
-            RoundedCornerShape(12.dp),
+            RoundedCornerShape(
+                12.dp
+            ),
+
         colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    Color(0xFF1E1E1E)
-            )
+            CardDefaults
+                .cardColors(
+
+                    containerColor =
+                        Color(
+                            0xFF1E1E1E
+                        )
+                )
     ) {
 
         Column(
@@ -731,57 +857,89 @@ fun TarjetaCuentaRechazada(
                     cuenta
             )
 
+
             Spacer(
                 modifier =
                     Modifier.height(12.dp)
             )
 
+
             Text(
                 text =
                     "Estado: RECHAZADA",
+
                 color =
-                    RojoErrorTextil
+                    RojoErrorTextil,
+
+                style =
+                    MaterialTheme
+                        .typography
+                        .labelLarge
             )
+
 
             Spacer(
                 modifier =
                     Modifier.height(8.dp)
             )
 
+
+            val motivo =
+                cuenta
+                    .motivoRechazo
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: "No se indicó un motivo."
+
+
             Text(
                 text =
-                    "Motivo: ${cuenta.motivoRechazo ?: "Sin motivo"}",
+                    "Motivo: $motivo",
+
                 color =
                     BlancoTextil
             )
+
 
             Spacer(
                 modifier =
                     Modifier.height(18.dp)
             )
 
+
             Button(
                 onClick =
                     onEliminar,
+
                 modifier =
                     Modifier.fillMaxWidth(),
+
                 colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor =
-                            RojoErrorTextil,
-                        contentColor =
-                            BlancoTextil
-                    )
+                    ButtonDefaults
+                        .buttonColors(
+
+                            containerColor =
+                                RojoErrorTextil,
+
+                            contentColor =
+                                BlancoTextil
+                        )
             ) {
 
                 Text(
-                    "ELIMINAR CUENTA"
+                    text =
+                        "ELIMINAR CUENTA"
                 )
             }
         }
     }
 }
 
+
+// =====================================
+// DATOS COMUNES DE LA CUENTA
+// =====================================
 
 @Composable
 fun DatosCuenta(
@@ -791,60 +949,83 @@ fun DatosCuenta(
     Text(
         text =
             cuenta.nombre,
+
         color =
             BlancoTextil,
+
         style =
-            MaterialTheme.typography.titleMedium
+            MaterialTheme
+                .typography
+                .titleMedium
     )
+
 
     Spacer(
         modifier =
             Modifier.height(4.dp)
     )
 
+
     Text(
         text =
             cuenta.nombreEmprendimiento,
+
         color =
-            TurquesaTextil
+            TurquesaTextil,
+
+        style =
+            MaterialTheme
+                .typography
+                .bodyLarge
     )
+
 
     Spacer(
         modifier =
             Modifier.height(12.dp)
     )
 
+
     Text(
         text =
             "RUT: ${cuenta.rut}",
+
         color =
             BlancoTextil
     )
+
 
     Text(
         text =
             "Correo: ${cuenta.correo}",
+
         color =
             BlancoTextil
     )
+
 
     Text(
         text =
             "Región: ${cuenta.region}",
+
         color =
             BlancoTextil
     )
+
 
     Text(
         text =
             "Comuna: ${cuenta.comuna}",
+
         color =
             BlancoTextil
     )
 
+
     Text(
         text =
             "Rubro: ${cuenta.rubro}",
+
         color =
             BlancoTextil
     )
