@@ -21,7 +21,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -49,195 +47,265 @@ fun PantallaLogin(
     modifier: Modifier = Modifier,
     onIngresarAdmin: () -> Unit = {},
     onIngresarUsuario: () -> Unit = {},
-    onCuentaEnRevision: () -> Unit = {},
+    onCuentaEnRevision: (String) -> Unit = {},
     onCrearCuenta: () -> Unit = {},
     onVolver: () -> Unit = {}
 ) {
+
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+
+    val scope =
+        rememberCoroutineScope()
+
     val dao = remember(context) {
-        TextilDatabase.getDatabase(context).emprendedoraDao()
+        TextilDatabase
+            .getDatabase(context)
+            .emprendedoraDao()
     }
 
-    var correo by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
-    var mostrarContrasena by remember { mutableStateOf(false) }
-    var errorLogin by remember { mutableStateOf<String?>(null) }
+    var correo by remember {
+        mutableStateOf("")
+    }
+
+    var contrasena by remember {
+        mutableStateOf("")
+    }
+
+    var mostrarContrasena by remember {
+        mutableStateOf(false)
+    }
+
+    var mensajeError by remember {
+        mutableStateOf<String?>(null)
+    }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(NegroTextil)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(
+                rememberScrollState()
+            )
             .padding(24.dp)
     ) {
-        Spacer(modifier = Modifier.height(60.dp))
+
+        Spacer(
+            modifier = Modifier.height(70.dp)
+        )
 
         Text(
             text = "INICIAR",
             color = BlancoTextil,
-            style = MaterialTheme.typography.headlineLarge
+            style =
+                MaterialTheme.typography.headlineLarge
         )
+
         Text(
             text = "SESIÓN",
             color = TurquesaTextil,
-            style = MaterialTheme.typography.headlineLarge
+            style =
+                MaterialTheme.typography.headlineLarge
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Ingresa tus datos para acceder a tu espacio Textil Circular.",
-            color = BlancoTextil,
-            style = MaterialTheme.typography.bodyLarge
+        Spacer(
+            modifier = Modifier.height(32.dp)
         )
-
-        Spacer(modifier = Modifier.height(40.dp))
 
         OutlinedTextField(
             value = correo,
             onValueChange = {
                 correo = it
-                errorLogin = null
+                mensajeError = null
             },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Correo electrónico") },
+            modifier =
+                Modifier.fillMaxWidth(),
+            label = {
+                Text("Correo electrónico")
+            },
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Default.Email,
-                    contentDescription = "Correo electrónico"
+                    imageVector =
+                        Icons.Default.Email,
+                    contentDescription =
+                        "Correo electrónico"
                 )
             },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = BlancoTextil,
-                unfocusedTextColor = BlancoTextil,
-                focusedBorderColor = TurquesaTextil,
-                unfocusedBorderColor = Color.Gray,
-                focusedLabelColor = TurquesaTextil,
-                unfocusedLabelColor = Color.LightGray,
-                focusedLeadingIconColor = TurquesaTextil,
-                unfocusedLeadingIconColor = Color.LightGray,
-                cursorColor = TurquesaTextil
-            )
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType =
+                        KeyboardType.Email
+                ),
+            colors =
+                coloresCampoRegistro()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         OutlinedTextField(
             value = contrasena,
             onValueChange = {
                 contrasena = it
-                errorLogin = null
+                mensajeError = null
             },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Contraseña") },
+            modifier =
+                Modifier.fillMaxWidth(),
+            label = {
+                Text("Contraseña")
+            },
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = "Contraseña"
+                    imageVector =
+                        Icons.Default.Lock,
+                    contentDescription =
+                        "Contraseña"
                 )
             },
             trailingIcon = {
-                IconButton(onClick = { mostrarContrasena = !mostrarContrasena }) {
+
+                IconButton(
+                    onClick = {
+                        mostrarContrasena =
+                            !mostrarContrasena
+                    }
+                ) {
+
                     Icon(
-                        imageVector = if (mostrarContrasena) {
-                            Icons.Default.VisibilityOff
-                        } else {
-                            Icons.Default.Visibility
-                        },
-                        contentDescription = if (mostrarContrasena) {
-                            "Ocultar contraseña"
-                        } else {
+                        imageVector =
+                            if (mostrarContrasena) {
+                                Icons.Default
+                                    .VisibilityOff
+                            } else {
+                                Icons.Default
+                                    .Visibility
+                            },
+                        contentDescription =
                             "Mostrar contraseña"
-                        }
                     )
                 }
             },
+            visualTransformation =
+                if (mostrarContrasena) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
             singleLine = true,
-            visualTransformation = if (mostrarContrasena) {
-                VisualTransformation.None
-            } else {
-                PasswordVisualTransformation()
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = BlancoTextil,
-                unfocusedTextColor = BlancoTextil,
-                focusedBorderColor = TurquesaTextil,
-                unfocusedBorderColor = Color.Gray,
-                focusedLabelColor = TurquesaTextil,
-                unfocusedLabelColor = Color.LightGray,
-                focusedLeadingIconColor = TurquesaTextil,
-                unfocusedLeadingIconColor = Color.LightGray,
-                focusedTrailingIconColor = TurquesaTextil,
-                unfocusedTrailingIconColor = Color.LightGray,
-                cursorColor = TurquesaTextil
-            )
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType =
+                        KeyboardType.Password
+                ),
+            colors =
+                coloresCampoRegistro()
         )
 
-        errorLogin?.let {
-            Spacer(modifier = Modifier.height(10.dp))
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        mensajeError?.let {
+
             Text(
                 text = it,
                 color = RojoErrorTextil,
-                style = MaterialTheme.typography.bodyMedium
+                style =
+                    MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(12.dp)
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
-
         Button(
             onClick = {
-                when {
-                    correo.isBlank() -> {
-                        errorLogin = "Debes ingresar tu correo electrónico"
-                    }
 
-                    contrasena.isBlank() -> {
-                        errorLogin = "Debes ingresar tu contraseña"
-                    }
+                mensajeError = null
 
-                    correo.equals("admin@textilcircular.cl", ignoreCase = true) &&
-                            contrasena == "Admin123!" -> {
-                        errorLogin = null
-                        onIngresarAdmin()
-                    }
+                val correoNormalizado =
+                    correo
+                        .trim()
+                        .lowercase()
 
-                    else -> {
-                        scope.launch {
-                            val cuenta = dao.iniciarSesion(
-                                correo = correo.trim().lowercase(),
-                                contrasena = contrasena
+                if (
+                    correoNormalizado.isBlank() ||
+                    contrasena.isBlank()
+                ) {
+
+                    mensajeError =
+                        "Debes ingresar correo y contraseña"
+
+                } else if (
+                    correoNormalizado ==
+                    "admin@textilcircular.cl" &&
+                    contrasena ==
+                    "Admin123!"
+                ) {
+
+                    onIngresarAdmin()
+
+                } else {
+
+                    scope.launch {
+
+                        val cuenta =
+                            dao.iniciarSesion(
+                                correo =
+                                    correoNormalizado,
+                                contrasena =
+                                    contrasena
                             )
 
-                            if (cuenta == null) {
-                                errorLogin = "Correo o contraseña incorrectos"
-                                return@launch
+                        if (cuenta == null) {
+
+                            val cuentaPorCorreo =
+                                dao.obtenerPorCorreo(
+                                    correoNormalizado
+                                )
+
+                            mensajeError =
+                                if (
+                                    cuentaPorCorreo != null
+                                ) {
+                                    "Contraseña incorrecta"
+                                } else {
+                                    "Correo o contraseña incorrectos"
+                                }
+
+                            return@launch
+                        }
+
+                        when (
+                            cuenta.estado.uppercase()
+                        ) {
+
+                            "APROBADA" -> {
+
+                                onIngresarUsuario()
                             }
 
-                            when (cuenta.estado.uppercase()) {
-                                "APROBADA" -> {
-                                    errorLogin = null
-                                    onIngresarUsuario()
-                                }
+                            "PENDIENTE" -> {
 
-                                "PENDIENTE" -> {
-                                    errorLogin = null
-                                    onCuentaEnRevision()
-                                }
+                                onCuentaEnRevision(
+                                    cuenta.correo
+                                )
+                            }
 
-                                "RECHAZADA" -> {
-                                    errorLogin = cuenta.motivoRechazo
-                                        ?.takeIf { it.isNotBlank() }
-                                        ?.let { "Tu cuenta fue rechazada. Motivo: $it" }
-                                        ?: "Tu cuenta fue rechazada por administración."
-                                }
+                            "RECHAZADA" -> {
 
-                                else -> {
-                                    onCuentaEnRevision()
-                                }
+                                onCuentaEnRevision(
+                                    cuenta.correo
+                                )
+                            }
+
+                            else -> {
+
+                                mensajeError =
+                                    "El estado de la cuenta no es válido"
                             }
                         }
                     }
@@ -246,36 +314,52 @@ fun PantallaLogin(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = TurquesaTextil,
-                contentColor = NegroTextil
-            )
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor =
+                        TurquesaTextil,
+                    contentColor =
+                        NegroTextil
+                )
         ) {
+
             Text(
                 text = "INGRESAR",
-                style = MaterialTheme.typography.labelLarge
+                style =
+                    MaterialTheme.typography.labelLarge
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
 
         TextButton(
-            onClick = onCrearCuenta,
-            modifier = Modifier.fillMaxWidth()
+            onClick =
+                onCrearCuenta,
+            modifier =
+                Modifier.fillMaxWidth()
         ) {
+
             Text(
-                text = "¿No tienes una cuenta? Crear cuenta",
-                color = BlancoTextil
+                text =
+                    "¿No tienes una cuenta? Crear cuenta",
+                color =
+                    BlancoTextil
             )
         }
 
         TextButton(
-            onClick = onVolver,
-            modifier = Modifier.fillMaxWidth()
+            onClick =
+                onVolver,
+            modifier =
+                Modifier.fillMaxWidth()
         ) {
+
             Text(
                 text = "Volver",
-                color = TurquesaTextil
+                color =
+                    TurquesaTextil
             )
         }
     }

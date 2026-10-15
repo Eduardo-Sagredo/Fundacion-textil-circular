@@ -8,19 +8,22 @@ class EmprendedoraRepository(
     private val emprendedoraDao: EmprendedoraDao
 ) {
 
-    // TODAS LAS EMPRENDEDORAS
     val todasLasEmprendedoras:
             Flow<List<EmprendedoraEntity>> =
         emprendedoraDao.obtenerTodas()
 
-
-    // SOLICITUDES PENDIENTES
     val solicitudesPendientes:
             Flow<List<EmprendedoraEntity>> =
         emprendedoraDao.obtenerPendientes()
 
+    val cuentasAprobadas:
+            Flow<List<EmprendedoraEntity>> =
+        emprendedoraDao.obtenerAprobadas()
 
-    // GUARDAR NUEVA EMPRENDEDORA
+    val cuentasRechazadas:
+            Flow<List<EmprendedoraEntity>> =
+        emprendedoraDao.obtenerRechazadas()
+
     suspend fun guardarEmprendedora(
         emprendedora: EmprendedoraEntity
     ) {
@@ -29,8 +32,6 @@ class EmprendedoraRepository(
         )
     }
 
-
-    // BUSCAR POR RUT
     suspend fun obtenerEmprendedoraRut(
         rut: String
     ): EmprendedoraEntity? {
@@ -40,8 +41,6 @@ class EmprendedoraRepository(
         )
     }
 
-
-    // BUSCAR POR CORREO
     suspend fun obtenerPorCorreo(
         correo: String
     ): EmprendedoraEntity? {
@@ -51,8 +50,6 @@ class EmprendedoraRepository(
         )
     }
 
-
-    // OBSERVAR ESTADO DE CUENTA
     fun observarPorCorreo(
         correo: String
     ): Flow<EmprendedoraEntity?> {
@@ -62,8 +59,6 @@ class EmprendedoraRepository(
         )
     }
 
-
-    // COMPROBAR CORREO DUPLICADO
     suspend fun existeCorreo(
         correo: String
     ): Boolean {
@@ -73,8 +68,6 @@ class EmprendedoraRepository(
         ) > 0
     }
 
-
-    // COMPROBAR RUT DUPLICADO
     suspend fun existeRut(
         rut: String
     ): Boolean {
@@ -84,32 +77,24 @@ class EmprendedoraRepository(
         ) > 0
     }
 
-
-    // APROBAR CUENTA
     suspend fun aprobarCuenta(
         rut: String
     ) {
-
         emprendedoraDao.aprobarCuenta(
             rut
         )
     }
 
-
-    // RECHAZAR CUENTA
     suspend fun rechazarCuenta(
         rut: String,
         motivo: String
     ) {
-
         emprendedoraDao.rechazarCuenta(
             rut,
             motivo
         )
     }
 
-
-    // INICIAR SESIÓN
     suspend fun iniciarSesion(
         correo: String,
         contrasena: String
@@ -118,6 +103,14 @@ class EmprendedoraRepository(
         return emprendedoraDao.iniciarSesion(
             correo,
             contrasena
+        )
+    }
+
+    suspend fun eliminarCuenta(
+        rut: String
+    ) {
+        emprendedoraDao.eliminarCuenta(
+            rut
         )
     }
 }

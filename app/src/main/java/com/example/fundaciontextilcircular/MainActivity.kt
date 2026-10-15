@@ -17,121 +17,164 @@ import com.example.fundaciontextilcircular.view.PantallaRegistro
 
 class MainActivity : ComponentActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate(
+        savedInstanceState: Bundle?
+    ) {
+
+        super.onCreate(
+            savedInstanceState
+        )
 
         setContent {
 
             TextilCircularTheme {
 
                 var pantallaActual by remember {
-                    mutableStateOf("bienvenida")
+                    mutableStateOf(
+                        "bienvenida"
+                    )
                 }
+
+                var correoEnRevision by remember {
+                    mutableStateOf("")
+                }
+
 
                 when (pantallaActual) {
 
-                    // PANTALLA DE BIENVENIDA
+
                     "bienvenida" -> {
 
                         PantallaBienvenida(
 
                             onIniciarSesion = {
-                                pantallaActual = "login"
+
+                                pantallaActual =
+                                    "login"
                             },
 
                             onCrearCuenta = {
-                                pantallaActual = "registro"
+
+                                pantallaActual =
+                                    "registro"
                             }
                         )
                     }
 
 
-                    // INICIO DE SESIÓN
                     "login" -> {
 
                         PantallaLogin(
 
                             onIngresarAdmin = {
-                                pantallaActual = "admin"
+
+                                pantallaActual =
+                                    "admin"
                             },
 
                             onIngresarUsuario = {
-                                pantallaActual = "principal"
+
+                                pantallaActual =
+                                    "principal"
                             },
 
                             onCuentaEnRevision = {
-                                pantallaActual = "revision"
+                                    correo ->
+
+                                correoEnRevision =
+                                    correo
+
+                                pantallaActual =
+                                    "revision"
                             },
 
                             onCrearCuenta = {
-                                pantallaActual = "registro"
+
+                                pantallaActual =
+                                    "registro"
                             },
 
                             onVolver = {
-                                pantallaActual = "bienvenida"
+
+                                pantallaActual =
+                                    "bienvenida"
                             }
                         )
                     }
 
 
-                    // REGISTRO
                     "registro" -> {
 
                         PantallaRegistro(
 
                             onRegistrar = {
-                                pantallaActual = "revision"
+                                    correo ->
+
+                                correoEnRevision =
+                                    correo
+
+                                pantallaActual =
+                                    "revision"
                             },
 
                             onVolver = {
-                                pantallaActual = "bienvenida"
+
+                                pantallaActual =
+                                    "bienvenida"
                             }
                         )
                     }
 
 
-                    // CUENTA EN REVISIÓN
                     "revision" -> {
 
                         PantallaCuentaEnRevision(
 
+                            correo =
+                                correoEnRevision,
+
                             onVolverInicioSesion = {
-                                pantallaActual = "login"
+
+                                pantallaActual =
+                                    "login"
                             }
                         )
                     }
 
 
-                    // PANEL ADMINISTRADOR
                     "admin" -> {
 
                         PantallaAdmin(
 
                             onCerrarSesion = {
-                                pantallaActual = "login"
+
+                                pantallaActual =
+                                    "login"
                             }
                         )
                     }
 
 
-                    // APLICACIÓN PRINCIPAL
                     "principal" -> {
 
                         MainScreen()
                     }
 
 
-                    // POR SEGURIDAD
                     else -> {
 
                         PantallaBienvenida(
 
                             onIniciarSesion = {
-                                pantallaActual = "login"
+
+                                pantallaActual =
+                                    "login"
                             },
 
                             onCrearCuenta = {
-                                pantallaActual = "registro"
+
+                                pantallaActual =
+                                    "registro"
                             }
                         )
                     }
