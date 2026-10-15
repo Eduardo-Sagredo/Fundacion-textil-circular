@@ -1,5 +1,6 @@
 package cl.textilcircular.view
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,12 +45,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.textilcircular.ui.theme.BlancoTextil
 import cl.textilcircular.ui.theme.NegroTextil
+import cl.textilcircular.ui.theme.RojoErrorTextil
 import cl.textilcircular.ui.theme.TurquesaTextil
+import cl.textilcircular.viewmodel.RegistroViewModel
 
-
-// REGIONES DE CHILE
 
 private val REGIONES_CHILE = listOf(
     "Arica y Parinacota",
@@ -70,8 +72,6 @@ private val REGIONES_CHILE = listOf(
     "Magallanes y de la Antártica Chilena"
 )
 
-
-// COMUNAS SEGÚN REGIÓN
 
 private val COMUNAS_POR_REGION = mapOf(
 
@@ -475,7 +475,8 @@ private val COMUNAS_POR_REGION = mapOf(
 fun PantallaRegistro(
     modifier: Modifier = Modifier,
     onRegistrar: () -> Unit = {},
-    onVolver: () -> Unit = {}
+    onVolver: () -> Unit = {},
+    registroViewModel: RegistroViewModel = viewModel()
 ) {
 
     var nombre by remember { mutableStateOf("") }
@@ -522,6 +523,10 @@ fun PantallaRegistro(
         mutableStateOf(false)
     }
 
+    var intentoRegistro by remember {
+        mutableStateOf(false)
+    }
+
     val opcionesGenero = listOf(
         "Femenino",
         "Masculino",
@@ -531,6 +536,27 @@ fun PantallaRegistro(
 
     val comunasDisponibles =
         COMUNAS_POR_REGION[region] ?: emptyList()
+
+
+    fun validarNuevamente() {
+
+        if (intentoRegistro) {
+
+            registroViewModel.validarFormulario(
+                nombre = nombre,
+                rut = rut,
+                correo = correo,
+                contrasena = contrasena,
+                confirmarContrasena = confirmarContrasena,
+                nombreEmprendimiento = nombreEmprendimiento,
+                rubro = rubro,
+                region = region,
+                comuna = comuna,
+                edad = edad,
+                genero = genero
+            )
+        }
+    }
 
 
     Column(
@@ -584,12 +610,19 @@ fun PantallaRegistro(
             modifier = Modifier.height(16.dp)
         )
 
+
+        // NOMBRE
+
         CampoRegistro(
             valor = nombre,
             onValorCambio = {
+
                 nombre = it
+
+                validarNuevamente()
             },
-            etiqueta = "Nombre completo"
+            etiqueta = "Nombre completo",
+            error = registroViewModel.errorNombre
         )
 
         Spacer(
@@ -609,6 +642,8 @@ fun PantallaRegistro(
                         it.isDigit() || it == 'K'
                     }
                     .take(9)
+
+                validarNuevamente()
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
@@ -621,6 +656,16 @@ fun PantallaRegistro(
                 )
             },
             singleLine = true,
+            isError = registroViewModel.errorRut != null,
+            supportingText = {
+
+                registroViewModel.errorRut?.let {
+
+                    Text(
+                        text = it
+                    )
+                }
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Ascii
             ),
@@ -638,7 +683,10 @@ fun PantallaRegistro(
         OutlinedTextField(
             value = correo,
             onValueChange = {
+
                 correo = it
+
+                validarNuevamente()
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
@@ -651,6 +699,16 @@ fun PantallaRegistro(
                 )
             },
             singleLine = true,
+            isError = registroViewModel.errorCorreo != null,
+            supportingText = {
+
+                registroViewModel.errorCorreo?.let {
+
+                    Text(
+                        text = it
+                    )
+                }
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email
             ),
@@ -667,7 +725,10 @@ fun PantallaRegistro(
         OutlinedTextField(
             value = contrasena,
             onValueChange = {
+
                 contrasena = it
+
+                validarNuevamente()
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
@@ -683,26 +744,42 @@ fun PantallaRegistro(
 
                 IconButton(
                     onClick = {
-                        mostrarContrasena = !mostrarContrasena
+
+                        mostrarContrasena =
+                            !mostrarContrasena
                     }
                 ) {
 
                     Icon(
-                        imageVector = if (mostrarContrasena) {
-                            Icons.Default.VisibilityOff
-                        } else {
-                            Icons.Default.Visibility
-                        },
-                        contentDescription = "Mostrar u ocultar contraseña"
+                        imageVector =
+                            if (mostrarContrasena) {
+                                Icons.Default.VisibilityOff
+                            } else {
+                                Icons.Default.Visibility
+                            },
+                        contentDescription =
+                            "Mostrar u ocultar contraseña"
                     )
                 }
             },
             singleLine = true,
-            visualTransformation = if (mostrarContrasena) {
-                VisualTransformation.None
-            } else {
-                PasswordVisualTransformation()
+            isError =
+                registroViewModel.errorContrasena != null,
+            supportingText = {
+
+                registroViewModel.errorContrasena?.let {
+
+                    Text(
+                        text = it
+                    )
+                }
             },
+            visualTransformation =
+                if (mostrarContrasena) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password
             ),
@@ -719,7 +796,10 @@ fun PantallaRegistro(
         OutlinedTextField(
             value = confirmarContrasena,
             onValueChange = {
+
                 confirmarContrasena = it
+
+                validarNuevamente()
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
@@ -735,23 +815,38 @@ fun PantallaRegistro(
 
                 IconButton(
                     onClick = {
+
                         mostrarConfirmarContrasena =
                             !mostrarConfirmarContrasena
                     }
                 ) {
 
                     Icon(
-                        imageVector = if (mostrarConfirmarContrasena) {
-                            Icons.Default.VisibilityOff
-                        } else {
-                            Icons.Default.Visibility
-                        },
+                        imageVector =
+                            if (mostrarConfirmarContrasena) {
+                                Icons.Default.VisibilityOff
+                            } else {
+                                Icons.Default.Visibility
+                            },
                         contentDescription =
                             "Mostrar u ocultar confirmación de contraseña"
                     )
                 }
             },
             singleLine = true,
+            isError =
+                registroViewModel.errorConfirmarContrasena != null,
+            supportingText = {
+
+                registroViewModel
+                    .errorConfirmarContrasena
+                    ?.let {
+
+                        Text(
+                            text = it
+                        )
+                    }
+            },
             visualTransformation =
                 if (mostrarConfirmarContrasena) {
                     VisualTransformation.None
@@ -781,24 +876,35 @@ fun PantallaRegistro(
             modifier = Modifier.height(16.dp)
         )
 
+
         CampoRegistro(
             valor = nombreEmprendimiento,
             onValorCambio = {
+
                 nombreEmprendimiento = it
+
+                validarNuevamente()
             },
-            etiqueta = "Nombre del emprendimiento"
+            etiqueta = "Nombre del emprendimiento",
+            error =
+                registroViewModel.errorNombreEmprendimiento
         )
 
         Spacer(
             modifier = Modifier.height(16.dp)
         )
 
+
         CampoRegistro(
             valor = rubro,
             onValorCambio = {
+
                 rubro = it
+
+                validarNuevamente()
             },
-            etiqueta = "Rubro o actividad"
+            etiqueta = "Rubro o actividad",
+            error = registroViewModel.errorRubro
         )
 
         Spacer(
@@ -813,6 +919,7 @@ fun PantallaRegistro(
             busqueda = busquedaRegion,
             menuAbierto = menuRegionAbierto,
             regiones = REGIONES_CHILE,
+            error = registroViewModel.errorRegion,
 
             onAbrirMenu = {
                 menuRegionAbierto = true
@@ -830,9 +937,6 @@ fun PantallaRegistro(
 
             onRegionSeleccionada = { nuevaRegion ->
 
-                // Si cambia de región,
-                // también borramos la comuna anterior.
-
                 if (region != nuevaRegion) {
                     comuna = ""
                 }
@@ -844,6 +948,8 @@ fun PantallaRegistro(
 
                 menuComunaAbierto = false
                 busquedaComuna = ""
+
+                validarNuevamente()
             }
         )
 
@@ -852,7 +958,7 @@ fun PantallaRegistro(
         )
 
 
-        // COMUNA SEGÚN REGIÓN
+        // COMUNA
 
         SelectorComuna(
             comunaSeleccionada = comuna,
@@ -860,6 +966,7 @@ fun PantallaRegistro(
             busqueda = busquedaComuna,
             menuAbierto = menuComunaAbierto,
             comunas = comunasDisponibles,
+            error = registroViewModel.errorComuna,
 
             onAbrirMenu = {
                 menuComunaAbierto = true
@@ -876,9 +983,13 @@ fun PantallaRegistro(
             },
 
             onComunaSeleccionada = {
+
                 comuna = it
+
                 menuComunaAbierto = false
                 busquedaComuna = ""
+
+                validarNuevamente()
             }
         )
 
@@ -905,17 +1016,31 @@ fun PantallaRegistro(
         OutlinedTextField(
             value = edad,
             onValueChange = {
+
                 edad = it
                     .filter { caracter ->
                         caracter.isDigit()
                     }
                     .take(3)
+
+                validarNuevamente()
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
                 Text("Edad")
             },
             singleLine = true,
+            isError =
+                registroViewModel.errorEdad != null,
+            supportingText = {
+
+                registroViewModel.errorEdad?.let {
+
+                    Text(
+                        text = it
+                    )
+                }
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
             ),
@@ -933,6 +1058,7 @@ fun PantallaRegistro(
             generoSeleccionado = genero,
             menuAbierto = menuGeneroAbierto,
             opciones = opcionesGenero,
+            error = registroViewModel.errorGenero,
 
             onAbrirMenu = {
                 menuGeneroAbierto = true
@@ -943,8 +1069,12 @@ fun PantallaRegistro(
             },
 
             onGeneroSeleccionado = {
+
                 genero = it
+
                 menuGeneroAbierto = false
+
+                validarNuevamente()
             }
         )
 
@@ -956,7 +1086,32 @@ fun PantallaRegistro(
         // CREAR CUENTA
 
         Button(
-            onClick = onRegistrar,
+            onClick = {
+
+                intentoRegistro = true
+
+                val formularioValido =
+                    registroViewModel.validarFormulario(
+                        nombre = nombre,
+                        rut = rut,
+                        correo = correo,
+                        contrasena = contrasena,
+                        confirmarContrasena =
+                            confirmarContrasena,
+                        nombreEmprendimiento =
+                            nombreEmprendimiento,
+                        rubro = rubro,
+                        region = region,
+                        comuna = comuna,
+                        edad = edad,
+                        genero = genero
+                    )
+
+                if (formularioValido) {
+
+                    onRegistrar()
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -977,8 +1132,6 @@ fun PantallaRegistro(
         )
 
 
-        // VOLVER
-
         TextButton(
             onClick = onVolver,
             modifier = Modifier.fillMaxWidth()
@@ -997,13 +1150,12 @@ fun PantallaRegistro(
 }
 
 
-// CAMPO NORMAL
-
 @Composable
 fun CampoRegistro(
     valor: String,
     onValorCambio: (String) -> Unit,
-    etiqueta: String
+    etiqueta: String,
+    error: String? = null
 ) {
 
     OutlinedTextField(
@@ -1020,12 +1172,20 @@ fun CampoRegistro(
             )
         },
         singleLine = true,
+        isError = error != null,
+        supportingText = {
+
+            error?.let {
+
+                Text(
+                    text = it
+                )
+            }
+        },
         colors = coloresCampoRegistro()
     )
 }
 
-
-// SELECTOR REGIÓN
 
 @Composable
 fun SelectorRegion(
@@ -1033,6 +1193,7 @@ fun SelectorRegion(
     busqueda: String,
     menuAbierto: Boolean,
     regiones: List<String>,
+    error: String?,
     onAbrirMenu: () -> Unit,
     onCerrarMenu: () -> Unit,
     onBusquedaCambio: (String) -> Unit,
@@ -1067,7 +1228,16 @@ fun SelectorRegion(
 
             OutlinedButton(
                 onClick = onAbrirMenu,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color =
+                        if (error != null) {
+                            RojoErrorTextil
+                        } else {
+                            Color.Gray
+                        }
+                )
             ) {
 
                 Text(
@@ -1122,11 +1292,22 @@ fun SelectorRegion(
                 }
             }
         }
+
+        error?.let {
+
+            Text(
+                text = it,
+                color = RojoErrorTextil,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    top = 4.dp
+                )
+            )
+        }
     }
 }
 
-
-// SELECTOR COMUNA
 
 @Composable
 fun SelectorComuna(
@@ -1135,6 +1316,7 @@ fun SelectorComuna(
     busqueda: String,
     menuAbierto: Boolean,
     comunas: List<String>,
+    error: String?,
     onAbrirMenu: () -> Unit,
     onCerrarMenu: () -> Unit,
     onBusquedaCambio: (String) -> Unit,
@@ -1173,7 +1355,16 @@ fun SelectorComuna(
             OutlinedButton(
                 onClick = onAbrirMenu,
                 enabled = regionSeleccionadaValida,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color =
+                        if (error != null) {
+                            RojoErrorTextil
+                        } else {
+                            Color.Gray
+                        }
+                )
             ) {
 
                 Text(
@@ -1240,17 +1431,29 @@ fun SelectorComuna(
                 }
             }
         }
+
+        error?.let {
+
+            Text(
+                text = it,
+                color = RojoErrorTextil,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    top = 4.dp
+                )
+            )
+        }
     }
 }
 
-
-// SELECTOR GÉNERO
 
 @Composable
 fun SelectorGenero(
     generoSeleccionado: String,
     menuAbierto: Boolean,
     opciones: List<String>,
+    error: String?,
     onAbrirMenu: () -> Unit,
     onCerrarMenu: () -> Unit,
     onGeneroSeleccionado: (String) -> Unit
@@ -1276,7 +1479,16 @@ fun SelectorGenero(
 
             OutlinedButton(
                 onClick = onAbrirMenu,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color =
+                        if (error != null) {
+                            RojoErrorTextil
+                        } else {
+                            Color.Gray
+                        }
+                )
             ) {
 
                 Text(
@@ -1308,36 +1520,63 @@ fun SelectorGenero(
                 }
             }
         }
+
+        error?.let {
+
+            Text(
+                text = it,
+                color = RojoErrorTextil,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    top = 4.dp
+                )
+            )
+        }
     }
 }
 
-
-// COLORES DE LOS CAMPOS
 
 @Composable
 fun coloresCampoRegistro() =
     OutlinedTextFieldDefaults.colors(
 
+        // TEXTO ESCRITO
         focusedTextColor = BlancoTextil,
         unfocusedTextColor = BlancoTextil,
 
+        // IMPORTANTE:
+        // si el campo tiene error, el texto sigue blanco
+        errorTextColor = BlancoTextil,
+
+        // BORDES
         focusedBorderColor = TurquesaTextil,
         unfocusedBorderColor = Color.Gray,
+        errorBorderColor = RojoErrorTextil,
 
+        // ETIQUETAS
         focusedLabelColor = TurquesaTextil,
         unfocusedLabelColor = Color.LightGray,
+        errorLabelColor = RojoErrorTextil,
 
+        // ICONOS IZQUIERDOS
         focusedLeadingIconColor = TurquesaTextil,
         unfocusedLeadingIconColor = Color.LightGray,
+        errorLeadingIconColor = RojoErrorTextil,
 
+        // ICONOS DERECHOS
         focusedTrailingIconColor = TurquesaTextil,
         unfocusedTrailingIconColor = Color.LightGray,
+        errorTrailingIconColor = RojoErrorTextil,
 
-        cursorColor = TurquesaTextil
+        // CURSOR
+        cursorColor = TurquesaTextil,
+        errorCursorColor = TurquesaTextil,
+
+        // MENSAJE DE ERROR
+        errorSupportingTextColor = RojoErrorTextil
     )
 
-
-// FORMATO VISUAL DEL RUT
 
 class RutVisualTransformation : VisualTransformation {
 

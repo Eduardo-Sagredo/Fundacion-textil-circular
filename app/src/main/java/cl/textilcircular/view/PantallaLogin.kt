@@ -37,12 +37,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import cl.textilcircular.ui.theme.BlancoTextil
 import cl.textilcircular.ui.theme.NegroTextil
+import cl.textilcircular.ui.theme.RojoErrorTextil
 import cl.textilcircular.ui.theme.TurquesaTextil
 
 @Composable
 fun PantallaLogin(
     modifier: Modifier = Modifier,
-    onIngresar: () -> Unit = {},
+    onIngresarAdmin: () -> Unit = {},
+    onIngresarUsuario: () -> Unit = {},
     onCrearCuenta: () -> Unit = {},
     onVolver: () -> Unit = {}
 ) {
@@ -57,6 +59,10 @@ fun PantallaLogin(
 
     var mostrarContrasena by remember {
         mutableStateOf(false)
+    }
+
+    var errorLogin by remember {
+        mutableStateOf<String?>(null)
     }
 
     Column(
@@ -97,10 +103,12 @@ fun PantallaLogin(
             modifier = Modifier.height(40.dp)
         )
 
+        // CORREO
         OutlinedTextField(
             value = correo,
             onValueChange = {
                 correo = it
+                errorLogin = null
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
@@ -133,10 +141,12 @@ fun PantallaLogin(
             modifier = Modifier.height(16.dp)
         )
 
+        // CONTRASEÑA
         OutlinedTextField(
             value = contrasena,
             onValueChange = {
                 contrasena = it
+                errorLogin = null
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
@@ -149,6 +159,7 @@ fun PantallaLogin(
                 )
             },
             trailingIcon = {
+
                 IconButton(
                     onClick = {
                         mostrarContrasena = !mostrarContrasena
@@ -193,12 +204,71 @@ fun PantallaLogin(
             )
         )
 
+        // MENSAJE DE ERROR
+        if (errorLogin != null) {
+
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
+
+            Text(
+                text = errorLogin!!,
+                color = RojoErrorTextil,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
         Spacer(
             modifier = Modifier.height(32.dp)
         )
 
+        // BOTÓN INGRESAR
         Button(
-            onClick = onIngresar,
+            onClick = {
+
+                when {
+
+                    correo.isBlank() -> {
+
+                        errorLogin =
+                            "Debes ingresar tu correo electrónico"
+                    }
+
+                    contrasena.isBlank() -> {
+
+                        errorLogin =
+                            "Debes ingresar tu contraseña"
+                    }
+
+                    correo.equals(
+                        "admin@textilcircular.cl",
+                        ignoreCase = true
+                    ) &&
+                            contrasena == "Admin123!" -> {
+
+                        errorLogin = null
+
+                        onIngresarAdmin()
+                    }
+
+                    correo.equals(
+                        "usuario@textilcircular.cl",
+                        ignoreCase = true
+                    ) &&
+                            contrasena == "Usuario123!" -> {
+
+                        errorLogin = null
+
+                        onIngresarUsuario()
+                    }
+
+                    else -> {
+
+                        errorLogin =
+                            "Correo o contraseña incorrectos"
+                    }
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
