@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation("com.google.android.gms:play-services-location:21.2.0")
     ksp(libs.room.compiler)
     ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.2")
     androidTestImplementation(platform(libs.androidx.compose.bom))
