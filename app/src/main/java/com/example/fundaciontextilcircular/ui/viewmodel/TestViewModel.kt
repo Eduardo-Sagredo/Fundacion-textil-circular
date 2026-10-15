@@ -22,12 +22,19 @@ class TestViewModel(private val repository: EmprendedoraRepository) : ViewModel(
             val nuevaEmprendedora = EmprendedoraEntity(
                 rut = "12345678-9",
                 nombre = "María Gómez",
+                correo = "mar.gomez@gmail.com",
+                contrasena = "Margom123",
                 nombreEmprendimiento = "Tejidos María",
                 rubro = "Reparación",
                 region = "Valparaíso",
                 comuna = "Viña del Mar",
+                edad = 53,
                 genero = "Femenino",
-                rangoEtario = "50-60"
+                rol = "EMPRENDEDORA",
+                estado = "PENDIENTE",
+                motivoRechazo = null
+
+
             )
             repository.guardarEmprendedora(nuevaEmprendedora)
         }
