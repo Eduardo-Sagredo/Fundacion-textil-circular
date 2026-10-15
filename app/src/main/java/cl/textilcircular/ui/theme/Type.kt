@@ -23,23 +23,34 @@ val NunitoFont = FontFamily(
     )
 )
 
+val MonumentFont = FontFamily(
+    Font(
+        resId = R.font.monument_extended_regular,
+        weight = FontWeight.Normal
+    ),
+    Font(
+        resId = R.font.monument_extended_black,
+        weight = FontWeight.Black
+    )
+)
+
 val Typography = Typography(
 
     headlineLarge = TextStyle(
-        fontFamily = NunitoFont,
-        fontWeight = FontWeight.Bold,
+        fontFamily = MonumentFont,
+        fontWeight = FontWeight.Black,
         fontSize = 30.sp
     ),
 
     headlineMedium = TextStyle(
-        fontFamily = NunitoFont,
-        fontWeight = FontWeight.Bold,
+        fontFamily = MonumentFont,
+        fontWeight = FontWeight.Black,
         fontSize = 24.sp
     ),
 
     titleLarge = TextStyle(
-        fontFamily = NunitoFont,
-        fontWeight = FontWeight.Bold,
+        fontFamily = MonumentFont,
+        fontWeight = FontWeight.Black,
         fontSize = 22.sp
     ),
 
