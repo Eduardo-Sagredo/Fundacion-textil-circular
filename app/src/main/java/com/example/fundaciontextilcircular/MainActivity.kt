@@ -13,9 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.fundaciontextilcircular.data.local.TextilDatabase
 import com.example.fundaciontextilcircular.data.local.dao.EmprendedoraDao
+import com.example.fundaciontextilcircular.data.repository.ChatRepository
 import com.example.fundaciontextilcircular.data.repository.EmprendedoraRepository
+import com.example.fundaciontextilcircular.data.utils.NetworkMonitor
 import com.example.fundaciontextilcircular.ui.theme.FundacionTextilCircularTheme
+import com.example.fundaciontextilcircular.ui.view.ChatScreen
 import com.example.fundaciontextilcircular.ui.view.TestScreen
+import com.example.fundaciontextilcircular.ui.viewmodel.ChatViewModel
 import com.example.fundaciontextilcircular.ui.viewmodel.TestViewModel
 
 class MainActivity : ComponentActivity() {
@@ -24,14 +28,16 @@ class MainActivity : ComponentActivity() {
 
         val database = TextilDatabase.getDatabase(this)
 
-        val repository = EmprendedoraRepository(database.emprendedoraDao())
+        val networkMonitor = NetworkMonitor(this)
 
-        val viewModel = TestViewModel(repository)
+        val chatRepository = ChatRepository(database.mensajeDao())
+
+        val chatViewModel = ChatViewModel(chatRepository, networkMonitor)
 
         enableEdgeToEdge()
         setContent {
             FundacionTextilCircularTheme {
-                TestScreen(viewModel = viewModel)
+                ChatScreen(viewModel = chatViewModel)
             }
 
         }
