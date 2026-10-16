@@ -1,5 +1,6 @@
 package com.example.fundaciontextilcircular.ui.view
 
+import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -23,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.fundaciontextilcircular.data.utils.ImageCompressor
 import com.example.fundaciontextilcircular.data.utils.ImageCompressor.crearUriTemporalParaCamara
+import com.example.fundaciontextilcircular.data.utils.LocationHelper
 import com.example.fundaciontextilcircular.ui.viewmodel.TestViewModel
 
 @Composable
@@ -30,13 +32,15 @@ fun TestScreen(viewModel: TestViewModel) {
     val listaEmprendedoras by viewModel.emprendedorasGuardadas.collectAsState()
     val context = LocalContext.current
 
-    // Ruta física permanente de la imagen comprimida
     var rutaFinalImagen by remember { mutableStateOf<String?>(null) }
-
-    // Uri temporal para la captura de la cámara
     var tempCamaraUri by remember { mutableStateOf<Uri?>(null) }
 
-    // 1. Lanzador de Galería
+    // Estados para almacenar la ubicación sugerida obtenida
+    var comunaSugerida by remember { mutableStateOf<String?>(null) }
+    var regionSugerida by remember { mutableStateOf<String?>(null) }
+    var mensajeErrorGps by remember { mutableStateOf<String?>(null) }
+
+    // Lanzadores de imágenes
     val galeriaLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
@@ -45,25 +49,45 @@ fun TestScreen(viewModel: TestViewModel) {
         }
     }
 
-    // 2. Lanzador de Cámara
     val camaraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { exitoso ->
         if (exitoso && tempCamaraUri != null) {
-            // Comprimimos la imagen capturada por la cámara y la guardamos en almacenamiento permanente
             rutaFinalImagen = ImageCompressor.comprimirYGuardar(context, tempCamaraUri!!)
         }
     }
 
+    // Lanzador para solicitar permisos de ubicación al usuario
+    val permisoUbicacionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permisos ->
+        val concedido = permisos[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permisos[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+        if (concedido) {
+            LocationHelper.obtenerUbicacionSugerida(
+                context = context,
+                onResultado = { comuna, region ->
+                    comunaSugerida = comuna
+                    regionSugerida = region
+                    mensajeErrorGps = null
+                },
+                onError = { error -> mensajeErrorGps = error }
+            )
+        } else {
+            mensajeErrorGps = "Permiso de ubicación denegado por el usuario."
+        }
+    }
+
     Column(modifier = Modifier.padding(16.dp)) {
-        // --- SECCIÓN BD ---
+        // --- SECCIÓN BASE DE DATOS ---
         Button(onClick = { viewModel.insertarEmprendedoraFalsa() }) {
             Text("Guardar Emprendedora en BD")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // --- SECCIÓN HARDWARE: GALERÍA Y CÁMARA ---
+        // --- SECCIÓN IMÁGENES ---
         Button(onClick = {
             galeriaLauncher.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -82,10 +106,38 @@ fun TestScreen(viewModel: TestViewModel) {
             Text("Tomar Foto con Cámara")
         }
 
-        // Muestra de resultados
         if (rutaFinalImagen != null) {
             Text(
-                text = "¡Foto procesada y guardada con éxito!\nRuta permanente: $rutaFinalImagen",
+                text = "¡Foto procesada!\nRuta: $rutaFinalImagen",
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // --- SECCIÓN GEOLOCALIZACIÓN ---
+        Button(onClick = {
+            // Solicita permisos de ubicación fina y gruesa
+            permisoUbicacionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }) {
+            Text("Obtener Ubicación Sugerida (GPS)")
+        }
+
+        if (comunaSugerida != null) {
+            Text(
+                text = "Ubicación detectada:\nComuna: $comunaSugerida\nRegión: $regionSugerida",
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+
+        if (mensajeErrorGps != null) {
+            Text(
+                text = "$mensajeErrorGps",
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
