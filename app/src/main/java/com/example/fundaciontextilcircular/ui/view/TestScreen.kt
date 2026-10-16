@@ -1,5 +1,6 @@
 package com.example.fundaciontextilcircular.ui.view
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,37 +22,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.fundaciontextilcircular.data.utils.ImageCompressor
+import com.example.fundaciontextilcircular.data.utils.ImageCompressor.crearUriTemporalParaCamara
 import com.example.fundaciontextilcircular.ui.viewmodel.TestViewModel
 
 @Composable
 fun TestScreen(viewModel: TestViewModel) {
     val listaEmprendedoras by viewModel.emprendedorasGuardadas.collectAsState()
-
-    // 1. Obtenemos el contexto actual para interactuar con los archivos internos del dispositivo
     val context = LocalContext.current
 
-    // 2. Estado para almacenar la ruta absoluta permanente del archivo ya comprimido
+    // Ruta física permanente de la imagen comprimida
     var rutaFinalImagen by remember { mutableStateOf<String?>(null) }
 
-    // 3. Contrato para abrir la galería y procesar la imagen seleccionada
+    // Uri temporal para la captura de la cámara
+    var tempCamaraUri by remember { mutableStateOf<Uri?>(null) }
+
+    // 1. Lanzador de Galería
     val galeriaLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
-            // Se comprime la imagen y se guarda permanentemente en la memoria interna
             rutaFinalImagen = ImageCompressor.comprimirYGuardar(context, uri)
         }
     }
 
+    // 2. Lanzador de Cámara
+    val camaraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { exitoso ->
+        if (exitoso && tempCamaraUri != null) {
+            // Comprimimos la imagen capturada por la cámara y la guardamos en almacenamiento permanente
+            rutaFinalImagen = ImageCompressor.comprimirYGuardar(context, tempCamaraUri!!)
+        }
+    }
+
     Column(modifier = Modifier.padding(16.dp)) {
-        // --- SECCIÓN DE BASE DE DATOS ---
+        // --- SECCIÓN BD ---
         Button(onClick = { viewModel.insertarEmprendedoraFalsa() }) {
             Text("Guardar Emprendedora en BD")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- SECCIÓN DE HARDWARE: GALERÍA Y COMPRESIÓN ---
+        // --- SECCIÓN HARDWARE: GALERÍA Y CÁMARA ---
         Button(onClick = {
             galeriaLauncher.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -60,10 +72,20 @@ fun TestScreen(viewModel: TestViewModel) {
             Text("Abrir Galería")
         }
 
-        // Muestra la ruta física permanente guardada en app storage (/data/user/0/...)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(onClick = {
+            val uri = crearUriTemporalParaCamara(context)
+            tempCamaraUri = uri
+            camaraLauncher.launch(uri)
+        }) {
+            Text("Tomar Foto con Cámara")
+        }
+
+        // Muestra de resultados
         if (rutaFinalImagen != null) {
             Text(
-                text = "¡Foto comprimida y guardada con éxito!\nRuta permanente: $rutaFinalImagen",
+                text = "¡Foto procesada y guardada con éxito!\nRuta permanente: $rutaFinalImagen",
                 modifier = Modifier.padding(top = 8.dp)
             )
         }

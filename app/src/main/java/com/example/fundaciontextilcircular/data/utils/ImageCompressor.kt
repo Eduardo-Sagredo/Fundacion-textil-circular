@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
@@ -31,5 +32,20 @@ object ImageCompressor {
             e.printStackTrace()
             null
         }
+    }
+
+    fun crearUriTemporalParaCamara(context: Context): Uri {
+        val tempFile = File.createTempFile(
+            "CAM_${System.currentTimeMillis()}_",
+            ".jpg",
+            context.cacheDir
+        ).apply {
+            createNewFile()
+        }
+        return FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            tempFile
+        )
     }
 }
