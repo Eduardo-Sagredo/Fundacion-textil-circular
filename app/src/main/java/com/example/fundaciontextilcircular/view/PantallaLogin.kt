@@ -45,39 +45,52 @@ import kotlinx.coroutines.launch
 @Composable
 fun PantallaLogin(
     modifier: Modifier = Modifier,
+
     onIngresarAdmin: () -> Unit = {},
-    onIngresarUsuario: () -> Unit = {},
+
+    onIngresarUsuario: (String) -> Unit = {},
+
     onCuentaEnRevision: (String) -> Unit = {},
+
     onCrearCuenta: () -> Unit = {},
+
     onVolver: () -> Unit = {}
 ) {
 
-    val context = LocalContext.current
+    val context =
+        LocalContext.current
 
     val scope =
         rememberCoroutineScope()
 
-    val dao = remember(context) {
-        TextilDatabase
-            .getDatabase(context)
-            .emprendedoraDao()
-    }
+    val dao =
+        remember(context) {
+
+            TextilDatabase
+                .getDatabase(context)
+                .emprendedoraDao()
+        }
+
 
     var correo by remember {
         mutableStateOf("")
     }
 
+
     var contrasena by remember {
         mutableStateOf("")
     }
+
 
     var mostrarContrasena by remember {
         mutableStateOf(false)
     }
 
+
     var mensajeError by remember {
         mutableStateOf<String?>(null)
     }
+
 
     Column(
         modifier = modifier
@@ -90,83 +103,140 @@ fun PantallaLogin(
     ) {
 
         Spacer(
-            modifier = Modifier.height(70.dp)
+            modifier =
+                Modifier.height(70.dp)
         )
+
 
         Text(
             text = "INICIAR",
-            color = BlancoTextil,
+
+            color =
+                BlancoTextil,
+
             style =
-                MaterialTheme.typography.headlineLarge
+                MaterialTheme
+                    .typography
+                    .headlineLarge
         )
+
 
         Text(
             text = "SESIÓN",
-            color = TurquesaTextil,
+
+            color =
+                TurquesaTextil,
+
             style =
-                MaterialTheme.typography.headlineLarge
+                MaterialTheme
+                    .typography
+                    .headlineLarge
         )
+
 
         Spacer(
-            modifier = Modifier.height(32.dp)
+            modifier =
+                Modifier.height(32.dp)
         )
 
+
+        // CORREO
+
         OutlinedTextField(
-            value = correo,
+            value =
+                correo,
+
             onValueChange = {
-                correo = it
-                mensajeError = null
+
+                correo =
+                    it
+
+                mensajeError =
+                    null
             },
+
             modifier =
                 Modifier.fillMaxWidth(),
+
             label = {
-                Text("Correo electrónico")
+
+                Text(
+                    "Correo electrónico"
+                )
             },
+
             leadingIcon = {
+
                 Icon(
                     imageVector =
                         Icons.Default.Email,
+
                     contentDescription =
                         "Correo electrónico"
                 )
             },
-            singleLine = true,
+
+            singleLine =
+                true,
+
             keyboardOptions =
                 KeyboardOptions(
                     keyboardType =
                         KeyboardType.Email
                 ),
+
             colors =
                 coloresCampoRegistro()
         )
 
+
         Spacer(
-            modifier = Modifier.height(16.dp)
+            modifier =
+                Modifier.height(16.dp)
         )
 
+
+        // CONTRASEÑA
+
         OutlinedTextField(
-            value = contrasena,
+            value =
+                contrasena,
+
             onValueChange = {
-                contrasena = it
-                mensajeError = null
+
+                contrasena =
+                    it
+
+                mensajeError =
+                    null
             },
+
             modifier =
                 Modifier.fillMaxWidth(),
+
             label = {
-                Text("Contraseña")
+
+                Text(
+                    "Contraseña"
+                )
             },
+
             leadingIcon = {
+
                 Icon(
                     imageVector =
                         Icons.Default.Lock,
+
                     contentDescription =
                         "Contraseña"
                 )
             },
+
             trailingIcon = {
 
                 IconButton(
                     onClick = {
+
                         mostrarContrasena =
                             !mostrarContrasena
                     }
@@ -174,46 +244,74 @@ fun PantallaLogin(
 
                     Icon(
                         imageVector =
-                            if (mostrarContrasena) {
+                            if (
+                                mostrarContrasena
+                            ) {
+
                                 Icons.Default
                                     .VisibilityOff
+
                             } else {
+
                                 Icons.Default
                                     .Visibility
                             },
+
                         contentDescription =
-                            "Mostrar contraseña"
+                            "Mostrar u ocultar contraseña"
                     )
                 }
             },
+
             visualTransformation =
-                if (mostrarContrasena) {
+                if (
+                    mostrarContrasena
+                ) {
+
                     VisualTransformation.None
+
                 } else {
+
                     PasswordVisualTransformation()
                 },
-            singleLine = true,
+
+            singleLine =
+                true,
+
             keyboardOptions =
                 KeyboardOptions(
                     keyboardType =
                         KeyboardType.Password
                 ),
+
             colors =
                 coloresCampoRegistro()
         )
 
+
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier =
+                Modifier.height(12.dp)
         )
+
+
+        // MENSAJE DE ERROR
 
         mensajeError?.let {
 
             Text(
-                text = it,
-                color = RojoErrorTextil,
+                text =
+                    it,
+
+                color =
+                    RojoErrorTextil,
+
                 style =
-                    MaterialTheme.typography.bodyMedium
+                    MaterialTheme
+                        .typography
+                        .bodyMedium
             )
+
 
             Spacer(
                 modifier =
@@ -221,25 +319,39 @@ fun PantallaLogin(
             )
         }
 
+
+        // BOTÓN INGRESAR
+
         Button(
             onClick = {
 
-                mensajeError = null
+                mensajeError =
+                    null
+
 
                 val correoNormalizado =
                     correo
                         .trim()
                         .lowercase()
 
+
                 if (
-                    correoNormalizado.isBlank() ||
-                    contrasena.isBlank()
+                    correoNormalizado
+                        .isBlank() ||
+                    contrasena
+                        .isBlank()
                 ) {
 
                     mensajeError =
                         "Debes ingresar correo y contraseña"
 
-                } else if (
+                    return@Button
+                }
+
+
+                // ADMINISTRADOR
+
+                if (
                     correoNormalizado ==
                     "admin@textilcircular.cl" &&
                     contrasena ==
@@ -248,95 +360,139 @@ fun PantallaLogin(
 
                     onIngresarAdmin()
 
-                } else {
+                    return@Button
+                }
 
-                    scope.launch {
 
-                        val cuenta =
-                            dao.iniciarSesion(
-                                correo =
-                                    correoNormalizado,
-                                contrasena =
-                                    contrasena
+                // USUARIO REGISTRADO EN ROOM
+
+                scope.launch {
+
+                    val cuenta =
+                        dao.iniciarSesion(
+
+                            correo =
+                                correoNormalizado,
+
+                            contrasena =
+                                contrasena
+                        )
+
+
+                    if (
+                        cuenta == null
+                    ) {
+
+                        val cuentaPorCorreo =
+                            dao.obtenerPorCorreo(
+                                correoNormalizado
                             )
 
-                        if (cuenta == null) {
 
-                            val cuentaPorCorreo =
-                                dao.obtenerPorCorreo(
-                                    correoNormalizado
-                                )
+                        mensajeError =
+                            if (
+                                cuentaPorCorreo != null
+                            ) {
 
-                            mensajeError =
-                                if (
-                                    cuentaPorCorreo != null
-                                ) {
-                                    "Contraseña incorrecta"
-                                } else {
-                                    "Correo o contraseña incorrectos"
-                                }
+                                "Contraseña incorrecta"
 
-                            return@launch
+                            } else {
+
+                                "Correo o contraseña incorrectos"
+                            }
+
+
+                        return@launch
+                    }
+
+
+                    when (
+                        cuenta
+                            .estado
+                            .uppercase()
+                    ) {
+
+
+                        // CUENTA APROBADA
+
+                        "APROBADA" -> {
+
+                            onIngresarUsuario(
+                                cuenta.correo
+                            )
                         }
 
-                        when (
-                            cuenta.estado.uppercase()
-                        ) {
 
-                            "APROBADA" -> {
+                        // CUENTA PENDIENTE
 
-                                onIngresarUsuario()
-                            }
+                        "PENDIENTE" -> {
 
-                            "PENDIENTE" -> {
+                            onCuentaEnRevision(
+                                cuenta.correo
+                            )
+                        }
 
-                                onCuentaEnRevision(
-                                    cuenta.correo
-                                )
-                            }
 
-                            "RECHAZADA" -> {
+                        // CUENTA RECHAZADA
 
-                                onCuentaEnRevision(
-                                    cuenta.correo
-                                )
-                            }
+                        "RECHAZADA" -> {
 
-                            else -> {
+                            onCuentaEnRevision(
+                                cuenta.correo
+                            )
+                        }
 
-                                mensajeError =
-                                    "El estado de la cuenta no es válido"
-                            }
+
+                        else -> {
+
+                            mensajeError =
+                                "El estado de la cuenta no es válido"
                         }
                     }
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+
             colors =
-                ButtonDefaults.buttonColors(
-                    containerColor =
-                        TurquesaTextil,
-                    contentColor =
-                        NegroTextil
-                )
+                ButtonDefaults
+                    .buttonColors(
+
+                        containerColor =
+                            TurquesaTextil,
+
+                        contentColor =
+                            NegroTextil
+                    )
         ) {
 
             Text(
-                text = "INGRESAR",
+                text =
+                    "INGRESAR",
+
                 style =
-                    MaterialTheme.typography.labelLarge
+                    MaterialTheme
+                        .typography
+                        .labelLarge
             )
         }
 
+
         Spacer(
-            modifier = Modifier.height(20.dp)
+            modifier =
+                Modifier.height(20.dp)
         )
+
+
+        // CREAR CUENTA
 
         TextButton(
             onClick =
                 onCrearCuenta,
+
             modifier =
                 Modifier.fillMaxWidth()
         ) {
@@ -344,20 +500,27 @@ fun PantallaLogin(
             Text(
                 text =
                     "¿No tienes una cuenta? Crear cuenta",
+
                 color =
                     BlancoTextil
             )
         }
 
+
+        // VOLVER
+
         TextButton(
             onClick =
                 onVolver,
+
             modifier =
                 Modifier.fillMaxWidth()
         ) {
 
             Text(
-                text = "Volver",
+                text =
+                    "Volver",
+
                 color =
                     TurquesaTextil
             )

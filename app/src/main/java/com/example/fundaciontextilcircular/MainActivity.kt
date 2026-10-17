@@ -21,27 +21,38 @@ class MainActivity : ComponentActivity() {
         savedInstanceState: Bundle?
     ) {
 
-        super.onCreate(
-            savedInstanceState
-        )
+        super.onCreate(savedInstanceState)
 
         setContent {
 
             TextilCircularTheme {
 
                 var pantallaActual by remember {
-                    mutableStateOf(
-                        "bienvenida"
-                    )
+                    mutableStateOf("bienvenida")
                 }
+
+
+                // CORREO DE CUENTA PENDIENTE O RECHAZADA
 
                 var correoEnRevision by remember {
                     mutableStateOf("")
                 }
 
 
+                // CORREO DE LA EMPRENDEDORA
+                // QUE INICIÓ SESIÓN
+
+                var correoUsuarioActual by remember {
+                    mutableStateOf("")
+                }
+
+
                 when (pantallaActual) {
 
+
+                    // =========================
+                    // BIENVENIDA
+                    // =========================
 
                     "bienvenida" -> {
 
@@ -62,6 +73,10 @@ class MainActivity : ComponentActivity() {
                     }
 
 
+                    // =========================
+                    // LOGIN
+                    // =========================
+
                     "login" -> {
 
                         PantallaLogin(
@@ -72,14 +87,22 @@ class MainActivity : ComponentActivity() {
                                     "admin"
                             },
 
-                            onIngresarUsuario = {
+
+                            // USUARIO APROBADO
+
+                            onIngresarUsuario = { correo ->
+
+                                correoUsuarioActual =
+                                    correo
 
                                 pantallaActual =
                                     "principal"
                             },
 
-                            onCuentaEnRevision = {
-                                    correo ->
+
+                            // PENDIENTE O RECHAZADO
+
+                            onCuentaEnRevision = { correo ->
 
                                 correoEnRevision =
                                     correo
@@ -87,6 +110,7 @@ class MainActivity : ComponentActivity() {
                                 pantallaActual =
                                     "revision"
                             },
+
 
                             onCrearCuenta = {
 
@@ -94,6 +118,7 @@ class MainActivity : ComponentActivity() {
                                     "registro"
                             },
 
+
                             onVolver = {
 
                                 pantallaActual =
@@ -103,12 +128,15 @@ class MainActivity : ComponentActivity() {
                     }
 
 
+                    // =========================
+                    // REGISTRO
+                    // =========================
+
                     "registro" -> {
 
                         PantallaRegistro(
 
-                            onRegistrar = {
-                                    correo ->
+                            onRegistrar = { correo ->
 
                                 correoEnRevision =
                                     correo
@@ -125,6 +153,10 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+
+                    // =========================
+                    // CUENTA EN REVISIÓN
+                    // =========================
 
                     "revision" -> {
 
@@ -142,6 +174,10 @@ class MainActivity : ComponentActivity() {
                     }
 
 
+                    // =========================
+                    // ADMINISTRADOR
+                    // =========================
+
                     "admin" -> {
 
                         PantallaAdmin(
@@ -155,11 +191,22 @@ class MainActivity : ComponentActivity() {
                     }
 
 
+                    // =========================
+                    // APLICACIÓN PRINCIPAL
+                    // =========================
+
                     "principal" -> {
 
-                        MainScreen()
+                        MainScreen(
+                            correo =
+                                correoUsuarioActual
+                        )
                     }
 
+
+                    // =========================
+                    // SEGURIDAD
+                    // =========================
 
                     else -> {
 

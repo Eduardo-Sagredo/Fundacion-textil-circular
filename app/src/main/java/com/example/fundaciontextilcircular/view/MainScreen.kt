@@ -21,7 +21,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    correo: String
+) {
 
     var opcionSeleccionada by remember {
         mutableIntStateOf(0)
@@ -32,21 +34,28 @@ fun MainScreen() {
         bottomBar = {
 
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.background
+                containerColor =
+                    MaterialTheme.colorScheme.background
             ) {
 
+
                 // INICIO
+
                 NavigationBarItem(
-                    selected = opcionSeleccionada == 0,
+                    selected =
+                        opcionSeleccionada == 0,
 
                     onClick = {
                         opcionSeleccionada = 0
                     },
 
                     icon = {
+
                         Icon(
-                            imageVector = Icons.Default.Home,
-                            contentDescription = "Inicio"
+                            imageVector =
+                                Icons.Default.Home,
+                            contentDescription =
+                                "Inicio"
                         )
                     },
 
@@ -54,27 +63,54 @@ fun MainScreen() {
                         Text("Inicio")
                     },
 
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.secondary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground
-                    )
+                    colors =
+                        NavigationBarItemDefaults.colors(
+
+                            selectedIconColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary,
+
+                            selectedTextColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary,
+
+                            indicatorColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .secondary,
+
+                            unselectedIconColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .onBackground,
+
+                            unselectedTextColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .onBackground
+                        )
                 )
 
+
                 // CATÁLOGO
+
                 NavigationBarItem(
-                    selected = opcionSeleccionada == 1,
+                    selected =
+                        opcionSeleccionada == 1,
 
                     onClick = {
                         opcionSeleccionada = 1
                     },
 
                     icon = {
+
                         Icon(
-                            imageVector = Icons.Default.List,
-                            contentDescription = "Catálogo"
+                            imageVector =
+                                Icons.Default.List,
+                            contentDescription =
+                                "Catálogo"
                         )
                     },
 
@@ -82,27 +118,54 @@ fun MainScreen() {
                         Text("Catálogo")
                     },
 
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.secondary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground
-                    )
+                    colors =
+                        NavigationBarItemDefaults.colors(
+
+                            selectedIconColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary,
+
+                            selectedTextColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary,
+
+                            indicatorColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .secondary,
+
+                            unselectedIconColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .onBackground,
+
+                            unselectedTextColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .onBackground
+                        )
                 )
 
+
                 // MENSAJES
+
                 NavigationBarItem(
-                    selected = opcionSeleccionada == 2,
+                    selected =
+                        opcionSeleccionada == 2,
 
                     onClick = {
                         opcionSeleccionada = 2
                     },
 
                     icon = {
+
                         Icon(
-                            imageVector = Icons.Default.Email,
-                            contentDescription = "Mensajes"
+                            imageVector =
+                                Icons.Default.Email,
+                            contentDescription =
+                                "Mensajes"
                         )
                     },
 
@@ -110,27 +173,54 @@ fun MainScreen() {
                         Text("Mensajes")
                     },
 
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.secondary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground
-                    )
+                    colors =
+                        NavigationBarItemDefaults.colors(
+
+                            selectedIconColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary,
+
+                            selectedTextColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary,
+
+                            indicatorColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .secondary,
+
+                            unselectedIconColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .onBackground,
+
+                            unselectedTextColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .onBackground
+                        )
                 )
 
+
                 // PERFIL
+
                 NavigationBarItem(
-                    selected = opcionSeleccionada == 3,
+                    selected =
+                        opcionSeleccionada == 3,
 
                     onClick = {
                         opcionSeleccionada = 3
                     },
 
                     icon = {
+
                         Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Perfil"
+                            imageVector =
+                                Icons.Default.Person,
+                            contentDescription =
+                                "Perfil"
                         )
                     },
 
@@ -138,36 +228,96 @@ fun MainScreen() {
                         Text("Perfil")
                     },
 
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.secondary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground
-                    )
+                    colors =
+                        NavigationBarItemDefaults.colors(
+
+                            selectedIconColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary,
+
+                            selectedTextColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary,
+
+                            indicatorColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .secondary,
+
+                            unselectedIconColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .onBackground,
+
+                            unselectedTextColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .onBackground
+                        )
                 )
             }
         }
 
     ) { paddingValues ->
 
+
         when (opcionSeleccionada) {
 
-            0 -> PantallaInicio(
-                modifier = Modifier.padding(paddingValues)
-            )
 
-            1 -> PantallaCatalogo(
-                modifier = Modifier.padding(paddingValues)
-            )
+            // INICIO
 
-            2 -> PantallaMensajes(
-                modifier = Modifier.padding(paddingValues)
-            )
+            0 -> {
 
-            3 -> PantallaPerfil(
-                modifier = Modifier.padding(paddingValues)
-            )
+                PantallaInicio(
+                    modifier =
+                        Modifier.padding(
+                            paddingValues
+                        )
+                )
+            }
+
+
+            // CATÁLOGO
+
+            1 -> {
+
+                PantallaCatalogo(
+                    modifier =
+                        Modifier.padding(
+                            paddingValues
+                        )
+                )
+            }
+
+
+            // MENSAJES
+
+            2 -> {
+
+                PantallaMensajes(
+                    modifier =
+                        Modifier.padding(
+                            paddingValues
+                        )
+                )
+            }
+
+
+            // PERFIL
+
+            3 -> {
+
+                PantallaPerfil(
+                    correo = correo,
+
+                    modifier =
+                        Modifier.padding(
+                            paddingValues
+                        )
+                )
+            }
         }
     }
 }
