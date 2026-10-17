@@ -22,6 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FundacionTextilCircular"
+rootProject.name = "TextilCircular"
 include(":app")
- 
