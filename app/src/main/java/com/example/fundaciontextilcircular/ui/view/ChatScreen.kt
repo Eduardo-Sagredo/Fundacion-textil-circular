@@ -34,7 +34,7 @@ fun ChatScreen(viewModel: ChatViewModel) {
                 val alineacion = if (mensaje.esDeUsuario) Alignment.End else Alignment.Start
                 val colorFondo = if (mensaje.esDeUsuario) Color(0xFFDCF8C6) else Color(0xFFE0E0E0)
                 val estado = if (mensaje.esDeUsuario) {
-                    if (mensaje.estaPendiente) " 🕒" else " ✓✓"
+                    if (mensaje.estaPendiente) "✖✖" else "✔✔gi"
                 } else ""
 
                 Column(
