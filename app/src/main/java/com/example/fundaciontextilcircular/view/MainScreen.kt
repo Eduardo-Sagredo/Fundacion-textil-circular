@@ -22,12 +22,14 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun MainScreen(
-    correo: String
+    correo: String,
+    onCerrarSesion: () -> Unit = {}
 ) {
 
     var opcionSeleccionada by remember {
         mutableIntStateOf(0)
     }
+
 
     Scaffold(
 
@@ -35,18 +37,24 @@ fun MainScreen(
 
             NavigationBar(
                 containerColor =
-                    MaterialTheme.colorScheme.background
+                    MaterialTheme
+                        .colorScheme
+                        .background
             ) {
 
 
+                // =========================
                 // INICIO
+                // =========================
 
                 NavigationBarItem(
                     selected =
                         opcionSeleccionada == 0,
 
                     onClick = {
-                        opcionSeleccionada = 0
+
+                        opcionSeleccionada =
+                            0
                     },
 
                     icon = {
@@ -54,54 +62,63 @@ fun MainScreen(
                         Icon(
                             imageVector =
                                 Icons.Default.Home,
+
                             contentDescription =
                                 "Inicio"
                         )
                     },
 
                     label = {
-                        Text("Inicio")
+
+                        Text(
+                            "Inicio"
+                        )
                     },
 
                     colors =
-                        NavigationBarItemDefaults.colors(
+                        NavigationBarItemDefaults
+                            .colors(
 
-                            selectedIconColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .primary,
+                                selectedIconColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .primary,
 
-                            selectedTextColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .primary,
+                                selectedTextColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .primary,
 
-                            indicatorColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .secondary,
+                                indicatorColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .secondary,
 
-                            unselectedIconColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .onBackground,
+                                unselectedIconColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .onBackground,
 
-                            unselectedTextColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .onBackground
-                        )
+                                unselectedTextColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .onBackground
+                            )
                 )
 
 
+                // =========================
                 // CATÁLOGO
+                // =========================
 
                 NavigationBarItem(
                     selected =
                         opcionSeleccionada == 1,
 
                     onClick = {
-                        opcionSeleccionada = 1
+
+                        opcionSeleccionada =
+                            1
                     },
 
                     icon = {
@@ -109,54 +126,63 @@ fun MainScreen(
                         Icon(
                             imageVector =
                                 Icons.Default.List,
+
                             contentDescription =
                                 "Catálogo"
                         )
                     },
 
                     label = {
-                        Text("Catálogo")
+
+                        Text(
+                            "Catálogo"
+                        )
                     },
 
                     colors =
-                        NavigationBarItemDefaults.colors(
+                        NavigationBarItemDefaults
+                            .colors(
 
-                            selectedIconColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .primary,
+                                selectedIconColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .primary,
 
-                            selectedTextColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .primary,
+                                selectedTextColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .primary,
 
-                            indicatorColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .secondary,
+                                indicatorColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .secondary,
 
-                            unselectedIconColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .onBackground,
+                                unselectedIconColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .onBackground,
 
-                            unselectedTextColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .onBackground
-                        )
+                                unselectedTextColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .onBackground
+                            )
                 )
 
 
+                // =========================
                 // MENSAJES
+                // =========================
 
                 NavigationBarItem(
                     selected =
                         opcionSeleccionada == 2,
 
                     onClick = {
-                        opcionSeleccionada = 2
+
+                        opcionSeleccionada =
+                            2
                     },
 
                     icon = {
@@ -164,54 +190,63 @@ fun MainScreen(
                         Icon(
                             imageVector =
                                 Icons.Default.Email,
+
                             contentDescription =
                                 "Mensajes"
                         )
                     },
 
                     label = {
-                        Text("Mensajes")
+
+                        Text(
+                            "Mensajes"
+                        )
                     },
 
                     colors =
-                        NavigationBarItemDefaults.colors(
+                        NavigationBarItemDefaults
+                            .colors(
 
-                            selectedIconColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .primary,
+                                selectedIconColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .primary,
 
-                            selectedTextColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .primary,
+                                selectedTextColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .primary,
 
-                            indicatorColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .secondary,
+                                indicatorColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .secondary,
 
-                            unselectedIconColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .onBackground,
+                                unselectedIconColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .onBackground,
 
-                            unselectedTextColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .onBackground
-                        )
+                                unselectedTextColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .onBackground
+                            )
                 )
 
 
+                // =========================
                 // PERFIL
+                // =========================
 
                 NavigationBarItem(
                     selected =
                         opcionSeleccionada == 3,
 
                     onClick = {
-                        opcionSeleccionada = 3
+
+                        opcionSeleccionada =
+                            3
                     },
 
                     icon = {
@@ -219,103 +254,130 @@ fun MainScreen(
                         Icon(
                             imageVector =
                                 Icons.Default.Person,
+
                             contentDescription =
                                 "Perfil"
                         )
                     },
 
                     label = {
-                        Text("Perfil")
+
+                        Text(
+                            "Perfil"
+                        )
                     },
 
                     colors =
-                        NavigationBarItemDefaults.colors(
+                        NavigationBarItemDefaults
+                            .colors(
 
-                            selectedIconColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .primary,
+                                selectedIconColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .primary,
 
-                            selectedTextColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .primary,
+                                selectedTextColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .primary,
 
-                            indicatorColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .secondary,
+                                indicatorColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .secondary,
 
-                            unselectedIconColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .onBackground,
+                                unselectedIconColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .onBackground,
 
-                            unselectedTextColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .onBackground
-                        )
+                                unselectedTextColor =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .onBackground
+                            )
                 )
             }
         }
 
-    ) { paddingValues ->
+    ) {
+            paddingValues ->
 
 
-        when (opcionSeleccionada) {
+        when (
+            opcionSeleccionada
+        ) {
 
 
+            // =========================
             // INICIO
+            // =========================
 
             0 -> {
 
                 PantallaInicio(
                     modifier =
-                        Modifier.padding(
-                            paddingValues
-                        )
+                        Modifier
+                            .padding(
+                                paddingValues
+                            )
                 )
             }
 
 
+            // =========================
             // CATÁLOGO
+            // =========================
 
             1 -> {
 
                 PantallaCatalogo(
                     modifier =
-                        Modifier.padding(
-                            paddingValues
-                        )
+                        Modifier
+                            .padding(
+                                paddingValues
+                            )
                 )
             }
 
 
+            // =========================
             // MENSAJES
+            // =========================
 
             2 -> {
 
                 PantallaMensajes(
                     modifier =
-                        Modifier.padding(
-                            paddingValues
-                        )
+                        Modifier
+                            .padding(
+                                paddingValues
+                            )
                 )
             }
 
 
+            // =========================
             // PERFIL
+            // =========================
 
             3 -> {
 
                 PantallaPerfil(
-                    correo = correo,
+
+                    correo =
+                        correo,
+
+                    onCerrarSesion = {
+
+                        onCerrarSesion()
+                    },
 
                     modifier =
-                        Modifier.padding(
-                            paddingValues
-                        )
+                        Modifier
+                            .padding(
+                                paddingValues
+                            )
                 )
             }
         }

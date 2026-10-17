@@ -13,7 +13,9 @@ import com.example.fundaciontextilcircular.view.PantallaAdmin
 import com.example.fundaciontextilcircular.view.PantallaBienvenida
 import com.example.fundaciontextilcircular.view.PantallaCuentaEnRevision
 import com.example.fundaciontextilcircular.view.PantallaLogin
+import com.example.fundaciontextilcircular.view.PantallaRecuperarContrasena
 import com.example.fundaciontextilcircular.view.PantallaRegistro
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
 
@@ -21,33 +23,36 @@ class MainActivity : ComponentActivity() {
         savedInstanceState: Bundle?
     ) {
 
-        super.onCreate(savedInstanceState)
+        super.onCreate(
+            savedInstanceState
+        )
+
 
         setContent {
 
             TextilCircularTheme {
 
+
                 var pantallaActual by remember {
-                    mutableStateOf("bienvenida")
+                    mutableStateOf(
+                        "bienvenida"
+                    )
                 }
 
-
-                // CORREO DE CUENTA PENDIENTE O RECHAZADA
 
                 var correoEnRevision by remember {
                     mutableStateOf("")
                 }
 
 
-                // CORREO DE LA EMPRENDEDORA
-                // QUE INICIÓ SESIÓN
-
                 var correoUsuarioActual by remember {
                     mutableStateOf("")
                 }
 
 
-                when (pantallaActual) {
+                when (
+                    pantallaActual
+                ) {
 
 
                     // =========================
@@ -88,9 +93,8 @@ class MainActivity : ComponentActivity() {
                             },
 
 
-                            // USUARIO APROBADO
-
-                            onIngresarUsuario = { correo ->
+                            onIngresarUsuario = {
+                                    correo ->
 
                                 correoUsuarioActual =
                                     correo
@@ -100,9 +104,8 @@ class MainActivity : ComponentActivity() {
                             },
 
 
-                            // PENDIENTE O RECHAZADO
-
-                            onCuentaEnRevision = { correo ->
+                            onCuentaEnRevision = {
+                                    correo ->
 
                                 correoEnRevision =
                                     correo
@@ -119,10 +122,34 @@ class MainActivity : ComponentActivity() {
                             },
 
 
+                            onOlvideContrasena = {
+
+                                pantallaActual =
+                                    "recuperarContrasena"
+                            },
+
+
                             onVolver = {
 
                                 pantallaActual =
                                     "bienvenida"
+                            }
+                        )
+                    }
+
+
+                    // =========================
+                    // RECUPERAR CONTRASEÑA
+                    // =========================
+
+                    "recuperarContrasena" -> {
+
+                        PantallaRecuperarContrasena(
+
+                            onVolver = {
+
+                                pantallaActual =
+                                    "login"
                             }
                         )
                     }
@@ -136,7 +163,8 @@ class MainActivity : ComponentActivity() {
 
                         PantallaRegistro(
 
-                            onRegistrar = { correo ->
+                            onRegistrar = {
+                                    correo ->
 
                                 correoEnRevision =
                                     correo
@@ -144,6 +172,7 @@ class MainActivity : ComponentActivity() {
                                 pantallaActual =
                                     "revision"
                             },
+
 
                             onVolver = {
 
@@ -164,6 +193,7 @@ class MainActivity : ComponentActivity() {
 
                             correo =
                                 correoEnRevision,
+
 
                             onVolverInicioSesion = {
 
@@ -192,14 +222,43 @@ class MainActivity : ComponentActivity() {
 
 
                     // =========================
-                    // APLICACIÓN PRINCIPAL
+                    // USUARIO PRINCIPAL
                     // =========================
 
                     "principal" -> {
 
                         MainScreen(
+
                             correo =
-                                correoUsuarioActual
+                                correoUsuarioActual,
+
+
+                            onCerrarSesion = {
+
+
+                                // CERRAR SESIÓN
+                                // REAL DE FIREBASE
+
+                                FirebaseAuth
+                                    .getInstance()
+                                    .signOut()
+
+
+                                // BORRAR DATOS
+                                // DE LA SESIÓN LOCAL
+
+                                correoUsuarioActual =
+                                    ""
+
+                                correoEnRevision =
+                                    ""
+
+
+                                // VOLVER AL LOGIN
+
+                                pantallaActual =
+                                    "login"
+                            }
                         )
                     }
 

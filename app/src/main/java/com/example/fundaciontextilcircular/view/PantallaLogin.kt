@@ -40,20 +40,19 @@ import com.example.fundaciontextilcircular.ui.theme.BlancoTextil
 import com.example.fundaciontextilcircular.ui.theme.NegroTextil
 import com.example.fundaciontextilcircular.ui.theme.RojoErrorTextil
 import com.example.fundaciontextilcircular.ui.theme.TurquesaTextil
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import kotlinx.coroutines.launch
 
 @Composable
 fun PantallaLogin(
     modifier: Modifier = Modifier,
-
     onIngresarAdmin: () -> Unit = {},
-
     onIngresarUsuario: (String) -> Unit = {},
-
     onCuentaEnRevision: (String) -> Unit = {},
-
     onCrearCuenta: () -> Unit = {},
-
+    onOlvideContrasena: () -> Unit = {},
     onVolver: () -> Unit = {}
 ) {
 
@@ -63,6 +62,11 @@ fun PantallaLogin(
     val scope =
         rememberCoroutineScope()
 
+
+    // =========================
+    // ROOM
+    // =========================
+
     val dao =
         remember(context) {
 
@@ -71,6 +75,22 @@ fun PantallaLogin(
                 .emprendedoraDao()
         }
 
+
+    // =========================
+    // FIREBASE
+    // =========================
+
+    val auth =
+        remember {
+
+            FirebaseAuth
+                .getInstance()
+        }
+
+
+    // =========================
+    // ESTADOS
+    // =========================
 
     var correo by remember {
         mutableStateOf("")
@@ -92,24 +112,36 @@ fun PantallaLogin(
     }
 
 
+    var iniciandoSesion by remember {
+        mutableStateOf(false)
+    }
+
+
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(NegroTextil)
-            .verticalScroll(
-                rememberScrollState()
-            )
-            .padding(24.dp)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(
+                    NegroTextil
+                )
+                .verticalScroll(
+                    rememberScrollState()
+                )
+                .padding(
+                    24.dp
+                )
     ) {
 
         Spacer(
             modifier =
-                Modifier.height(70.dp)
+                Modifier
+                    .height(70.dp)
         )
 
 
         Text(
-            text = "INICIAR",
+            text =
+                "INICIAR",
 
             color =
                 BlancoTextil,
@@ -122,7 +154,8 @@ fun PantallaLogin(
 
 
         Text(
-            text = "SESIÓN",
+            text =
+                "SESIÓN",
 
             color =
                 TurquesaTextil,
@@ -136,11 +169,14 @@ fun PantallaLogin(
 
         Spacer(
             modifier =
-                Modifier.height(32.dp)
+                Modifier
+                    .height(32.dp)
         )
 
 
+        // =========================
         // CORREO
+        // =========================
 
         OutlinedTextField(
             value =
@@ -156,7 +192,8 @@ fun PantallaLogin(
             },
 
             modifier =
-                Modifier.fillMaxWidth(),
+                Modifier
+                    .fillMaxWidth(),
 
             label = {
 
@@ -192,11 +229,14 @@ fun PantallaLogin(
 
         Spacer(
             modifier =
-                Modifier.height(16.dp)
+                Modifier
+                    .height(16.dp)
         )
 
 
+        // =========================
         // CONTRASEÑA
+        // =========================
 
         OutlinedTextField(
             value =
@@ -212,7 +252,8 @@ fun PantallaLogin(
             },
 
             modifier =
-                Modifier.fillMaxWidth(),
+                Modifier
+                    .fillMaxWidth(),
 
             label = {
 
@@ -291,36 +332,73 @@ fun PantallaLogin(
 
         Spacer(
             modifier =
-                Modifier.height(12.dp)
+                Modifier
+                    .height(8.dp)
         )
 
 
-        // MENSAJE DE ERROR
+        // =========================
+        // OLVIDÉ MI CONTRASEÑA
+        // =========================
 
-        mensajeError?.let {
+        TextButton(
+            onClick =
+                onOlvideContrasena,
+
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+        ) {
 
             Text(
                 text =
-                    it,
+                    "¿Olvidaste tu contraseña?",
 
                 color =
-                    RojoErrorTextil,
-
-                style =
-                    MaterialTheme
-                        .typography
-                        .bodyMedium
-            )
-
-
-            Spacer(
-                modifier =
-                    Modifier.height(12.dp)
+                    TurquesaTextil
             )
         }
 
 
-        // BOTÓN INGRESAR
+        Spacer(
+            modifier =
+                Modifier
+                    .height(8.dp)
+        )
+
+
+        // =========================
+        // ERROR
+        // =========================
+
+        mensajeError
+            ?.let {
+
+                Text(
+                    text =
+                        it,
+
+                    color =
+                        RojoErrorTextil,
+
+                    style =
+                        MaterialTheme
+                            .typography
+                            .bodyMedium
+                )
+
+
+                Spacer(
+                    modifier =
+                        Modifier
+                            .height(12.dp)
+                )
+            }
+
+
+        // =========================
+        // INGRESAR
+        // =========================
 
         Button(
             onClick = {
@@ -349,7 +427,9 @@ fun PantallaLogin(
                 }
 
 
+                // =========================
                 // ADMINISTRADOR
+                // =========================
 
                 if (
                     correoNormalizado ==
@@ -364,93 +444,161 @@ fun PantallaLogin(
                 }
 
 
-                // USUARIO REGISTRADO EN ROOM
-
-                scope.launch {
-
-                    val cuenta =
-                        dao.iniciarSesion(
-
-                            correo =
-                                correoNormalizado,
-
-                            contrasena =
-                                contrasena
-                        )
+                iniciandoSesion =
+                    true
 
 
-                    if (
-                        cuenta == null
-                    ) {
+                // =========================
+                // FIREBASE
+                // =========================
 
-                        val cuentaPorCorreo =
-                            dao.obtenerPorCorreo(
-                                correoNormalizado
-                            )
+                auth
+                    .signInWithEmailAndPassword(
+                        correoNormalizado,
+                        contrasena
+                    )
+                    .addOnCompleteListener {
+                            task ->
 
 
-                        mensajeError =
-                            if (
-                                cuentaPorCorreo != null
-                            ) {
+                        if (
+                            task.isSuccessful
+                        ) {
 
-                                "Contraseña incorrecta"
 
-                            } else {
+                            // =========================
+                            // BUSCAR DATOS EN ROOM
+                            // =========================
 
-                                "Correo o contraseña incorrectos"
+                            scope.launch {
+
+                                val cuenta =
+                                    dao
+                                        .obtenerPorCorreo(
+                                            correoNormalizado
+                                        )
+
+
+                                if (
+                                    cuenta ==
+                                    null
+                                ) {
+
+                                    auth.signOut()
+
+                                    iniciandoSesion =
+                                        false
+
+                                    mensajeError =
+                                        "No se encontraron los datos de esta cuenta"
+
+                                    return@launch
+                                }
+
+
+                                when (
+                                    cuenta
+                                        .estado
+                                        .uppercase()
+                                ) {
+
+
+                                    // =========================
+                                    // APROBADA
+                                    // =========================
+
+                                    "APROBADA" -> {
+
+                                        iniciandoSesion =
+                                            false
+
+                                        onIngresarUsuario(
+                                            cuenta.correo
+                                        )
+                                    }
+
+
+                                    // =========================
+                                    // PENDIENTE
+                                    // =========================
+
+                                    "PENDIENTE" -> {
+
+                                        auth.signOut()
+
+                                        iniciandoSesion =
+                                            false
+
+                                        onCuentaEnRevision(
+                                            cuenta.correo
+                                        )
+                                    }
+
+
+                                    // =========================
+                                    // RECHAZADA
+                                    // =========================
+
+                                    "RECHAZADA" -> {
+
+                                        auth.signOut()
+
+                                        iniciandoSesion =
+                                            false
+
+                                        onCuentaEnRevision(
+                                            cuenta.correo
+                                        )
+                                    }
+
+
+                                    else -> {
+
+                                        auth.signOut()
+
+                                        iniciandoSesion =
+                                            false
+
+                                        mensajeError =
+                                            "El estado de la cuenta no es válido"
+                                    }
+                                }
                             }
 
 
-                        return@launch
-                    }
+                        } else {
 
 
-                    when (
-                        cuenta
-                            .estado
-                            .uppercase()
-                    ) {
+                            iniciandoSesion =
+                                false
 
-
-                        // CUENTA APROBADA
-
-                        "APROBADA" -> {
-
-                            onIngresarUsuario(
-                                cuenta.correo
-                            )
-                        }
-
-
-                        // CUENTA PENDIENTE
-
-                        "PENDIENTE" -> {
-
-                            onCuentaEnRevision(
-                                cuenta.correo
-                            )
-                        }
-
-
-                        // CUENTA RECHAZADA
-
-                        "RECHAZADA" -> {
-
-                            onCuentaEnRevision(
-                                cuenta.correo
-                            )
-                        }
-
-
-                        else -> {
 
                             mensajeError =
-                                "El estado de la cuenta no es válido"
+                                when (
+                                    task.exception
+                                ) {
+
+
+                                    is FirebaseAuthInvalidCredentialsException ->
+
+                                        "Correo o contraseña incorrectos"
+
+
+                                    is FirebaseAuthInvalidUserException ->
+
+                                        "No existe una cuenta registrada con este correo"
+
+
+                                    else ->
+
+                                        "No se pudo iniciar sesión. Revisa tus datos y tu conexión."
+                                }
                         }
                     }
-                }
             },
+
+            enabled =
+                !iniciandoSesion,
 
             modifier =
                 Modifier
@@ -471,7 +619,16 @@ fun PantallaLogin(
 
             Text(
                 text =
-                    "INGRESAR",
+                    if (
+                        iniciandoSesion
+                    ) {
+
+                        "INGRESANDO..."
+
+                    } else {
+
+                        "INGRESAR"
+                    },
 
                 style =
                     MaterialTheme
@@ -483,18 +640,22 @@ fun PantallaLogin(
 
         Spacer(
             modifier =
-                Modifier.height(20.dp)
+                Modifier
+                    .height(20.dp)
         )
 
 
+        // =========================
         // CREAR CUENTA
+        // =========================
 
         TextButton(
             onClick =
                 onCrearCuenta,
 
             modifier =
-                Modifier.fillMaxWidth()
+                Modifier
+                    .fillMaxWidth()
         ) {
 
             Text(
@@ -507,14 +668,17 @@ fun PantallaLogin(
         }
 
 
+        // =========================
         // VOLVER
+        // =========================
 
         TextButton(
             onClick =
                 onVolver,
 
             modifier =
-                Modifier.fillMaxWidth()
+                Modifier
+                    .fillMaxWidth()
         ) {
 
             Text(
