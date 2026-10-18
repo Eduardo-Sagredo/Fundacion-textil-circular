@@ -27,70 +27,72 @@ class EmprendedoraRepository(
     suspend fun guardarEmprendedora(
         emprendedora: EmprendedoraEntity
     ) {
-        emprendedoraDao
-            .insertarEmprendedora(
-                emprendedora
-            )
+        emprendedoraDao.insertarEmprendedora(
+            emprendedora
+        )
     }
 
     suspend fun obtenerEmprendedoraRut(
         rut: String
     ): EmprendedoraEntity? {
 
-        return emprendedoraDao
-            .obtenerPorRut(rut)
+        return emprendedoraDao.obtenerPorRut(
+            rut
+        )
     }
 
     suspend fun obtenerPorCorreo(
         correo: String
     ): EmprendedoraEntity? {
 
-        return emprendedoraDao
-            .obtenerPorCorreo(correo)
+        return emprendedoraDao.obtenerPorCorreo(
+            correo
+        )
     }
 
     fun observarPorCorreo(
         correo: String
     ): Flow<EmprendedoraEntity?> {
 
-        return emprendedoraDao
-            .observarPorCorreo(correo)
+        return emprendedoraDao.observarPorCorreo(
+            correo
+        )
     }
 
     suspend fun existeCorreo(
         correo: String
     ): Boolean {
 
-        return emprendedoraDao
-            .existeCorreo(correo) > 0
+        return emprendedoraDao.existeCorreo(
+            correo
+        ) > 0
     }
 
     suspend fun existeRut(
         rut: String
     ): Boolean {
 
-        return emprendedoraDao
-            .existeRut(rut) > 0
+        return emprendedoraDao.existeRut(
+            rut
+        ) > 0
     }
 
     suspend fun aprobarCuenta(
         rut: String
     ) {
-
-        emprendedoraDao
-            .aprobarCuenta(rut)
+        emprendedoraDao.aprobarCuenta(
+            rut
+        )
     }
 
     suspend fun rechazarCuenta(
         rut: String,
         motivo: String
     ) {
-
-        emprendedoraDao
-            .rechazarCuenta(
-                rut,
-                motivo
-            )
+        emprendedoraDao.rechazarCuenta(
+            rut,
+            motivo
+        )
     }
 
     suspend fun iniciarSesion(
@@ -98,18 +100,17 @@ class EmprendedoraRepository(
         contrasena: String
     ): EmprendedoraEntity? {
 
-        return emprendedoraDao
-            .iniciarSesion(
-                correo,
-                contrasena
-            )
+        return emprendedoraDao.iniciarSesion(
+            correo,
+            contrasena
+        )
     }
 
     suspend fun eliminarCuenta(
         rut: String
     ) {
-
-        emprendedoraDao
-            .eliminarCuenta(rut)
+        emprendedoraDao.eliminarCuenta(
+            rut
+        )
     }
 }
