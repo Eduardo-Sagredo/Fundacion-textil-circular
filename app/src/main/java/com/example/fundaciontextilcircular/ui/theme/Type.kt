@@ -2,33 +2,85 @@ package com.example.fundaciontextilcircular.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.fundaciontextilcircular.R
 
-// Set of Material typography styles to start with
-val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
+val NunitoFont = FontFamily(
+    Font(
+        resId = R.font.nunito_regular,
+        weight = FontWeight.Normal
     ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+    Font(
+        resId = R.font.nunito_semibold,
+        weight = FontWeight.SemiBold
+    ),
+    Font(
+        resId = R.font.nunito_bold,
+        weight = FontWeight.Bold
     )
-    */
+)
+
+val MonumentFont = FontFamily(
+    Font(
+        resId = R.font.monument_extended_regular,
+        weight = FontWeight.Normal
+    ),
+    Font(
+        resId = R.font.monument_extended_black,
+        weight = FontWeight.Black
+    )
+)
+
+val Typography = Typography(
+
+    headlineLarge = TextStyle(
+        fontFamily = MonumentFont,
+        fontWeight = FontWeight.Black,
+        fontSize = 30.sp
+    ),
+
+    headlineMedium = TextStyle(
+        fontFamily = MonumentFont,
+        fontWeight = FontWeight.Black,
+        fontSize = 24.sp
+    ),
+
+    titleLarge = TextStyle(
+        fontFamily = MonumentFont,
+        fontWeight = FontWeight.Black,
+        fontSize = 22.sp
+    ),
+
+    titleMedium = TextStyle(
+        fontFamily = NunitoFont,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp
+    ),
+
+    bodyLarge = TextStyle(
+        fontFamily = NunitoFont,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp
+    ),
+
+    bodyMedium = TextStyle(
+        fontFamily = NunitoFont,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp
+    ),
+
+    labelLarge = TextStyle(
+        fontFamily = NunitoFont,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 14.sp
+    ),
+
+    labelMedium = TextStyle(
+        fontFamily = NunitoFont,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 12.sp
+    )
 )

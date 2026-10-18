@@ -21,27 +21,24 @@ abstract class TextilDatabase : RoomDatabase() {
     companion object {
 
         @Volatile
-        private var INSTANCE:
-                TextilDatabase? = null
+        private var INSTANCE: TextilDatabase? = null
 
         fun getDatabase(
             context: Context
         ): TextilDatabase {
 
-            return INSTANCE
-                ?: synchronized(this) {
+            return INSTANCE ?: synchronized(this) {
 
-                    val instance =
-                        Room.databaseBuilder(
-                            context.applicationContext,
-                            TextilDatabase::class.java,
-                            "textil_circular_db"
-                        ).build()
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    TextilDatabase::class.java,
+                    "textil_circular_db"
+                ).build()
 
-                    INSTANCE = instance
+                INSTANCE = instance
 
-                    instance
-                }
+                instance
+            }
         }
     }
 }
