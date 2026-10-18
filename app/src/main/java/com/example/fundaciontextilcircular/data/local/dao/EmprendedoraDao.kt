@@ -10,9 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface EmprendedoraDao {
 
-    @Insert(
-        onConflict = OnConflictStrategy.ABORT
-    )
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertarEmprendedora(
         emprendedora: EmprendedoraEntity
     )
