@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "840394957729",
+    "project_id": "fundaciontextilcircular-5e4e6",
+    "storage_bucket": "fundaciontextilcircular-5e4e6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:840394957729:android:943e0d335f15b72572e1e0",
+        "android_client_info": {
+          "package_name": "com.example.fundaciontextilcircular"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBeg7LsyLDW6Qvtec-T2lJk2KfE34uuDrI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
