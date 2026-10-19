@@ -112,6 +112,15 @@ dependencies {
 
 
     // =========================
+    // UBICACION
+    // =========================
+
+    implementation(
+        "com.google.android.gms:play-services-location:21.3.0"
+    )
+
+
+    // =========================
     // ROOM
     // =========================
 
