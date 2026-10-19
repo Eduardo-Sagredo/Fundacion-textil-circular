@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.core.view.WindowCompat
 import com.example.fundaciontextilcircular.ui.theme.TextilCircularTheme
 import com.example.fundaciontextilcircular.view.MainScreen
 import com.example.fundaciontextilcircular.view.PantallaAdmin
@@ -23,15 +24,36 @@ class MainActivity : ComponentActivity() {
         savedInstanceState: Bundle?
     ) {
 
-        super.onCreate(
-            savedInstanceState
-        )
+        super.onCreate(savedInstanceState)
+
+
+        // =========================================
+        // BARRA SUPERIOR DEL TELÉFONO
+        // =========================================
+
+        WindowCompat
+            .getInsetsController(
+                window,
+                window.decorView
+            )
+            .isAppearanceLightStatusBars = true
+
+
+        // =========================================
+        // BARRA INFERIOR DEL TELÉFONO
+        // =========================================
+
+        WindowCompat
+            .getInsetsController(
+                window,
+                window.decorView
+            )
+            .isAppearanceLightNavigationBars = true
 
 
         setContent {
 
             TextilCircularTheme {
-
 
                 var pantallaActual by remember {
                     mutableStateOf(
@@ -55,9 +77,9 @@ class MainActivity : ComponentActivity() {
                 ) {
 
 
-                    // =========================
+                    // =================================
                     // BIENVENIDA
-                    // =========================
+                    // =================================
 
                     "bienvenida" -> {
 
@@ -78,9 +100,9 @@ class MainActivity : ComponentActivity() {
                     }
 
 
-                    // =========================
+                    // =================================
                     // LOGIN
-                    // =========================
+                    // =================================
 
                     "login" -> {
 
@@ -138,9 +160,9 @@ class MainActivity : ComponentActivity() {
                     }
 
 
-                    // =========================
+                    // =================================
                     // RECUPERAR CONTRASEÑA
-                    // =========================
+                    // =================================
 
                     "recuperarContrasena" -> {
 
@@ -155,9 +177,9 @@ class MainActivity : ComponentActivity() {
                     }
 
 
-                    // =========================
+                    // =================================
                     // REGISTRO
-                    // =========================
+                    // =================================
 
                     "registro" -> {
 
@@ -183,9 +205,9 @@ class MainActivity : ComponentActivity() {
                     }
 
 
-                    // =========================
+                    // =================================
                     // CUENTA EN REVISIÓN
-                    // =========================
+                    // =================================
 
                     "revision" -> {
 
@@ -204,9 +226,9 @@ class MainActivity : ComponentActivity() {
                     }
 
 
-                    // =========================
+                    // =================================
                     // ADMINISTRADOR
-                    // =========================
+                    // =================================
 
                     "admin" -> {
 
@@ -221,9 +243,9 @@ class MainActivity : ComponentActivity() {
                     }
 
 
-                    // =========================
+                    // =================================
                     // USUARIO PRINCIPAL
-                    // =========================
+                    // =================================
 
                     "principal" -> {
 
@@ -235,17 +257,18 @@ class MainActivity : ComponentActivity() {
 
                             onCerrarSesion = {
 
-
-                                // CERRAR SESIÓN
-                                // REAL DE FIREBASE
+                                // =====================
+                                // CERRAR FIREBASE
+                                // =====================
 
                                 FirebaseAuth
                                     .getInstance()
                                     .signOut()
 
 
-                                // BORRAR DATOS
-                                // DE LA SESIÓN LOCAL
+                                // =====================
+                                // LIMPIAR SESIÓN LOCAL
+                                // =====================
 
                                 correoUsuarioActual =
                                     ""
@@ -254,7 +277,9 @@ class MainActivity : ComponentActivity() {
                                     ""
 
 
+                                // =====================
                                 // VOLVER AL LOGIN
+                                // =====================
 
                                 pantallaActual =
                                     "login"
@@ -263,9 +288,9 @@ class MainActivity : ComponentActivity() {
                     }
 
 
-                    // =========================
+                    // =================================
                     // SEGURIDAD
-                    // =========================
+                    // =================================
 
                     else -> {
 
@@ -286,7 +311,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-
         }
     }
 }
