@@ -5,40 +5,140 @@ import com.example.fundaciontextilcircular.data.local.entities.MensajeEntity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 
-class ChatRepository(private val mensajeDao: MensajeDao) {
+class ChatRepository(
+    private val mensajeDao: MensajeDao
+) {
 
-    //Se Expone el historial completo para que la pantalla lo lea
-    val historialChat: Flow<List<MensajeEntity>> = mensajeDao.obtenerHistorialChat()
+    // =========================
+    // OBTENER HISTORIAL
+    // =========================
 
-    // Guardar un mensaje escrito por la emprendedora
-    suspend fun guardarMensajeLocal(contenido: String) {
-        val nuevoMensaje = MensajeEntity(
-            contenido = contenido,
-            esDeUsuario = true,
-            estaPendiente = true // Siempre nace como "pendiente" por diseño Offline-First
-        )
-        mensajeDao.insertarMensaje(nuevoMensaje)
+    fun obtenerHistorialChat(
+        chatId: String
+    ): Flow<List<MensajeEntity>> {
+
+        return mensajeDao
+            .obtenerMensajesPorChat(
+                chatId
+            )
     }
 
-    //Motor de sincronización (Simulación de Backend)
-    suspend fun sincronizarPendientes() {
-        val pendientes = mensajeDao.obtenerMensajesPendientes()
 
-        if (pendientes.isNotEmpty()) {
-            // Simulacion de un pequeño retraso de red de 1.5 segundos para que se vea realista
+    // =========================
+    // GUARDAR MENSAJE LOCAL
+    // =========================
+
+    suspend fun guardarMensajeLocal(
+        chatId: String,
+        contenido: String
+    ) {
+
+        val nuevoMensaje =
+            MensajeEntity(
+
+                chatId =
+                    chatId,
+
+                contenido =
+                    contenido,
+
+                esDeUsuario =
+                    true,
+
+                estaPendiente =
+                    true,
+
+                // El mensaje que yo envío
+                // no cuenta como no leído
+
+                leido =
+                    true
+            )
+
+        mensajeDao
+            .insertarMensaje(
+                nuevoMensaje
+            )
+    }
+
+
+    // =========================
+    // MARCAR CHAT COMO LEÍDO
+    // =========================
+
+    suspend fun marcarChatComoLeido(
+        chatId: String
+    ) {
+
+        mensajeDao
+            .marcarChatComoLeido(
+                chatId
+            )
+    }
+
+
+    // =========================
+    // SINCRONIZAR
+    // =========================
+
+    suspend fun sincronizarPendientes() {
+
+        val pendientes =
+            mensajeDao
+                .obtenerTodosLosMensajesPendientes()
+
+        if (
+            pendientes.isNotEmpty()
+        ) {
+
+            // Simulamos el tiempo
+            // que demora la respuesta
+
             delay(1500)
 
-            pendientes.forEach { mensaje ->
-                // A) Marcamos el mensaje de la usuaria como enviado (doble check)
-                mensajeDao.marcarComoEnviado(mensaje.id)
+            pendientes.forEach {
+                    mensaje ->
 
-                // B) Generamos la respuesta automática del sistema
-                val respuestaAutomatica = MensajeEntity(
-                    contenido = "Hemos recibido tu mensaje: '${mensaje.contenido}'. Una administradora te responderá a la brevedad.",
-                    esDeUsuario = false,
-                    estaPendiente = false // Las respuestas del sistema ya nacen entregadas
-                )
-                mensajeDao.insertarMensaje(respuestaAutomatica)
+                // El mensaje enviado
+                // deja de estar pendiente
+
+                mensajeDao
+                    .marcarComoEnviado(
+                        mensaje.id
+                    )
+
+
+                // =========================
+                // RESPUESTA RECIBIDA
+                // =========================
+
+                val respuestaAutomatica =
+                    MensajeEntity(
+
+                        chatId =
+                            mensaje.chatId,
+
+                        contenido =
+                            "Hemos recibido tu mensaje: '${mensaje.contenido}'. Una administradora te responderá a la brevedad.",
+
+                        esDeUsuario =
+                            false,
+
+                        estaPendiente =
+                            false,
+
+                        // IMPORTANTE:
+                        // esta respuesta todavía
+                        // no ha sido leída
+
+                        leido =
+                            false
+                    )
+
+                mensajeDao
+                    .insertarMensaje(
+                        respuestaAutomatica
+                    )
             }
         }
     }
