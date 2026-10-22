@@ -974,7 +974,7 @@ fun PantallaRegistro(
 
         // MENSAJE DE ADVERTENCIA
         Text(
-            text = "* Si esta no es tu ubicación, comunícate con un administrador.",
+            text = "* Si esta no es tu ubicación,continua con el proceso de crear la cuenta y posteriormente comunícate con un administrador.",
             color = Color.LightGray,
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(start = 4.dp)
@@ -1248,6 +1248,7 @@ fun PantallaRegistro(
 
                             return@launch
                         }
+
 
 
                         // =========================

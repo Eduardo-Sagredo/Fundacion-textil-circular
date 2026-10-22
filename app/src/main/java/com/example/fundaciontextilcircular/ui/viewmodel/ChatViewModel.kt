@@ -86,6 +86,25 @@ class ChatViewModel(
                     false
             )
 
+    // =========================
+    // ESTADO DE CHAT CERRADO
+    // =========================
+    val chatCerrado: StateFlow<Boolean> = _chatIdActual
+        .flatMapLatest { chatId ->
+            repository.observarEstadoChat(chatId)
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
+    fun cerrarChatAdministrador() {
+        viewModelScope.launch {
+            repository.cerrarChat(_chatIdActual.value)
+        }
+    }
+
 
     // =========================
     // CUANDO VUELVE INTERNET

@@ -2,6 +2,7 @@ package com.example.fundaciontextilcircular.ui.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +33,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.fundaciontextilcircular.ui.viewmodel.ChatViewModel
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 
 @Composable
 fun ChatScreen(
@@ -46,6 +52,9 @@ fun ChatScreen(
 
     val isOnline by
     viewModel.isOnline.collectAsState()
+
+    val chatCerrado by viewModel.chatCerrado.collectAsState()
+
 
     var textoMensaje by remember {
         mutableStateOf("")
@@ -75,6 +84,7 @@ fun ChatScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.ime.exclude(WindowInsets.navigationBars))
             .padding(16.dp)
     ) {
 
@@ -130,9 +140,9 @@ fun ChatScreen(
                 Text(
                     text =
                         if (isOnline) {
-                            "🟢 Conectado"
+                            "🟢 Conectado. Tus mensajes se enviaran de forma inmediata"
                         } else {
-                            "🔴 Sin conexión"
+                            "🔴 Sin conexión. Tus mensajes se enviaran cuando te reconectes"
                         },
 
                     color =
@@ -157,11 +167,12 @@ fun ChatScreen(
 
         LazyColumn(
             modifier = Modifier
-                .weight(1f)
                 .fillMaxWidth()
+                .weight(1f)
                 .padding(
                     top = 16.dp
-                ),
+                )
+            ,
 
             verticalArrangement =
                 Arrangement.spacedBy(
@@ -282,68 +293,44 @@ fun ChatScreen(
         // ESCRIBIR MENSAJE
         // =========================
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    top = 8.dp
-                ),
-
-            verticalAlignment =
-                Alignment.CenterVertically
-        ) {
-
-            OutlinedTextField(
-                value =
-                    textoMensaje,
-
-                onValueChange = {
-
-                    textoMensaje =
-                        it
-                },
-
-                modifier =
-                    Modifier
-                        .weight(1f),
-
-                placeholder = {
-
-                    Text(
-                        "Escribe un mensaje..."
-                    )
-                }
-            )
-
-
-            Spacer(
-                modifier =
-                    Modifier.width(
-                        8.dp
-                    )
-            )
-
-
-            Button(
-                onClick = {
-
-                    viewModel
-                        .enviarMensaje(
-                            textoMensaje
-                        )
-
-                    textoMensaje =
-                        ""
-                },
-
-                enabled =
-                    textoMensaje
-                        .isNotBlank()
+        if (chatCerrado) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                contentAlignment = Alignment.Center
             ) {
-
                 Text(
-                    "Enviar"
+                    text = "El administrador ha cerrado este chat.",
+                    color = Color.Red,
+                    style = MaterialTheme.typography.labelLarge
                 )
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = textoMensaje,
+                    onValueChange = { textoMensaje = it },
+                    modifier = Modifier.weight(1f),
+                    placeholder = { Text("Escribe un mensaje...") }
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Button(
+                    onClick = {
+                        viewModel.enviarMensaje(textoMensaje)
+                        textoMensaje = ""
+                    },
+                    enabled = textoMensaje.isNotBlank()
+                ) {
+                    Text("Enviar")
+                }
             }
         }
     }

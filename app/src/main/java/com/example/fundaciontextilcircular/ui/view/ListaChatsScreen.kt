@@ -31,6 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fundaciontextilcircular.data.local.TextilDatabase
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.ExtendedFloatingActionButton
 
 data class ChatResumenUI(
 
@@ -108,8 +110,7 @@ fun ListaChatsScreen(
     val emprendedorasDisponibles =
 
         emprendedorasAprobadas
-            .filter {
-                    emprendedora ->
+            .filter { emprendedora ->
 
                 emprendedora
                     .correo
@@ -129,8 +130,7 @@ fun ListaChatsScreen(
     val conversaciones =
 
         emprendedorasDisponibles
-            .map {
-                    emprendedora ->
+            .map { emprendedora ->
 
                 ChatResumenUI(
 
@@ -149,434 +149,154 @@ fun ListaChatsScreen(
                 )
             }
 
-
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(
-                    16.dp
-                )
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
-
-        // =========================
-        // TÍTULO
-        // =========================
-
-        Text(
-            text =
-                "Mis conversaciones",
-
-            style =
-                MaterialTheme
-                    .typography
-                    .headlineSmall,
-
-            fontWeight =
-                FontWeight.Bold,
-
-            modifier =
-                Modifier.padding(
-                    top = 24.dp,
-                    bottom = 4.dp
-                )
-        )
-
-
-        Text(
-            text =
-                "Selecciona una emprendedora",
-
-            style =
-                MaterialTheme
-                    .typography
-                    .bodyMedium,
-
-            color =
-                Color.Gray
-        )
-
-
-        Spacer(
-            modifier =
-                Modifier.height(
-                    16.dp
-                )
-        )
-
-
-        // =========================
-        // SIN CONVERSACIONES
-        // =========================
-
-        if (
-            conversaciones.isEmpty()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-
+            // =
+            // TÍTULO
+            //
             Text(
-                text =
-                    "No hay emprendedoras disponibles para conversar.",
-
-                color =
-                    Color.Gray
+                text = "Mis conversaciones",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 24.dp, bottom = 4.dp)
             )
 
-        } else {
+            Text(
+                text = "Selecciona una emprendedora",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
 
-            // =========================
-            // LISTA DE CHATS
-            // =========================
+            Spacer(modifier = Modifier.height(16.dp))
 
-            LazyColumn(
-
-                verticalArrangement =
-                    Arrangement
-                        .spacedBy(
-                            10.dp
-                        )
-            ) {
-
-                items(
-
-                    items =
-                        conversaciones,
-
-                    key = {
-                            chat ->
-
-                        chat.chatId
-                    }
-
+            //
+            // SIN CONVERSACIONES
+            //
+            if (conversaciones.isEmpty()) {
+                Text(
+                    text = "No hay emprendedoras disponibles para conversar.",
+                    color = Color.Gray
+                )
+            } else {
+                // LISTA DE CHATS
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                        chat ->
+                    items(
+                        items = conversaciones,
+                        key = { chat -> chat.chatId }
+                    ) { chat ->
+                        val mensajesNoLeidos by mensajeDao
+                            .observarCantidadNoLeidos(chat.chatId)
+                            .collectAsState(initial = 0)
 
+                        val ultimoMensaje by mensajeDao
+                            .observarUltimoMensaje(chat.chatId)
+                            .collectAsState(initial = null)
 
-                    // =========================
-                    // MENSAJES NO LEÍDOS
-                    // =========================
-
-                    val mensajesNoLeidos by
-
-                    mensajeDao
-                        .observarCantidadNoLeidos(
-                            chat.chatId
-                        )
-                        .collectAsState(
-                            initial =
-                                0
-                        )
-
-
-                    // =========================
-                    // ÚLTIMO MENSAJE
-                    // =========================
-
-                    val ultimoMensaje by
-
-                    mensajeDao
-                        .observarUltimoMensaje(
-                            chat.chatId
-                        )
-                        .collectAsState(
-                            initial =
-                                null
-                        )
-
-
-                    Card(
-                        modifier =
-                            Modifier
+                        Card(
+                            modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-
-                                    onAbrirChat(
-                                        chat.chatId,
-                                        chat.nombre
-                                    )
+                                    onAbrirChat(chat.chatId, chat.nombre)
                                 },
-
-                        shape =
-                            RoundedCornerShape(
-                                16.dp
-                            ),
-
-                        colors =
-                            CardDefaults
-                                .cardColors(
-                                    containerColor =
-                                        Color.White
-                                ),
-
-                        elevation =
-                            CardDefaults
-                                .cardElevation(
-                                    defaultElevation =
-                                        3.dp
-                                )
-                    ) {
-
-                        Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        16.dp
-                                    ),
-
-                            verticalAlignment =
-                                Alignment
-                                    .CenterVertically
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
                         ) {
-
-                            // =========================
-                            // FOTO / INICIAL
-                            // =========================
-
-                            Surface(
-                                modifier =
-                                    Modifier
-                                        .width(
-                                            48.dp
-                                        )
-                                        .height(
-                                            48.dp
-                                        ),
-
-                                shape =
-                                    CircleShape,
-
-                                color =
-                                    Color(
-                                        0xFF00A6A6
-                                    )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-
-                                Column(
-
-                                    horizontalAlignment =
-                                        Alignment
-                                            .CenterHorizontally,
-
-                                    verticalArrangement =
-                                        Arrangement
-                                            .Center
-                                ) {
-
-                                    Text(
-                                        text =
-                                            chat.nombre
-                                                .take(1)
-                                                .uppercase(),
-
-                                        color =
-                                            Color.White,
-
-                                        fontSize =
-                                            20.sp,
-
-                                        fontWeight =
-                                            FontWeight.Bold
-                                    )
-                                }
-                            }
-
-
-                            Spacer(
-                                modifier =
-                                    Modifier.width(
-                                        12.dp
-                                    )
-                            )
-
-
-                            // =========================
-                            // INFORMACIÓN
-                            // =========================
-
-                            Column(
-                                modifier =
-                                    Modifier
-                                        .weight(
-                                            1f
-                                        )
-                            ) {
-
-                                Text(
-                                    text =
-                                        chat.nombre,
-
-                                    style =
-                                        MaterialTheme
-                                            .typography
-                                            .titleMedium,
-
-                                    fontWeight =
-                                        if (
-                                            mensajesNoLeidos > 0
-                                        ) {
-
-                                            FontWeight.Bold
-
-                                        } else {
-
-                                            FontWeight.SemiBold
-                                        },
-
-                                    color =
-                                        Color.Black
-                                )
-
-
-                                Spacer(
-                                    modifier =
-                                        Modifier.height(
-                                            4.dp
-                                        )
-                                )
-
-
-                                // =========================
-                                // ÚLTIMO MENSAJE
-                                // =========================
-
-                                Text(
-                                    text =
-                                        ultimoMensaje
-                                            ?.contenido
-                                            ?: chat.descripcion,
-
-                                    style =
-                                        MaterialTheme
-                                            .typography
-                                            .bodyMedium,
-
-                                    color =
-                                        if (
-                                            mensajesNoLeidos > 0
-                                        ) {
-
-                                            Color.Black
-
-                                        } else {
-
-                                            Color.Gray
-                                        },
-
-                                    fontWeight =
-                                        if (
-                                            mensajesNoLeidos > 0
-                                        ) {
-
-                                            FontWeight.Bold
-
-                                        } else {
-
-                                            FontWeight.Normal
-                                        },
-
-                                    maxLines =
-                                        1
-                                )
-
-
-                                // =========================
-                                // AVISO MENSAJE NUEVO
-                                // =========================
-
-                                if (
-                                    mensajesNoLeidos > 0
-                                ) {
-
-                                    Spacer(
-                                        modifier =
-                                            Modifier.height(
-                                                5.dp
-                                            )
-                                    )
-
-
-                                    Text(
-                                        text =
-                                            if (
-                                                mensajesNoLeidos == 1
-                                            ) {
-
-                                                "● 1 mensaje nuevo"
-
-                                            } else {
-
-                                                "● $mensajesNoLeidos mensajes nuevos"
-                                            },
-
-                                        color =
-                                            Color(
-                                                0xFF00A6A6
-                                            ),
-
-                                        fontWeight =
-                                            FontWeight.Bold,
-
-                                        style =
-                                            MaterialTheme
-                                                .typography
-                                                .labelMedium
-                                    )
-                                }
-                            }
-
-
-                            // =========================
-                            // CONTADOR
-                            // =========================
-
-                            if (
-                                mensajesNoLeidos > 0
-                            ) {
-
-                                Spacer(
-                                    modifier =
-                                        Modifier.width(
-                                            8.dp
-                                        )
-                                )
-
-
+                                // FOTO / INICIAL
                                 Surface(
-                                    shape =
-                                        CircleShape,
-
-                                    color =
-                                        Color(
-                                            0xFFFFC107
-                                        )
+                                    modifier = Modifier.width(48.dp).height(48.dp),
+                                    shape = CircleShape,
+                                    color = Color(0xFF00A6A6)
                                 ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Text(
+                                            text = chat.nombre.take(1).uppercase(),
+                                            color = Color.White,
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
 
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                // INFORMACIÓN
+                                Column(
+                                    modifier = Modifier.weight(1f)
+                                ) {
                                     Text(
-                                        text =
-                                            mensajesNoLeidos
-                                                .toString(),
-
-                                        modifier =
-                                            Modifier
-                                                .padding(
-                                                    horizontal =
-                                                        10.dp,
-                                                    vertical =
-                                                        5.dp
-                                                ),
-
-                                        color =
-                                            Color.Black,
-
-                                        fontWeight =
-                                            FontWeight.Bold
+                                        text = chat.nombre,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = if (mensajesNoLeidos > 0) FontWeight.Bold else FontWeight.SemiBold,
+                                        color = Color.Black
                                     )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    // ÚLTIMO MENSAJE
+                                    Text(
+                                        text = ultimoMensaje?.contenido ?: chat.descripcion,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = if (mensajesNoLeidos > 0) Color.Black else Color.Gray,
+                                        fontWeight = if (mensajesNoLeidos > 0) FontWeight.Bold else FontWeight.Normal,
+                                        maxLines = 1
+                                    )
+                                }
+
+                                // AVISO MENSAJE NUEVO
+                                if (mensajesNoLeidos > 0) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = Color(0xFFFFC107)
+                                    ) {
+                                        Text(
+                                            text = mensajesNoLeidos.toString(),
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+
+        // =========================
+        // BOTÓN COMUNICARSE CON ADMINISTRADOR
+        // =========================
+        ExtendedFloatingActionButton(
+            onClick = {
+                // Crea un ID único para el chat con el administrador
+                val chatIdAdmin = "chat_admin_${correoUsuario.replace(".", "_")}"
+                onAbrirChat(chatIdAdmin, "Administrador")
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = Color(0xFF00A6A6), // Turquesa
+            contentColor = Color.White
+        ) {
+            Text("Comunicarse con un administrador", fontWeight = FontWeight.Bold)
         }
     }
 }

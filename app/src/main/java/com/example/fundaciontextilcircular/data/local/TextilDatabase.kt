@@ -9,6 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.fundaciontextilcircular.data.local.dao.EmprendedoraDao
 import com.example.fundaciontextilcircular.data.local.dao.MensajeDao
 import com.example.fundaciontextilcircular.data.local.dao.ProductoDao
+import com.example.fundaciontextilcircular.data.local.entities.ChatEntity
 import com.example.fundaciontextilcircular.data.local.entities.EmprendedoraEntity
 import com.example.fundaciontextilcircular.data.local.entities.MensajeEntity
 import com.example.fundaciontextilcircular.data.local.entities.ProductoEntity
@@ -17,9 +18,10 @@ import com.example.fundaciontextilcircular.data.local.entities.ProductoEntity
     entities = [
         EmprendedoraEntity::class,
         MensajeEntity::class,
-        ProductoEntity::class
+        ProductoEntity::class,
+        ChatEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class TextilDatabase : RoomDatabase() {
@@ -143,6 +145,24 @@ abstract class TextilDatabase : RoomDatabase() {
                 }
             }
 
+        // =========================
+        // MIGRACIÓN 6 → 7
+        // CREAR TABLA CHATS
+        // =========================
+        private val MIGRATION_6_7 =
+            object : Migration(6, 7) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        """
+                        CREATE TABLE IF NOT EXISTS chats (
+                            chatId TEXT PRIMARY KEY NOT NULL,
+                            cerrado INTEGER NOT NULL DEFAULT 0
+                        )
+                        """.trimIndent()
+                    )
+                }
+            }
+
 
         fun getDatabase(
             context: Context
@@ -161,7 +181,8 @@ abstract class TextilDatabase : RoomDatabase() {
                                 MIGRATION_2_3,
                                 MIGRATION_3_4,
                                 MIGRATION_4_5,
-                                MIGRATION_5_6
+                                MIGRATION_5_6,
+                                MIGRATION_6_7
                             )
                             .build()
 

@@ -157,4 +157,21 @@ interface MensajeDao {
     suspend fun marcarComoEnviado(
         mensajeId: Int
     )
+
+    // ===================================
+    // ESTADO DEL CHAT (CERRADO/ABIERTO)
+    // ===================================
+
+    // Inserta o actualiza el estado general del chat
+    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    suspend fun guardarChat(chat: com.example.fundaciontextilcircular.data.local.entities.ChatEntity)
+
+    @Query(
+        """
+        SELECT cerrado 
+        FROM chats 
+        WHERE chatId = :chatId
+        """
+    )
+    fun observarEstadoChat(chatId: String): Flow<Boolean?>
 }

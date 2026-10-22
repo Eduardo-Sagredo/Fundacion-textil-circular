@@ -4,6 +4,7 @@ import com.example.fundaciontextilcircular.data.local.dao.MensajeDao
 import com.example.fundaciontextilcircular.data.local.entities.MensajeEntity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class ChatRepository(
     private val mensajeDao: MensajeDao
@@ -91,16 +92,10 @@ class ChatRepository(
             pendientes.isNotEmpty()
         ) {
 
-            // Simulamos el tiempo
-            // que demora la respuesta
-
             delay(1500)
 
             pendientes.forEach {
                     mensaje ->
-
-                // El mensaje enviado
-                // deja de estar pendiente
 
                 mensajeDao
                     .marcarComoEnviado(
@@ -119,17 +114,13 @@ class ChatRepository(
                             mensaje.chatId,
 
                         contenido =
-                            "Hemos recibido tu mensaje: '${mensaje.contenido}'. Una administradora te responderá a la brevedad.",
+                            "Hemos recibido tu mensaje. Una administradora te responderá a la brevedad.",
 
                         esDeUsuario =
                             false,
 
                         estaPendiente =
                             false,
-
-                        // IMPORTANTE:
-                        // esta respuesta todavía
-                        // no ha sido leída
 
                         leido =
                             false
@@ -141,5 +132,24 @@ class ChatRepository(
                     )
             }
         }
+    }
+
+
+    // =========================
+    // ESTADO DE CHAT CERRADO
+    // =========================
+
+    fun observarEstadoChat(chatId: String): Flow<Boolean> {
+        return mensajeDao.observarEstadoChat(chatId).map { cerrado ->
+            cerrado ?: false
+        }
+    }
+
+    suspend fun cerrarChat(chatId: String) {
+        val chat = com.example.fundaciontextilcircular.data.local.entities.ChatEntity(
+            chatId = chatId,
+            cerrado = true
+        )
+        mensajeDao.guardarChat(chat)
     }
 }
