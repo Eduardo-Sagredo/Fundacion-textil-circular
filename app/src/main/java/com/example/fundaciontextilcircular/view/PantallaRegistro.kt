@@ -1,5 +1,18 @@
 package com.example.fundaciontextilcircular.view
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,6 +45,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fundaciontextilcircular.data.local.TextilDatabase
 import com.example.fundaciontextilcircular.data.local.entities.EmprendedoraEntity
+import com.example.fundaciontextilcircular.data.utils.LocationHelper.obtenerUbicacionSugerida
 import com.example.fundaciontextilcircular.ui.theme.BlancoTextil
 import com.example.fundaciontextilcircular.ui.theme.NegroTextil
 import com.example.fundaciontextilcircular.ui.theme.RojoErrorTextil
@@ -60,425 +75,6 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import kotlinx.coroutines.launch
-
-
-private val REGIONES_CHILE = listOf(
-    "Arica y Parinacota",
-    "Tarapacá",
-    "Antofagasta",
-    "Atacama",
-    "Coquimbo",
-    "Valparaíso",
-    "Metropolitana de Santiago",
-    "Libertador General Bernardo O'Higgins",
-    "Maule",
-    "Ñuble",
-    "Biobío",
-    "La Araucanía",
-    "Los Ríos",
-    "Los Lagos",
-    "Aysén del General Carlos Ibáñez del Campo",
-    "Magallanes y de la Antártica Chilena"
-)
-
-
-private val COMUNAS_POR_REGION = mapOf(
-
-    "Arica y Parinacota" to listOf(
-        "Arica",
-        "Camarones",
-        "General Lagos",
-        "Putre"
-    ),
-
-    "Tarapacá" to listOf(
-        "Alto Hospicio",
-        "Camiña",
-        "Colchane",
-        "Huara",
-        "Iquique",
-        "Pica",
-        "Pozo Almonte"
-    ),
-
-    "Antofagasta" to listOf(
-        "Antofagasta",
-        "Calama",
-        "María Elena",
-        "Mejillones",
-        "Ollagüe",
-        "San Pedro de Atacama",
-        "Sierra Gorda",
-        "Taltal",
-        "Tocopilla"
-    ),
-
-    "Atacama" to listOf(
-        "Alto del Carmen",
-        "Caldera",
-        "Chañaral",
-        "Copiapó",
-        "Diego de Almagro",
-        "Freirina",
-        "Huasco",
-        "Tierra Amarilla",
-        "Vallenar"
-    ),
-
-    "Coquimbo" to listOf(
-        "Andacollo",
-        "Canela",
-        "Combarbalá",
-        "Coquimbo",
-        "Illapel",
-        "La Higuera",
-        "La Serena",
-        "Los Vilos",
-        "Monte Patria",
-        "Ovalle",
-        "Paihuano",
-        "Punitaqui",
-        "Río Hurtado",
-        "Salamanca",
-        "Vicuña"
-    ),
-
-    "Valparaíso" to listOf(
-        "Algarrobo",
-        "Cabildo",
-        "Calle Larga",
-        "Cartagena",
-        "Casablanca",
-        "Catemu",
-        "Concón",
-        "El Quisco",
-        "El Tabo",
-        "Hijuelas",
-        "Isla de Pascua",
-        "Juan Fernández",
-        "La Calera",
-        "La Cruz",
-        "La Ligua",
-        "Limache",
-        "Llaillay",
-        "Los Andes",
-        "Nogales",
-        "Olmué",
-        "Panquehue",
-        "Papudo",
-        "Petorca",
-        "Puchuncaví",
-        "Putaendo",
-        "Quillota",
-        "Quilpué",
-        "Quintero",
-        "Rinconada",
-        "San Antonio",
-        "San Esteban",
-        "San Felipe",
-        "Santa María",
-        "Santo Domingo",
-        "Valparaíso",
-        "Villa Alemana",
-        "Viña del Mar",
-        "Zapallar"
-    ),
-
-    "Metropolitana de Santiago" to listOf(
-        "Alhué",
-        "Buin",
-        "Calera de Tango",
-        "Cerrillos",
-        "Cerro Navia",
-        "Colina",
-        "Conchalí",
-        "Curacaví",
-        "El Bosque",
-        "El Monte",
-        "Estación Central",
-        "Huechuraba",
-        "Independencia",
-        "Isla de Maipo",
-        "La Cisterna",
-        "La Florida",
-        "La Granja",
-        "Lampa",
-        "La Pintana",
-        "La Reina",
-        "Las Condes",
-        "Lo Barnechea",
-        "Lo Espejo",
-        "Lo Prado",
-        "Macul",
-        "Maipú",
-        "María Pinto",
-        "Melipilla",
-        "Ñuñoa",
-        "Padre Hurtado",
-        "Paine",
-        "Pedro Aguirre Cerda",
-        "Peñaflor",
-        "Peñalolén",
-        "Pirque",
-        "Providencia",
-        "Pudahuel",
-        "Puente Alto",
-        "Quilicura",
-        "Quinta Normal",
-        "Recoleta",
-        "Renca",
-        "San Bernardo",
-        "San Joaquín",
-        "San José de Maipo",
-        "San Miguel",
-        "San Pedro",
-        "San Ramón",
-        "Santiago",
-        "Talagante",
-        "Tiltil",
-        "Vitacura"
-    ),
-
-    "Libertador General Bernardo O'Higgins" to listOf(
-        "Chépica",
-        "Chimbarongo",
-        "Codegua",
-        "Coinco",
-        "Coltauco",
-        "Doñihue",
-        "Graneros",
-        "La Estrella",
-        "Las Cabras",
-        "Litueche",
-        "Lolol",
-        "Machalí",
-        "Malloa",
-        "Marchihue",
-        "Mostazal",
-        "Nancagua",
-        "Navidad",
-        "Olivar",
-        "Palmilla",
-        "Paredones",
-        "Peralillo",
-        "Peumo",
-        "Pichidegua",
-        "Pichilemu",
-        "Placilla",
-        "Pumanque",
-        "Quinta de Tilcoco",
-        "Rancagua",
-        "Rengo",
-        "Requínoa",
-        "San Fernando",
-        "Santa Cruz",
-        "San Vicente"
-    ),
-
-    "Maule" to listOf(
-        "Cauquenes",
-        "Chanco",
-        "Colbún",
-        "Constitución",
-        "Curepto",
-        "Curicó",
-        "Empedrado",
-        "Hualañé",
-        "Licantén",
-        "Linares",
-        "Longaví",
-        "Maule",
-        "Molina",
-        "Parral",
-        "Pelarco",
-        "Pelluhue",
-        "Pencahue",
-        "Rauco",
-        "Retiro",
-        "Río Claro",
-        "Romeral",
-        "Sagrada Familia",
-        "San Clemente",
-        "San Javier",
-        "San Rafael",
-        "Talca",
-        "Teno",
-        "Vichuquén",
-        "Villa Alegre",
-        "Yerbas Buenas"
-    ),
-
-    "Ñuble" to listOf(
-        "Bulnes",
-        "Chillán",
-        "Chillán Viejo",
-        "Cobquecura",
-        "Coelemu",
-        "Coihueco",
-        "El Carmen",
-        "Ninhue",
-        "Ñiquén",
-        "Pemuco",
-        "Pinto",
-        "Portezuelo",
-        "Quillón",
-        "Quirihue",
-        "Ránquil",
-        "San Carlos",
-        "San Fabián",
-        "San Ignacio",
-        "San Nicolás",
-        "Treguaco",
-        "Yungay"
-    ),
-
-    "Biobío" to listOf(
-        "Alto Biobío",
-        "Antuco",
-        "Arauco",
-        "Cabrero",
-        "Cañete",
-        "Chiguayante",
-        "Concepción",
-        "Contulmo",
-        "Coronel",
-        "Curanilahue",
-        "Florida",
-        "Hualpén",
-        "Hualqui",
-        "Laja",
-        "Lebu",
-        "Los Alamos",
-        "Los Angeles",
-        "Lota",
-        "Mulchén",
-        "Nacimiento",
-        "Negrete",
-        "Penco",
-        "Quilaco",
-        "Quilleco",
-        "San Pedro de la Paz",
-        "San Rosendo",
-        "Santa Bárbara",
-        "Santa Juana",
-        "Talcahuano",
-        "Tirúa",
-        "Tomé",
-        "Tucapel",
-        "Yumbel"
-    ),
-
-    "La Araucanía" to listOf(
-        "Angol",
-        "Carahue",
-        "Cholchol",
-        "Collipulli",
-        "Cunco",
-        "Curacautín",
-        "Curarrehue",
-        "Ercilla",
-        "Freire",
-        "Galvarino",
-        "Gorbea",
-        "Lautaro",
-        "Loncoche",
-        "Lonquimay",
-        "Los Sauces",
-        "Lumaco",
-        "Melipeuco",
-        "Nueva Imperial",
-        "Padre Las Casas",
-        "Perquenco",
-        "Pitrufquén",
-        "Pucón",
-        "Purén",
-        "Renaico",
-        "Saavedra",
-        "Temuco",
-        "Teodoro Schmidt",
-        "Toltén",
-        "Traiguén",
-        "Victoria",
-        "Vilcún",
-        "Villarrica"
-    ),
-
-    "Los Ríos" to listOf(
-        "Corral",
-        "Futrono",
-        "Lago Ranco",
-        "Lanco",
-        "La Unión",
-        "Los Lagos",
-        "Máfil",
-        "Mariquina",
-        "Paillaco",
-        "Panguipulli",
-        "Río Bueno",
-        "Valdivia"
-    ),
-
-    "Los Lagos" to listOf(
-        "Ancud",
-        "Calbuco",
-        "Castro",
-        "Chaitén",
-        "Chonchi",
-        "Cochamó",
-        "Curaco de Vélez",
-        "Dalcahue",
-        "Fresia",
-        "Frutillar",
-        "Futaleufú",
-        "Hualaihué",
-        "Llanquihue",
-        "Los Muermos",
-        "Maullín",
-        "Osorno",
-        "Palena",
-        "Puerto Montt",
-        "Puerto Octay",
-        "Puerto Varas",
-        "Puqueldón",
-        "Purranque",
-        "Puyehue",
-        "Queilén",
-        "Quellón",
-        "Quemchi",
-        "Quinchao",
-        "Río Negro",
-        "San Juan de la Costa",
-        "San Pablo"
-    ),
-
-    "Aysén del General Carlos Ibáñez del Campo" to listOf(
-        "Aysén",
-        "Chile Chico",
-        "Cisnes",
-        "Cochrane",
-        "Coyhaique",
-        "Guaitecas",
-        "Lago Verde",
-        "O'Higgins",
-        "Río Ibáñez",
-        "Tortel"
-    ),
-
-    "Magallanes y de la Antártica Chilena" to listOf(
-        "Antártica",
-        "Cabo de Hornos",
-        "Laguna Blanca",
-        "Natales",
-        "Porvenir",
-        "Primavera",
-        "Punta Arenas",
-        "Río Verde",
-        "San Gregorio",
-        "Timaukel",
-        "Torres del Paine"
-    )
-)
-
 
 @Composable
 fun PantallaRegistro(
@@ -545,14 +141,6 @@ fun PantallaRegistro(
         mutableStateOf("")
     }
 
-    var region by remember {
-        mutableStateOf("")
-    }
-
-    var comuna by remember {
-        mutableStateOf("")
-    }
-
     var edad by remember {
         mutableStateOf("")
     }
@@ -593,6 +181,13 @@ fun PantallaRegistro(
         mutableStateOf(false)
     }
 
+    var regionGps by remember { mutableStateOf("") }
+    var comunaGps by remember { mutableStateOf("") }
+    var mostrarDialogoAjustes by remember { mutableStateOf(false) }
+    var estaBuscandoUbicacion by remember { mutableStateOf(true) }
+    var errorUbicacion by remember { mutableStateOf<String?>(null) }
+
+
 
     val opcionesGenero =
         listOf(
@@ -602,11 +197,132 @@ fun PantallaRegistro(
             "Prefiero no responder"
         )
 
+    if (mostrarDialogoAjustes) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoAjustes = false },
+            title = {
+                Text("Permiso obligatorio", color = TurquesaTextil)
+            },
+            text = {
+                Text(
+                    "Para poder registrarte necesitamos acceder a tu ubicación. Por favor, actívala en los ajustes de la aplicación.",
+                    color = BlancoTextil
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        mostrarDialogoAjustes = false
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text("Acceder a ajustes", color = TurquesaTextil)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoAjustes = false }) {
+                    Text("Cancelar", color = Color.Gray)
+                }
+            },
+            containerColor = NegroTextil
+        )
+    }
 
-    val comunasDisponibles =
-        COMUNAS_POR_REGION[region]
-            ?: emptyList()
+    val lanzadorPermisos = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permisos ->
+            val permisoOtorgado = permisos[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                    permisos[Manifest.permission.ACCESS_COARSE_LOCATION] == true
 
+            if (permisoOtorgado) {
+                obtenerUbicacionSugerida(
+                    context = context,
+                    onResultado = { comunaEncontrada, regionEncontrada ->
+                        comunaGps = comunaEncontrada
+                        regionGps = regionEncontrada
+                        estaBuscandoUbicacion = false
+                    },
+                    onError = { mensaje ->
+                        errorUbicacion = mensaje
+                        estaBuscandoUbicacion = false
+                    }
+                )
+            } else {
+                errorUbicacion = "Permiso de ubicación denegado"
+                estaBuscandoUbicacion = false
+                mostrarDialogoAjustes = true
+            }
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        estaBuscandoUbicacion = true
+        errorUbicacion = null
+
+        val tienePermisoFino = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        val tienePermisoGrueso = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+        if (tienePermisoFino || tienePermisoGrueso) {
+            obtenerUbicacionSugerida(
+                context = context,
+                onResultado = { comunaEncontrada, regionEncontrada ->
+                    comunaGps = comunaEncontrada
+                    regionGps = regionEncontrada
+                    estaBuscandoUbicacion = false
+                },
+                onError = { mensaje ->
+                    errorUbicacion = mensaje
+                    estaBuscandoUbicacion = false
+                }
+            )
+        } else {
+            lanzadorPermisos.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    val cicloDeVida = LocalLifecycleOwner.current
+
+    DisposableEffect(cicloDeVida) {
+        val observador = LifecycleEventObserver { _, evento ->
+            if (evento == Lifecycle.Event.ON_RESUME) {
+
+                val tienePermisoFino = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                val tienePermisoGrueso = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+                if (tienePermisoFino || tienePermisoGrueso) {
+                    estaBuscandoUbicacion = true
+                    errorUbicacion = null
+
+                    obtenerUbicacionSugerida(
+                        context = context,
+                        onResultado = { comunaEncontrada, regionEncontrada ->
+                            comunaGps = comunaEncontrada
+                            regionGps = regionEncontrada
+                            estaBuscandoUbicacion = false
+                        },
+                        onError = { mensaje ->
+                            errorUbicacion = mensaje
+                            estaBuscandoUbicacion = false
+                        }
+                    )
+                }
+            }
+        }
+
+        cicloDeVida.lifecycle.addObserver(observador)
+
+        onDispose {
+            cicloDeVida.lifecycle.removeObserver(observador)
+        }
+    }
 
     fun validarNuevamente() {
 
@@ -623,8 +339,8 @@ fun PantallaRegistro(
                     nombreEmprendimiento =
                         nombreEmprendimiento,
                     rubro = rubro,
-                    region = region,
-                    comuna = comuna,
+                    region = regionGps,
+                    comuna = comunaGps,
                     edad = edad,
                     genero = genero
                 )
@@ -1231,158 +947,40 @@ fun PantallaRegistro(
 
 
         // REGIÓN
-
-        SelectorRegion(
-            regionSeleccionada =
-                region,
-
-            busqueda =
-                busquedaRegion,
-
-            menuAbierto =
-                menuRegionAbierto,
-
-            regiones =
-                REGIONES_CHILE,
-
-            error =
-                registroViewModel
-                    .errorRegion,
-
-            onAbrirMenu = {
-
-                menuRegionAbierto =
-                    true
-
-                busquedaRegion =
-                    ""
-            },
-
-            onCerrarMenu = {
-
-                menuRegionAbierto =
-                    false
-
-                busquedaRegion =
-                    ""
-            },
-
-            onBusquedaCambio = {
-
-                busquedaRegion =
-                    it
-            },
-
-            onRegionSeleccionada = {
-                    nuevaRegion ->
-
-                if (
-                    region !=
-                    nuevaRegion
-                ) {
-
-                    comuna =
-                        ""
-                }
-
-                region =
-                    nuevaRegion
-
-                menuRegionAbierto =
-                    false
-
-                busquedaRegion =
-                    ""
-
-                menuComunaAbierto =
-                    false
-
-                busquedaComuna =
-                    ""
-
-                errorRegistro =
-                    null
-
-                validarNuevamente()
-            }
+        OutlinedTextField(
+            value = if (estaBuscandoUbicacion) "Detectando región..." else if (regionGps.isEmpty()) "Región no detectada" else regionGps,
+            onValueChange = {},
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Región (Automática)") },
+            readOnly = true,
+            enabled = false,
+            colors = coloresCampoRegistro()
         )
 
-
-        Spacer(
-            modifier =
-                Modifier.height(16.dp)
-        )
-
+        Spacer(modifier = Modifier.height(16.dp))
 
         // COMUNA
-
-        SelectorComuna(
-            comunaSeleccionada =
-                comuna,
-
-            regionSeleccionada =
-                region,
-
-            busqueda =
-                busquedaComuna,
-
-            menuAbierto =
-                menuComunaAbierto,
-
-            comunas =
-                comunasDisponibles,
-
-            error =
-                registroViewModel
-                    .errorComuna,
-
-            onAbrirMenu = {
-
-                menuComunaAbierto =
-                    true
-
-                busquedaComuna =
-                    ""
-            },
-
-            onCerrarMenu = {
-
-                menuComunaAbierto =
-                    false
-
-                busquedaComuna =
-                    ""
-            },
-
-            onBusquedaCambio = {
-
-                busquedaComuna =
-                    it
-            },
-
-            onComunaSeleccionada = {
-
-                comuna =
-                    it
-
-                menuComunaAbierto =
-                    false
-
-                busquedaComuna =
-                    ""
-
-                errorRegistro =
-                    null
-
-                validarNuevamente()
-            }
+        OutlinedTextField(
+            value = if (estaBuscandoUbicacion) "Detectando comuna..." else if (comunaGps.isEmpty()) "Comuna no detectada" else comunaGps,
+            onValueChange = {},
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Comuna (Automática)") },
+            readOnly = true,
+            enabled = false,
+            colors = coloresCampoRegistro()
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
 
-        Spacer(
-            modifier =
-                Modifier.height(28.dp)
+        // MENSAJE DE ADVERTENCIA
+        Text(
+            text = "* Si esta no es tu ubicación, comunícate con un administrador.",
+            color = Color.LightGray,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(start = 4.dp)
         )
+
+        Spacer(modifier = Modifier.height(28.dp))
 
 
         // =========================
@@ -1597,10 +1195,10 @@ fun PantallaRegistro(
                                 rubro,
 
                             region =
-                                region,
+                                regionGps,
 
                             comuna =
-                                comuna,
+                                comunaGps,
 
                             edad =
                                 edad,
@@ -1762,10 +1360,10 @@ fun PantallaRegistro(
                                                             .trim(),
 
                                                     region =
-                                                        region,
+                                                        regionGps,
 
                                                     comuna =
-                                                        comuna,
+                                                        comunaGps,
 
                                                     edad =
                                                         edad
@@ -1883,7 +1481,7 @@ fun PantallaRegistro(
             },
 
             enabled =
-                !registrando,
+                !registrando && !estaBuscandoUbicacion && errorUbicacion == null && regionGps.isNotBlank() && comunaGps.isNotBlank(),
 
             modifier =
                 Modifier
@@ -1898,7 +1496,13 @@ fun PantallaRegistro(
                             TurquesaTextil,
 
                         contentColor =
-                            NegroTextil
+                            NegroTextil,
+
+                        disabledContainerColor =
+                            TurquesaTextil.copy(alpha = 0.4f),
+
+                        disabledContentColor =
+                            NegroTextil.copy(alpha = 0.6f)
                     )
         ) {
 
@@ -2666,6 +2270,15 @@ fun coloresCampoRegistro() =
 
             errorTextColor =
                 BlancoTextil,
+
+            disabledTextColor =
+                Color.LightGray,
+
+            disabledBorderColor =
+                Color.DarkGray,
+
+            disabledLabelColor =
+                Color.Gray,
 
             focusedBorderColor =
                 TurquesaTextil,
