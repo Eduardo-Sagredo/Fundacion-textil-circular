@@ -1,14 +1,25 @@
 package com.example.fundaciontextilcircular.data.repository
 
 import com.example.fundaciontextilcircular.data.local.dao.MensajeDao
+import com.example.fundaciontextilcircular.data.local.entities.ChatEntity
 import com.example.fundaciontextilcircular.data.local.entities.MensajeEntity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class ChatRepository(
     private val mensajeDao: MensajeDao
 ) {
+    private val syncMutex = Mutex()
+
+    // =========================
+    // OBTENER TODOS LOS CHATS (ADMIN)
+    // =========================
+    fun obtenerTodosLosChats(): Flow<List<ChatEntity>> {
+        return mensajeDao.obtenerTodosLosChats()
+    }
 
     // =========================
     // OBTENER HISTORIAL
@@ -31,35 +42,24 @@ class ChatRepository(
 
     suspend fun guardarMensajeLocal(
         chatId: String,
-        contenido: String
+        contenido: String,
+        esDeUsuario: Boolean = true
     ) {
 
-        val nuevoMensaje =
-            MensajeEntity(
+        val nuevoMensaje = MensajeEntity(
+            chatId = chatId,
+            contenido = contenido,
+            esDeUsuario = esDeUsuario,
+            estaPendiente = esDeUsuario,
+            leido = true
+        )
+        mensajeDao.insertarMensaje(nuevoMensaje)
 
-                chatId =
-                    chatId,
-
-                contenido =
-                    contenido,
-
-                esDeUsuario =
-                    true,
-
-                estaPendiente =
-                    true,
-
-                // El mensaje que yo envío
-                // no cuenta como no leído
-
-                leido =
-                    true
-            )
-
-        mensajeDao
-            .insertarMensaje(
-                nuevoMensaje
-            )
+        val chat = ChatEntity(
+            chatId = chatId,
+            cerrado = false
+        )
+        mensajeDao.guardarChat(chat)
     }
 
 
@@ -75,61 +75,49 @@ class ChatRepository(
             .marcarChatComoLeido(
                 chatId
             )
+
+        val chat = ChatEntity(
+            chatId = chatId,
+            cerrado = false
+        )
+        mensajeDao.guardarChat(chat)
     }
 
 
     // =========================
     // SINCRONIZAR
     // =========================
-
     suspend fun sincronizarPendientes() {
 
-        val pendientes =
-            mensajeDao
-                .obtenerTodosLosMensajesPendientes()
+        syncMutex.withLock {
+            val pendientes = mensajeDao.obtenerTodosLosMensajesPendientes()
 
-        if (
-            pendientes.isNotEmpty()
-        ) {
+            if (pendientes.isNotEmpty()) {
+                delay(300)
 
-            delay(1500)
+                val chatsAfectados = mutableSetOf<String>()
 
-            pendientes.forEach {
-                    mensaje ->
+                pendientes.forEach { mensajeLocal ->
+                    mensajeDao.marcarComoEnviado(mensajeLocal.id)
+                    chatsAfectados.add(mensajeLocal.chatId)
+                }
 
-                mensajeDao
-                    .marcarComoEnviado(
-                        mensaje.id
-                    )
+                chatsAfectados.forEach { idDelChat ->
 
+                    val historialDelChat = mensajeDao.obtenerMensajesPorChatSincrono(idDelChat)
+                    val cantidadRespuestas = historialDelChat.count { !it.esDeUsuario }
 
-                // =========================
-                // RESPUESTA RECIBIDA
-                // =========================
-
-                val respuestaAutomatica =
-                    MensajeEntity(
-
-                        chatId =
-                            mensaje.chatId,
-
-                        contenido =
-                            "Hemos recibido tu mensaje. Una administradora te responderá a la brevedad.",
-
-                        esDeUsuario =
-                            false,
-
-                        estaPendiente =
-                            false,
-
-                        leido =
-                            false
-                    )
-
-                mensajeDao
-                    .insertarMensaje(
-                        respuestaAutomatica
-                    )
+                    if (cantidadRespuestas == 0) {
+                        val respuestaAutomatica = MensajeEntity(
+                            chatId = idDelChat,
+                            contenido = "Hemos recibido tu mensaje. Una administradora te responderá a la brevedad.",
+                            esDeUsuario = false,
+                            estaPendiente = false,
+                            leido = false
+                        )
+                        mensajeDao.insertarMensaje(respuestaAutomatica)
+                    }
+                }
             }
         }
     }

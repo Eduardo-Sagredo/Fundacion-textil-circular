@@ -2,6 +2,7 @@ package com.example.fundaciontextilcircular.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.fundaciontextilcircular.data.local.entities.ChatEntity
 import com.example.fundaciontextilcircular.data.local.entities.MensajeEntity
 import com.example.fundaciontextilcircular.data.repository.ChatRepository
 import com.example.fundaciontextilcircular.data.utils.NetworkMonitor
@@ -99,6 +100,19 @@ class ChatViewModel(
             initialValue = false
         )
 
+    // =========================
+    // TODOS LOS CHATS (ADMIN)
+    // =========================
+    val todosLosChats: StateFlow<List<ChatEntity>> = repository
+        .obtenerTodosLosChats()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    var esAdmin: Boolean = false
+
     fun cerrarChatAdministrador() {
         viewModelScope.launch {
             repository.cerrarChat(_chatIdActual.value)
@@ -166,11 +180,13 @@ class ChatViewModel(
                         _chatIdActual.value,
 
                     contenido =
-                        texto.trim()
+                        texto.trim(),
+
+                    esDeUsuario = !esAdmin
                 )
 
             if (
-                isOnline.value
+                (isOnline.value && !esAdmin)
             ) {
 
                 repository

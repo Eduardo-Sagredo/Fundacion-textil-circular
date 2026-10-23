@@ -171,116 +171,47 @@ fun ChatScreen(
                 .weight(1f)
                 .padding(
                     top = 16.dp
-                )
-            ,
-
-            verticalArrangement =
-                Arrangement.spacedBy(
-                    6.dp
-                )
+                ),
+            verticalArrangement = Arrangement.spacedBy(
+                6.dp
+            )
         ) {
-
             items(
-                items =
-                    historial,
-
-                key = {
-                        mensaje ->
-
+                items = historial,
+                key = { mensaje ->
                     mensaje.id
                 }
+            ) { mensaje ->
 
-            ) {
-                    mensaje ->
+                val esMiMensaje = if (viewModel.esAdmin) !mensaje.esDeUsuario else mensaje.esDeUsuario
 
-                val alineacion =
-
-                    if (
-                        mensaje.esDeUsuario
-                    ) {
-                        Alignment.End
-                    } else {
-                        Alignment.Start
-                    }
-
-
-                val colorFondo =
-
-                    if (
-                        mensaje.esDeUsuario
-                    ) {
-                        Color(
-                            0xFFD7F8C6
-                        )
-                    } else {
-                        Color(
-                            0xFFE0E0E0
-                        )
-                    }
-
+                val alineacion = if (esMiMensaje) Alignment.End else Alignment.Start
+                val colorFondo = if (esMiMensaje) Color(0xFFD7F8C6) else Color(0xFFE0E0E0)
 
                 Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth(),
-
-                    horizontalAlignment =
-                        alineacion
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = alineacion
                 ) {
-
                     Column(
-                        modifier =
-                            Modifier
-                                .background(
-                                    color =
-                                        colorFondo,
-
-                                    shape =
-                                        RoundedCornerShape(
-                                            12.dp
-                                        )
-                                )
-                                .padding(
-                                    12.dp
-                                )
+                        modifier = Modifier
+                            .background(
+                                color = colorFondo,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .padding(12.dp)
                     ) {
-
                         Text(
-                            text =
-                                mensaje.contenido,
-
-                            color =
-                                Color.Black
+                            text = mensaje.contenido,
+                            color = Color.Black
                         )
 
 
-                        if (
-                            mensaje.esDeUsuario
-                        ) {
-
+                        if (esMiMensaje) {
                             Text(
-                                text =
-                                    if (
-                                        mensaje.estaPendiente
-                                    ) {
-                                        "Pendiente"
-                                    } else {
-                                        "Enviado"
-                                    },
-
-                                style =
-                                    MaterialTheme
-                                        .typography
-                                        .labelSmall,
-
-                                color =
-                                    Color.DarkGray,
-
-                                modifier =
-                                    Modifier
-                                        .align(
-                                            Alignment.End
-                                        )
+                                text = if (mensaje.estaPendiente) "Pendiente" else "Enviado",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.DarkGray,
+                                modifier = Modifier.align(Alignment.End)
                             )
                         }
                     }

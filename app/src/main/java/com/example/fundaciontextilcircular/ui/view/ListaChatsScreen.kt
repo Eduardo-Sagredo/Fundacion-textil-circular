@@ -32,7 +32,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fundaciontextilcircular.data.local.TextilDatabase
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 data class ChatResumenUI(
 
@@ -53,7 +56,10 @@ fun ListaChatsScreen(
         chatId: String,
         nombreChat: String
     ) -> Unit
+
 ) {
+
+    var mostrarAlertaTicket by remember { mutableStateOf(false) }
 
     val context =
         LocalContext.current
@@ -127,27 +133,24 @@ fun ListaChatsScreen(
     // CREAR CHATS
     // =========================
 
-    val conversaciones =
+    val correoLimpioUsuario = correoUsuario.replace(".", "_")
+    val misTickets by mensajeDao.obtenerMisTickets(correoLimpioUsuario)
+        .collectAsState(initial = emptyList())
 
-        emprendedorasDisponibles
-            .map { emprendedora ->
+    val conversaciones = emprendedorasDisponibles.map { emprendedora ->
+        ChatResumenUI(
+            chatId = generarChatId(correoUsuario, emprendedora.correo),
+            nombre = emprendedora.nombreEmprendimiento,
+            descripcion = "${emprendedora.rubro} • ${emprendedora.comuna}"
+        )
+    } + misTickets.map { ticket ->
 
-                ChatResumenUI(
-
-                    chatId =
-                        generarChatId(
-                            correoUsuario,
-                            emprendedora.correo
-                        ),
-
-                    nombre =
-                        emprendedora
-                            .nombreEmprendimiento,
-
-                    descripcion =
-                        "${emprendedora.rubro} • ${emprendedora.comuna}"
-                )
-            }
+        ChatResumenUI(
+            chatId = ticket.chatId,
+            nombre = "Soporte Técnico (Admin)",
+            descripcion = if (ticket.cerrado) "Ticket Cerrado" else "Ticket Abierto"
+        )
+    }.sortedByDescending { it.chatId }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -157,7 +160,7 @@ fun ListaChatsScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // =
+            //
             // TÍTULO
             //
             Text(
@@ -268,7 +271,10 @@ fun ListaChatsScreen(
                                     ) {
                                         Text(
                                             text = mensajesNoLeidos.toString(),
-                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                            modifier = Modifier.padding(
+                                                horizontal = 10.dp,
+                                                vertical = 5.dp
+                                            ),
                                             color = Color.Black,
                                             fontWeight = FontWeight.Bold
                                         )
@@ -282,13 +288,46 @@ fun ListaChatsScreen(
         }
 
         // =========================
+        // DIÁLOGO DE TICKET EN PROCESO
+        // =========================
+        if (mostrarAlertaTicket) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { mostrarAlertaTicket = false },
+                containerColor = Color.White,
+                title = {
+                    Text("Ticket en proceso", color = Color(0xFF00A6A6), fontWeight = FontWeight.Bold)
+                },
+                text = {
+                    Text("Ya tienes un chat de soporte técnico abierto. Por favor, ingresa a él directamente a través de tu lista de 'Mis conversaciones'.", color = Color.DarkGray)
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { mostrarAlertaTicket = false },
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF00A6A6))
+                    ) {
+                        Text("Entendido", color = Color.White)
+                    }
+                }
+            )
+        }
+
+        // =========================
         // BOTÓN COMUNICARSE CON ADMINISTRADOR
         // =========================
         ExtendedFloatingActionButton(
             onClick = {
-                // Crea un ID único para el chat con el administrador
-                val chatIdAdmin = "chat_admin_${correoUsuario.replace(".", "_")}"
-                onAbrirChat(chatIdAdmin, "Administrador")
+
+                val ticketAbierto = misTickets.find { !it.cerrado }
+
+                if (ticketAbierto != null) {
+
+                    mostrarAlertaTicket = true
+                } else {
+
+                    val timestamp = System.currentTimeMillis()
+                    val chatIdAdmin = "ticket_${correoLimpioUsuario}_$timestamp"
+                    onAbrirChat(chatIdAdmin, "Soporte Técnico")
+                }
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -300,8 +339,6 @@ fun ListaChatsScreen(
         }
     }
 }
-
-
 // =============================================
 // CREAR ID ÚNICO ENTRE DOS USUARIOS
 // =============================================
@@ -334,3 +371,4 @@ private fun generarChatId(
                 "__"
         )
 }
+

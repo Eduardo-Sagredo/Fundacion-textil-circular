@@ -50,6 +50,7 @@ import com.example.fundaciontextilcircular.ui.theme.RojoErrorTextil
 import com.example.fundaciontextilcircular.ui.theme.TurquesaTextil
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import com.example.fundaciontextilcircular.data.local.entities.ChatEntity
 
 
 // Color de las tarjetas y ventanas del administrador
@@ -57,10 +58,11 @@ private val FondoAdmin =
     Color(0xFF1E1E1E)
 
 
-@Composable
+@Composable()
 fun PantallaAdmin(
     modifier: Modifier = Modifier,
-    onCerrarSesion: () -> Unit = {}
+    onCerrarSesion: () -> Unit = {},
+    onVerChat: (String) -> Unit = {}
 ) {
 
     val context =
@@ -69,6 +71,7 @@ fun PantallaAdmin(
     val scope =
         rememberCoroutineScope()
 
+    val database = remember(context) { TextilDatabase.getDatabase(context) }
 
     val dao =
         remember(context) {
@@ -78,6 +81,7 @@ fun PantallaAdmin(
                 .emprendedoraDao()
         }
 
+    val chatDao = remember(database) { database.mensajeDao() }
 
     val auth =
         remember {
@@ -85,6 +89,8 @@ fun PantallaAdmin(
             FirebaseAuth
                 .getInstance()
         }
+
+
 
 
     // =========================
@@ -118,6 +124,8 @@ fun PantallaAdmin(
         .collectAsState(
             initial = emptyList()
         )
+
+    val chats by chatDao.obtenerTodosLosChats().collectAsState(initial = emptyList())
 
 
     // =========================
@@ -305,6 +313,52 @@ fun PantallaAdmin(
                     16.dp
                 )
         ) {
+
+            // =========================
+            // MENSAJES Y CHATS
+            // =========================
+            item {
+                Text(
+                    text = "MENSAJES DE EMPRENDEDORAS (${chats.size})",
+                    color = AmarilloTextil,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
+            if (chats.isEmpty()) {
+                item {
+                    Text(
+                        text = "No hay mensajes ni chats activos.",
+                        color = BlancoTextil
+                    )
+                }
+            } else {
+                items(
+                    items = chats,
+                    key = { "chat_${it.chatId}" }
+                ) { chat ->
+
+                    val emprendedoraAsociada = activas.find { cuenta ->
+                        val correoLimpio = cuenta.correo.replace(".", "_")
+                        chat.chatId.contains(correoLimpio)
+                    }
+
+                    TarjetaChatAdmin(
+                        chat = chat,
+                        emprendedora = emprendedoraAsociada,
+                        onResponder = { onVerChat(chat.chatId) },
+                        onCerrarChat = {
+                            scope.launch {
+                                chatDao.cerrarChat(chat.chatId)
+                            }
+                        }
+                    )
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+            }
 
 
             // =========================
@@ -2774,3 +2828,77 @@ fun coloresCampoAdmin() =
         errorCursorColor =
             RojoErrorTextil
     )
+
+// =========================
+// TARJETA CHAT ADMIN
+// =========================
+@Composable
+fun TarjetaChatAdmin(
+    chat: ChatEntity,
+    emprendedora: EmprendedoraEntity?,
+    onResponder: () -> Unit,
+    onCerrarChat: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = FondoAdmin)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+
+            val tituloMostrar = if (emprendedora != null) {
+                "${emprendedora.nombre} / ${emprendedora.nombreEmprendimiento}"
+            } else {
+                "Emprendedora desconocida"
+            }
+
+            Text(
+                text = tituloMostrar,
+                color = BlancoTextil,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+
+            val estadoText = if (chat.cerrado) "CERRADO" else "ABIERTO"
+            val estadoColor = if (chat.cerrado) RojoErrorTextil else TurquesaTextil
+
+            Text(
+                text = "Estado: $estadoText",
+                color = estadoColor,
+                style = MaterialTheme.typography.labelLarge
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Button(
+                    onClick = onResponder,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = TurquesaTextil,
+                        contentColor = NegroTextil
+                    )
+                ) {
+                    Text(text = "VER / RESPONDER")
+                }
+
+                if (!chat.cerrado) {
+                    Button(
+                        onClick = onCerrarChat,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = RojoErrorTextil,
+                            contentColor = BlancoTextil
+                        )
+                    ) {
+                        Text(text = "CERRAR CHAT")
+                    }
+                }
+            }
+        }
+    }
+}

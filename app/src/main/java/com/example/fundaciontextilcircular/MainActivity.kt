@@ -8,8 +8,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
+import com.example.fundaciontextilcircular.data.local.TextilDatabase
+import com.example.fundaciontextilcircular.data.repository.ChatRepository
+import com.example.fundaciontextilcircular.data.utils.NetworkMonitor
 import com.example.fundaciontextilcircular.ui.theme.TextilCircularTheme
+import com.example.fundaciontextilcircular.ui.view.ChatScreen
+import com.example.fundaciontextilcircular.ui.viewmodel.ChatViewModel
 import com.example.fundaciontextilcircular.view.MainScreen
 import com.example.fundaciontextilcircular.view.PantallaAdmin
 import com.example.fundaciontextilcircular.view.PantallaBienvenida
@@ -59,6 +65,14 @@ class MainActivity : ComponentActivity() {
 
                 var correoUsuarioActual by remember {
 
+                    mutableStateOf("")
+                }
+
+                // =========================================
+                // CHAT SELECCIONADO POR EL ADMIN
+                // =========================================
+
+                var chatSeleccionado by remember {
                     mutableStateOf("")
                 }
 
@@ -278,6 +292,42 @@ class MainActivity : ComponentActivity() {
 
                                 pantallaActual =
                                     "login"
+                            },
+
+                            onVerChat = { idDelChat ->
+                                chatSeleccionado = idDelChat
+                                pantallaActual = "chat_admin"
+                            }
+
+                        )
+                    }
+
+                    // =====================================
+                    // CHAT DEL ADMINISTRADOR
+                    // =====================================
+                    "chat_admin" -> {
+                        val context = LocalContext.current
+                        val database = remember { TextilDatabase.getDatabase(context) }
+                        val repositorio = remember { ChatRepository(database.mensajeDao()) }
+                        val networkMonitor = remember { NetworkMonitor(context) }
+
+                        val adminChatViewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                            factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                                    return ChatViewModel(repositorio, networkMonitor) as T
+                                }
+                            }
+                        )
+
+                        adminChatViewModel.esAdmin = true
+
+                        ChatScreen(
+                            chatId = chatSeleccionado,
+                            nombreChat = "Soporte Técnico (Ticket)",
+                            viewModel = adminChatViewModel,
+                            onVolver = {
+                                pantallaActual = "admin"
+                                chatSeleccionado = ""
                             }
                         )
                     }
@@ -288,6 +338,21 @@ class MainActivity : ComponentActivity() {
                     // =====================================
 
                     "principal" -> {
+
+                        val context = LocalContext.current
+                        val database = remember { TextilDatabase.getDatabase(context) }
+                        val repositorio = remember { ChatRepository(database.mensajeDao()) }
+                        val networkMonitor = remember { NetworkMonitor(context) }
+
+                        val userChatViewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                            factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                                    return ChatViewModel(repositorio, networkMonitor) as T
+                                }
+                            }
+                        )
+
+                        userChatViewModel.esAdmin = false
 
                         MainScreen(
 

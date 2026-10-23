@@ -163,7 +163,7 @@ interface MensajeDao {
     // ===================================
 
     // Inserta o actualiza el estado general del chat
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    @Insert(onConflict = androidx.room.OnConflictStrategy.IGNORE)
     suspend fun guardarChat(chat: com.example.fundaciontextilcircular.data.local.entities.ChatEntity)
 
     @Query(
@@ -174,4 +174,63 @@ interface MensajeDao {
         """
     )
     fun observarEstadoChat(chatId: String): Flow<Boolean?>
+
+    // =========================
+    // OBTENER TODOS LOS CHATS (ADMIN)
+    // =========================
+
+    @Query(
+        """
+        SELECT *
+        FROM chats
+        """
+    )
+    fun obtenerTodosLosChats(): Flow<List<com.example.fundaciontextilcircular.data.local.entities.ChatEntity>>
+
+    // =========================
+    // CERRAR UN CHAT (ADMIN)
+    // =========================
+
+    @Query(
+        """
+        UPDATE chats 
+        SET cerrado = 1 
+        WHERE chatId = :chatId
+        """
+    )
+    suspend fun cerrarChat(chatId: String)
+
+    // =========================
+    // OBTENER TICKETS DEL USUARIO
+    // =========================
+    @Query(
+        """
+        SELECT * 
+        FROM chats 
+        WHERE chatId LIKE '%' || :correoLimpio || '%'
+        """
+    )
+    fun obtenerMisTickets(correoLimpio: String): Flow<List<com.example.fundaciontextilcircular.data.local.entities.ChatEntity>>
+
+    // =========================
+    // CONTAR RESPUESTAS DE ADMIN
+    // =========================
+    @Query("""
+        SELECT COUNT(*) 
+        FROM mensajes 
+        WHERE chatId = :chatId AND esDeUsuario = 0
+    """)
+    suspend fun contarRespuestasAdmin(chatId: String): Int
+
+    // =========================
+    // OBTENER MENSAJES SÍNCRONO PARA CONTEO
+    // =========================
+    @Query(
+        """
+        SELECT *
+        FROM mensajes
+        WHERE chatId = :chatId
+        """
+    )
+    suspend fun obtenerMensajesPorChatSincrono(chatId: String): List<MensajeEntity>
 }
