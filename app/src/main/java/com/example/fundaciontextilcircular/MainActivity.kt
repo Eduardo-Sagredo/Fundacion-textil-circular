@@ -23,6 +23,7 @@ import com.example.fundaciontextilcircular.view.PantallaCuentaEnRevision
 import com.example.fundaciontextilcircular.view.PantallaLogin
 import com.example.fundaciontextilcircular.view.PantallaRecuperarContrasena
 import com.example.fundaciontextilcircular.view.PantallaRegistro
+import com.example.fundaciontextilcircular.view.PantallaSplash
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
@@ -31,11 +32,15 @@ class MainActivity : ComponentActivity() {
         savedInstanceState: Bundle?
     ) {
 
-        super.onCreate(savedInstanceState)
+        super.onCreate(
+            savedInstanceState
+        )
+
 
         setContent {
 
             TextilCircularTheme {
+
 
                 // =========================================
                 // PANTALLA ACTUAL
@@ -44,7 +49,7 @@ class MainActivity : ComponentActivity() {
                 var pantallaActual by remember {
 
                     mutableStateOf(
-                        "bienvenida"
+                        "splash"
                     )
                 }
 
@@ -84,15 +89,19 @@ class MainActivity : ComponentActivity() {
                 SideEffect {
 
                     /*
-                     * Todas las pantallas anteriores
-                     * al MainScreen utilizan principalmente
-                     * fondo oscuro.
+                     * Splash:
+                     * fondo crema → iconos oscuros.
                      *
-                     * Principal utiliza fondo claro.
+                     * Principal:
+                     * fondo claro → iconos oscuros.
+                     *
+                     * Login y demás pantallas oscuras:
+                     * iconos blancos.
                      */
 
-                    val pantallaOscura =
-                        pantallaActual != "principal"
+                    val pantallaClara =
+                        pantallaActual == "splash" ||
+                                pantallaActual == "principal"
 
 
                     val controlador =
@@ -103,22 +112,14 @@ class MainActivity : ComponentActivity() {
                             )
 
 
-                    // =====================================
-                    // BARRA SUPERIOR
-                    // =====================================
-
                     controlador
                         .isAppearanceLightStatusBars =
-                        !pantallaOscura
+                        pantallaClara
 
-
-                    // =====================================
-                    // BARRA INFERIOR
-                    // =====================================
 
                     controlador
                         .isAppearanceLightNavigationBars =
-                        !pantallaOscura
+                        pantallaClara
                 }
 
 
@@ -129,6 +130,23 @@ class MainActivity : ComponentActivity() {
                 when (
                     pantallaActual
                 ) {
+
+
+                    // =====================================
+                    // SPLASH ANIMADO
+                    // =====================================
+
+                    "splash" -> {
+
+                        PantallaSplash(
+
+                            onFinalizar = {
+
+                                pantallaActual =
+                                    "bienvenida"
+                            }
+                        )
+                    }
 
 
                     // =====================================
@@ -363,7 +381,7 @@ class MainActivity : ComponentActivity() {
                             onCerrarSesion = {
 
                                 // =================================
-                                // CERRAR SESIÓN FIREBASE
+                                // CERRAR FIREBASE
                                 // =================================
 
                                 FirebaseAuth
@@ -372,7 +390,7 @@ class MainActivity : ComponentActivity() {
 
 
                                 // =================================
-                                // LIMPIAR SESIÓN LOCAL
+                                // LIMPIAR SESIÓN
                                 // =================================
 
                                 correoUsuarioActual =
