@@ -1,6 +1,6 @@
 # Fundacion-textil-circular
 
-# Aplicación móvil Android diseñada para gestionar, evaluar y conectar a emprendedoras del rubro textil. El sistema permite el registro de perfiles, la evaluación de cuentas por parte de la administración y un canal de comunicación directo y estructurado entre las usuarias y el equipo de soporte técnico.
+## Aplicación móvil Android diseñada para gestionar, evaluar y conectar a emprendedoras del rubro textil. El sistema permite el registro de perfiles, la evaluación de cuentas por parte de la administración y un canal de comunicación directo y estructurado entre las usuarias y el equipo de soporte técnico.
 
 # Roles
 
