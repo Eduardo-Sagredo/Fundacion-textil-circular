@@ -1,1 +1,0 @@
-# Fundacion-textil-circular
