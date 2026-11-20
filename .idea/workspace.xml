@@ -5,28 +5,36 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c653f0cb-c844-41c4-bd3b-0a4d8529d7ce" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/backend/.gitkeep" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Eduardo-Sagredo"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Eduardo-Sagredo&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Eduardo-Sagredo/Fundacion-textil-circular.git",
-    "accountId": "debf901e-13c8-4fc0-a958-9bfe77c68c2e"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Eduardo-Sagredo/Fundacion-textil-circular.git&quot;,
+    &quot;accountId&quot;: &quot;debf901e-13c8-4fc0-a958-9bfe77c68c2e&quot;
   }
-}]]></component>
+}</component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -34,10 +42,69 @@
       </MavenGeneralSettings>
     </option>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 4,
-  "fromUser": false
-}]]></component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.000342257029606" />
+      <entry key="S2" value="1.288149950692756" />
+      <entry key="S5" value="2.173706565786409" />
+      <entry key="S10" value="2.967780032667275" />
+      <entry key="S30" value="4.6511726618468145" />
+      <entry key="S60" value="8.25221017617508" />
+      <entry key="M2" value="17.36152040403192" />
+      <entry key="M5" value="41.674702735635755" />
+      <entry key="M10" value="70.9268429671218" />
+      <entry key="M15" value="89.3661909319976" />
+      <entry key="M30" value="116.37978352987359" />
+      <entry key="H1" value="134.5670268110934" />
+      <entry key="H2" value="145.1876954077767" />
+      <entry key="H4" value="150.93582387806367" />
+      <entry key="D1" value="155.96653854797972" />
+      <entry key="W1" value="156.8517941271997" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="9.099883250462819E-169" />
+      <entry key="MS500" value="2.4679040782097736E-34" />
+      <entry key="S2" value="4.699911075594384E-9" />
+      <entry key="S5" value="6.589168686216328E-4" />
+      <entry key="S10" value="0.037838610196844355" />
+      <entry key="S30" value="1.095105052375638" />
+      <entry key="S60" value="4.410523203386188" />
+      <entry key="M2" value="13.351647627819416" />
+      <entry key="M5" value="43.51865818277233" />
+      <entry key="M10" value="81.77647671428078" />
+      <entry key="M15" value="105.29017857930191" />
+      <entry key="M30" value="138.90203741951473" />
+      <entry key="H1" value="161.07044884201736" />
+      <entry key="H2" value="173.87219621542218" />
+      <entry key="H4" value="180.76093456313714" />
+      <entry key="D1" value="186.76831524946445" />
+      <entry key="W1" value="187.82341717351926" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="5.631411845348215E-7" />
+      <entry key="MS500" value="0.05643281159964968" />
+      <entry key="S2" value="0.7043043264173623" />
+      <entry key="S5" value="1.76437473225182" />
+      <entry key="S10" value="2.7155040075512584" />
+      <entry key="S30" value="5.563954863601613" />
+      <entry key="S60" value="12.481153271817112" />
+      <entry key="M2" value="30.508502347541423" />
+      <entry key="M5" value="84.9656838252009" />
+      <entry key="M10" value="152.49929330546505" />
+      <entry key="M15" value="194.48366995423737" />
+      <entry key="M30" value="255.16933712314352" />
+      <entry key="H1" value="295.5726320710836" />
+      <entry key="H2" value="319.02498826581234" />
+      <entry key="H4" value="331.67863934082527" />
+      <entry key="D1" value="342.7317369638783" />
+      <entry key="W1" value="344.6747636056846" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4,
+  &quot;fromUser&quot;: false
+}</component>
   <component name="ProjectId" id="3M7a3qVSX0T8AAfLPBX9R9q10cP" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -48,11 +115,13 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "git-widget-placeholder": "develop",
+    "git-widget-placeholder": "feature/mensaje-productos",
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.jshint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.jshint": "",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm"
   }
