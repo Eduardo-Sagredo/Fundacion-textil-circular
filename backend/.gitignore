@@ -31,3 +31,22 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Evita subir credenciales ###
+../../.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+application-secret.properties
+application-secret.yml
+**/src/main/resources/wallet/
+src/main/resources/wallet/
+Wallet_*.zip
+*.sso
+*.p12
+*.jks
+tnsnames.ora
+sqlnet.ora
+ojdbc.properties
