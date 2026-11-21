@@ -126,15 +126,13 @@ fun MainScreen(
     // =============================================
     // CHAT REPOSITORY
     // =============================================
-
     val chatRepository =
         remember(
-            mensajeDao
+            key1 = mensajeDao
         ) {
-
             ChatRepository(
-                mensajeDao =
-                    mensajeDao
+                mensajeDao = mensajeDao,
+                appContext = context.applicationContext
             )
         }
 

@@ -7,7 +7,9 @@ import androidx.room.PrimaryKey
 data class MensajeEntity(
 
     @PrimaryKey(autoGenerate = true)
-    var id: Int = 0,
+    val id: Int = 0,
+
+    val remoteId: Long? = null,
 
     val chatId: String,
 
@@ -15,11 +17,9 @@ data class MensajeEntity(
 
     val esDeUsuario: Boolean,
 
-    val estaPendiente: Boolean,
+    val estaPendiente: Boolean = true,
 
-    // true = el mensaje ya fue leído
-    // false = hay un mensaje nuevo
-    val leido: Boolean = true,
+    val leido: Boolean = false,
 
     val timestamp: Long =
         System.currentTimeMillis()

@@ -233,4 +233,17 @@ interface MensajeDao {
         """
     )
     suspend fun obtenerMensajesPorChatSincrono(chatId: String): List<MensajeEntity>
+
+
+    // =========================
+    // VALIDACIONES CON BACKEND
+    // =========================
+
+    @Query("UPDATE mensajes SET estaPendiente = 0, remoteId = :remoteId WHERE id = :localId")
+    suspend fun confirmarEnvio(localId: Int, remoteId: Long)
+    @Query("SELECT EXISTS(SELECT 1 FROM mensajes WHERE remoteId = :remoteId)")
+    suspend fun existeRemoteId(remoteId: Long): Boolean
+
+    @Query("DELETE FROM mensajes WHERE id = :localId")
+    suspend fun eliminarMensajePorId(localId: Int)
 }
