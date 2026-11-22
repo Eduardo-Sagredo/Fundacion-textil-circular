@@ -36,6 +36,7 @@ import com.example.fundaciontextilcircular.ui.theme.BlancoTextil
 import com.example.fundaciontextilcircular.ui.theme.NegroTextil
 import com.example.fundaciontextilcircular.ui.theme.RojoErrorTextil
 import com.example.fundaciontextilcircular.ui.theme.TurquesaTextil
+import com.example.fundaciontextilcircular.ui.viewmodel.ProductoViewModel
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -43,16 +44,15 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 @Composable
 fun PantallaPerfil(
     correo: String,
+    productoViewModel: ProductoViewModel,
     modifier: Modifier = Modifier,
     onCerrarSesion: () -> Unit = {}
 ) {
 
-    val context =
-        LocalContext.current
+    val context = LocalContext.current
 
     val dao =
         remember(context) {
-
             TextilDatabase
                 .getDatabase(context)
                 .emprendedoraDao()
@@ -60,15 +60,11 @@ fun PantallaPerfil(
 
     val cuenta by dao
         .observarPorCorreo(correo)
-        .collectAsState(
-            initial = null
-        )
+        .collectAsState(initial = null)
 
     val auth =
         remember {
-
-            FirebaseAuth
-                .getInstance()
+            FirebaseAuth.getInstance()
         }
 
     var mostrarCambiarContrasena by remember {
@@ -77,204 +73,106 @@ fun PantallaPerfil(
 
 
     Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(
-                    NegroTextil
-                )
-                .verticalScroll(
-                    rememberScrollState()
-                )
-                .padding(24.dp)
+        modifier = modifier
+            .fillMaxSize()
+            .background(NegroTextil)
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp)
     ) {
 
-        Spacer(
-            modifier =
-                Modifier.height(30.dp)
-        )
-
+        Spacer(modifier = Modifier.height(30.dp))
 
         Text(
-            text =
-                "MI PERFIL",
-
-            color =
-                TurquesaTextil,
-
-            style =
-                MaterialTheme
-                    .typography
-                    .headlineLarge
+            text = "MI PERFIL",
+            color = TurquesaTextil,
+            style = MaterialTheme.typography.headlineLarge
         )
 
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Spacer(
-            modifier =
-                Modifier.height(24.dp)
-        )
-
-
-        if (
-            cuenta == null
-        ) {
+        if (cuenta == null) {
 
             Text(
-                text =
-                    "Cargando información...",
-
-                color =
-                    BlancoTextil
+                text = "Cargando información...",
+                color = BlancoTextil
             )
 
         } else {
 
-            val usuario =
-                cuenta!!
-
+            val usuario = cuenta!!
 
             TarjetaDatoPerfil(
-                titulo =
-                    "Nombre",
-
-                valor =
-                    usuario.nombre
+                titulo = "Nombre",
+                valor = usuario.nombre
             )
-
 
             TarjetaDatoPerfil(
-                titulo =
-                    "RUT",
-
-                valor =
-                    usuario.rut
+                titulo = "RUT",
+                valor = usuario.rut
             )
-
 
             TarjetaDatoPerfil(
-                titulo =
-                    "Correo",
-
-                valor =
-                    usuario.correo
+                titulo = "Correo",
+                valor = usuario.correo
             )
-
 
             TarjetaDatoPerfil(
-                titulo =
-                    "Edad",
-
-                valor =
-                    usuario.edad
-                        .toString()
+                titulo = "Edad",
+                valor = usuario.edad.toString()
             )
-
 
             TarjetaDatoPerfil(
-                titulo =
-                    "Género",
-
-                valor =
-                    usuario.genero
+                titulo = "Género",
+                valor = usuario.genero
             )
-
 
             TarjetaDatoPerfil(
-                titulo =
-                    "Emprendimiento",
-
-                valor =
-                    usuario.nombreEmprendimiento
+                titulo = "Emprendimiento",
+                valor = usuario.nombreEmprendimiento
             )
-
 
             TarjetaDatoPerfil(
-                titulo =
-                    "Rubro",
-
-                valor =
-                    usuario.rubro
+                titulo = "Rubro",
+                valor = usuario.rubro
             )
-
 
             TarjetaDatoPerfil(
-                titulo =
-                    "Región",
-
-                valor =
-                    usuario.region
+                titulo = "Región",
+                valor = usuario.region
             )
-
 
             TarjetaDatoPerfil(
-                titulo =
-                    "Comuna",
-
-                valor =
-                    usuario.comuna
+                titulo = "Comuna",
+                valor = usuario.comuna
             )
 
-
-            Spacer(
-                modifier =
-                    Modifier.height(20.dp)
-            )
-
+            Spacer(modifier = Modifier.height(20.dp))
 
             Card(
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                colors =
-                    CardDefaults
-                        .cardColors(
-                            containerColor =
-                                TurquesaTextil
-                        )
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = TurquesaTextil
+                )
             ) {
-
                 Column(
-                    modifier =
-                        Modifier.padding(
-                            16.dp
-                        )
+                    modifier = Modifier.padding(16.dp)
                 ) {
-
                     Text(
-                        text =
-                            "Cuenta activa",
-
-                        color =
-                            NegroTextil,
-
-                        style =
-                            MaterialTheme
-                                .typography
-                                .titleMedium
+                        text = "Cuenta activa",
+                        color = NegroTextil,
+                        style = MaterialTheme.typography.titleMedium
                     )
 
-
-                    Spacer(
-                        modifier =
-                            Modifier.height(4.dp)
-                    )
-
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text =
-                            "Tu cuenta se encuentra aprobada.",
-
-                        color =
-                            NegroTextil
+                        text = "Tu cuenta se encuentra aprobada.",
+                        color = NegroTextil
                     )
                 }
             }
 
-
-            Spacer(
-                modifier =
-                    Modifier.height(24.dp)
-            )
+            Spacer(modifier = Modifier.height(24.dp))
 
 
             // =========================
@@ -283,47 +181,25 @@ fun PantallaPerfil(
 
             Button(
                 onClick = {
-
-                    mostrarCambiarContrasena =
-                        true
+                    mostrarCambiarContrasena = true
                 },
-
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-
-                colors =
-                    ButtonDefaults
-                        .buttonColors(
-                            containerColor =
-                                TurquesaTextil,
-
-                            contentColor =
-                                NegroTextil
-                        )
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = TurquesaTextil,
+                    contentColor = NegroTextil
+                )
             ) {
-
                 Icon(
-                    imageVector =
-                        Icons.Default.Lock,
-
-                    contentDescription =
-                        null
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = null
                 )
 
-
-                Text(
-                    text =
-                        "  CAMBIAR CONTRASEÑA"
-                )
+                Text(text = "  CAMBIAR CONTRASEÑA")
             }
 
-
-            Spacer(
-                modifier =
-                    Modifier.height(16.dp)
-            )
+            Spacer(modifier = Modifier.height(16.dp))
 
 
             // =========================
@@ -332,42 +208,23 @@ fun PantallaPerfil(
 
             Button(
                 onClick = {
-
                     onCerrarSesion()
                 },
-
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-
-                colors =
-                    ButtonDefaults
-                        .buttonColors(
-                            containerColor =
-                                RojoErrorTextil,
-
-                            contentColor =
-                                BlancoTextil
-                        )
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = RojoErrorTextil,
+                    contentColor = BlancoTextil
+                )
             ) {
-
                 Text(
-                    text =
-                        "CERRAR SESIÓN",
-
-                    style =
-                        MaterialTheme
-                            .typography
-                            .labelLarge
+                    text = "CERRAR SESIÓN",
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
 
-
-            Spacer(
-                modifier =
-                    Modifier.height(30.dp)
-            )
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 
@@ -376,19 +233,11 @@ fun PantallaPerfil(
     // VENTANA CAMBIAR CONTRASEÑA
     // =========================
 
-    if (
-        mostrarCambiarContrasena
-    ) {
-
+    if (mostrarCambiarContrasena) {
         DialogoCambiarContrasena(
-
-            auth =
-                auth,
-
+            auth = auth,
             onCerrar = {
-
-                mostrarCambiarContrasena =
-                    false
+                mostrarCambiarContrasena = false
             }
         )
     }
@@ -400,61 +249,29 @@ fun TarjetaDatoPerfil(
     titulo: String,
     valor: String
 ) {
-
     Card(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(
-                    bottom = 12.dp
-                ),
-
-        colors =
-            CardDefaults
-                .cardColors(
-                    containerColor =
-                        BlancoTextil
-                )
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = BlancoTextil
+        )
     ) {
-
         Column(
-            modifier =
-                Modifier.padding(
-                    16.dp
-                )
+            modifier = Modifier.padding(16.dp)
         ) {
-
             Text(
-                text =
-                    titulo,
-
-                color =
-                    TurquesaTextil,
-
-                style =
-                    MaterialTheme
-                        .typography
-                        .labelLarge
+                text = titulo,
+                color = TurquesaTextil,
+                style = MaterialTheme.typography.labelLarge
             )
 
-
-            Spacer(
-                modifier =
-                    Modifier.height(6.dp)
-            )
-
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text =
-                    valor,
-
-                color =
-                    NegroTextil,
-
-                style =
-                    MaterialTheme
-                        .typography
-                        .bodyLarge
+                text = valor,
+                color = NegroTextil,
+                style = MaterialTheme.typography.bodyLarge
             )
         }
     }
@@ -493,430 +310,189 @@ fun DialogoCambiarContrasena(
 
 
     AlertDialog(
-
         onDismissRequest = {
-
-            if (
-                !cambiando
-            ) {
-
+            if (!cambiando) {
                 onCerrar()
             }
         },
-
-
         title = {
-
-            Text(
-                text =
-                    "Cambiar contraseña"
-            )
+            Text(text = "Cambiar contraseña")
         },
-
-
         text = {
-
             Column {
-
                 Text(
-                    text =
-                        "Ingresa tu contraseña actual y luego crea una nueva."
+                    text = "Ingresa tu contraseña actual y luego crea una nueva."
                 )
 
-
-                Spacer(
-                    modifier =
-                        Modifier.height(16.dp)
-                )
-
+                Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
-                    value =
-                        contrasenaActual,
-
+                    value = contrasenaActual,
                     onValueChange = {
-
-                        contrasenaActual =
-                            it
-
-                        mensajeError =
-                            null
+                        contrasenaActual = it
+                        mensajeError = null
                     },
-
-                    modifier =
-                        Modifier.fillMaxWidth(),
-
-                    label = {
-
-                        Text(
-                            "Contraseña actual"
-                        )
-                    },
-
-                    visualTransformation =
-                        PasswordVisualTransformation(),
-
-                    singleLine =
-                        true
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Contraseña actual") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true
                 )
 
-
-                Spacer(
-                    modifier =
-                        Modifier.height(12.dp)
-                )
-
+                Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
-                    value =
-                        nuevaContrasena,
-
+                    value = nuevaContrasena,
                     onValueChange = {
-
-                        nuevaContrasena =
-                            it
-
-                        mensajeError =
-                            null
+                        nuevaContrasena = it
+                        mensajeError = null
                     },
-
-                    modifier =
-                        Modifier.fillMaxWidth(),
-
-                    label = {
-
-                        Text(
-                            "Nueva contraseña"
-                        )
-                    },
-
-                    visualTransformation =
-                        PasswordVisualTransformation(),
-
-                    singleLine =
-                        true
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Nueva contraseña") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true
                 )
 
-
-                Spacer(
-                    modifier =
-                        Modifier.height(12.dp)
-                )
-
+                Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
-                    value =
-                        confirmarContrasena,
-
+                    value = confirmarContrasena,
                     onValueChange = {
-
-                        confirmarContrasena =
-                            it
-
-                        mensajeError =
-                            null
+                        confirmarContrasena = it
+                        mensajeError = null
                     },
-
-                    modifier =
-                        Modifier.fillMaxWidth(),
-
-                    label = {
-
-                        Text(
-                            "Confirmar nueva contraseña"
-                        )
-                    },
-
-                    visualTransformation =
-                        PasswordVisualTransformation(),
-
-                    singleLine =
-                        true
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Confirmar nueva contraseña") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true
                 )
 
+                mensajeError?.let {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = it,
+                        color = RojoErrorTextil
+                    )
+                }
 
-                mensajeError
-                    ?.let {
-
-                        Spacer(
-                            modifier =
-                                Modifier.height(12.dp)
-                        )
-
-
-                        Text(
-                            text =
-                                it,
-
-                            color =
-                                RojoErrorTextil
-                        )
-                    }
-
-
-                mensajeExito
-                    ?.let {
-
-                        Spacer(
-                            modifier =
-                                Modifier.height(12.dp)
-                        )
-
-
-                        Text(
-                            text =
-                                it,
-
-                            color =
-                                TurquesaTextil
-                        )
-                    }
+                mensajeExito?.let {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = it,
+                        color = TurquesaTextil
+                    )
+                }
             }
         },
-
-
         confirmButton = {
-
             TextButton(
-                enabled =
-                    !cambiando,
-
+                enabled = !cambiando,
                 onClick = {
-
-                    mensajeError =
-                        null
-
-                    mensajeExito =
-                        null
-
+                    mensajeError = null
+                    mensajeExito = null
 
                     if (
                         contrasenaActual.isBlank() ||
                         nuevaContrasena.isBlank() ||
                         confirmarContrasena.isBlank()
                     ) {
-
-                        mensajeError =
-                            "Debes completar todos los campos"
-
+                        mensajeError = "Debes completar todos los campos"
                         return@TextButton
                     }
 
-
-                    if (
-                        nuevaContrasena.length <
-                        7
-                    ) {
-
+                    if (nuevaContrasena.length < 7) {
                         mensajeError =
                             "La nueva contraseña debe tener al menos 7 caracteres"
-
                         return@TextButton
                     }
 
-
-                    if (
-                        !nuevaContrasena.any {
-                            it.isLetter()
-                        }
-                    ) {
-
+                    if (!nuevaContrasena.any { it.isLetter() }) {
                         mensajeError =
                             "La nueva contraseña debe contener una letra"
-
                         return@TextButton
                     }
 
-
-                    if (
-                        !nuevaContrasena.any {
-                            it.isDigit()
-                        }
-                    ) {
-
+                    if (!nuevaContrasena.any { it.isDigit() }) {
                         mensajeError =
                             "La nueva contraseña debe contener un número"
-
                         return@TextButton
                     }
 
-
-                    if (
-                        nuevaContrasena.all {
-                            it.isLetterOrDigit()
-                        }
-                    ) {
-
+                    if (nuevaContrasena.all { it.isLetterOrDigit() }) {
                         mensajeError =
                             "La nueva contraseña debe contener un carácter especial"
-
                         return@TextButton
                     }
 
-
-                    if (
-                        nuevaContrasena !=
-                        confirmarContrasena
-                    ) {
-
-                        mensajeError =
-                            "Las contraseñas no coinciden"
-
+                    if (nuevaContrasena != confirmarContrasena) {
+                        mensajeError = "Las contraseñas no coinciden"
                         return@TextButton
                     }
 
-
-                    if (
-                        nuevaContrasena ==
-                        contrasenaActual
-                    ) {
-
+                    if (nuevaContrasena == contrasenaActual) {
                         mensajeError =
                             "La nueva contraseña debe ser diferente a la actual"
-
                         return@TextButton
                     }
 
+                    val usuario = auth.currentUser
+                    val correo = usuario?.email
 
-                    val usuario =
-                        auth.currentUser
-
-
-                    val correo =
-                        usuario?.email
-
-
-                    if (
-                        usuario == null ||
-                        correo == null
-                    ) {
-
-                        mensajeError =
-                            "No se encontró la sesión del usuario"
-
+                    if (usuario == null || correo == null) {
+                        mensajeError = "No se encontró la sesión del usuario"
                         return@TextButton
                     }
 
-
-                    cambiando =
-                        true
-
+                    cambiando = true
 
                     val credencial =
-                        EmailAuthProvider
-                            .getCredential(
-                                correo,
-                                contrasenaActual
-                            )
-
+                        EmailAuthProvider.getCredential(
+                            correo,
+                            contrasenaActual
+                        )
 
                     usuario
-                        .reauthenticate(
-                            credencial
-                        )
-                        .addOnCompleteListener {
-                                reauthTask ->
-
-
-                            if (
-                                reauthTask
-                                    .isSuccessful
-                            ) {
-
-
+                        .reauthenticate(credencial)
+                        .addOnCompleteListener { reauthTask ->
+                            if (reauthTask.isSuccessful) {
                                 usuario
-                                    .updatePassword(
-                                        nuevaContrasena
-                                    )
-                                    .addOnCompleteListener {
-                                            actualizarTask ->
+                                    .updatePassword(nuevaContrasena)
+                                    .addOnCompleteListener { actualizarTask ->
+                                        cambiando = false
 
-
-                                        cambiando =
-                                            false
-
-
-                                        if (
-                                            actualizarTask
-                                                .isSuccessful
-                                        ) {
-
-                                            contrasenaActual =
-                                                ""
-
-                                            nuevaContrasena =
-                                                ""
-
-                                            confirmarContrasena =
-                                                ""
-
-
+                                        if (actualizarTask.isSuccessful) {
+                                            contrasenaActual = ""
+                                            nuevaContrasena = ""
+                                            confirmarContrasena = ""
                                             mensajeExito =
                                                 "Contraseña actualizada correctamente"
-
-
                                         } else {
-
                                             mensajeError =
                                                 "No se pudo actualizar la contraseña. Inténtalo nuevamente."
                                         }
                                     }
-
-
                             } else {
-
-                                cambiando =
-                                    false
-
-
+                                cambiando = false
                                 mensajeError =
-                                    if (
-                                        reauthTask.exception
-                                                is FirebaseAuthInvalidCredentialsException
-                                    ) {
-
+                                    if (reauthTask.exception is FirebaseAuthInvalidCredentialsException) {
                                         "La contraseña actual es incorrecta"
-
                                     } else {
-
                                         "No se pudo verificar tu contraseña actual"
                                     }
                             }
                         }
                 }
             ) {
-
                 Text(
-                    text =
-                        if (
-                            cambiando
-                        ) {
-
-                            "GUARDANDO..."
-
-                        } else {
-
-                            "GUARDAR"
-                        }
+                    text = if (cambiando) "GUARDANDO..." else "GUARDAR"
                 )
             }
         },
-
-
         dismissButton = {
-
             TextButton(
-                enabled =
-                    !cambiando,
-
-                onClick =
-                    onCerrar
+                enabled = !cambiando,
+                onClick = onCerrar
             ) {
-
-                Text(
-                    text =
-                        "CANCELAR"
-                )
+                Text(text = "CANCELAR")
             }
         }
     )

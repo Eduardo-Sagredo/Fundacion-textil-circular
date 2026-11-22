@@ -9,6 +9,8 @@ data class ProductoEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
+    val remoteId: Long? = null,
+
     val nombre: String,
 
     val descripcion: String,
@@ -27,5 +29,7 @@ data class ProductoEntity(
     val estado: String = "DISPONIBLE",
 
     val fechaCreacion: Long =
-        System.currentTimeMillis()
+        System.currentTimeMillis(),
+
+    val accionPendiente: String? = null
 )
