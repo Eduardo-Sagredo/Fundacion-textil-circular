@@ -22,6 +22,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,15 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.fundaciontextilcircular.data.local.TextilDatabase
-import com.example.fundaciontextilcircular.ui.theme.BlancoTextil
-import com.example.fundaciontextilcircular.ui.theme.NegroTextil
-import com.example.fundaciontextilcircular.ui.theme.RojoErrorTextil
-import com.example.fundaciontextilcircular.ui.theme.TurquesaTextil
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.fundaciontextilcircular.data.remote.RetrofitClient
+import com.example.fundaciontextilcircular.data.repository.AuthRepository
+import com.example.fundaciontextilcircular.data.utils.NetworkMonitor
+import com.example.fundaciontextilcircular.ui.theme.SelectorTema
 import com.example.fundaciontextilcircular.ui.viewmodel.ProductoViewModel
-import com.google.firebase.auth.EmailAuthProvider
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.example.fundaciontextilcircular.viewmodel.PerfilViewModel
+import com.example.fundaciontextilcircular.viewmodel.PerfilViewModelFactory
 
 @Composable
 fun PantallaPerfil(
@@ -51,31 +51,57 @@ fun PantallaPerfil(
 
     val context = LocalContext.current
 
-    val dao =
-        remember(context) {
-            TextilDatabase
-                .getDatabase(context)
-                .emprendedoraDao()
-        }
+    // =========================================
+    // RED
+    // =========================================
 
-    val cuenta by dao
-        .observarPorCorreo(correo)
-        .collectAsState(initial = null)
+    val networkMonitor = remember {
+        NetworkMonitor(context.applicationContext)
+    }
 
-    val auth =
-        remember {
-            FirebaseAuth.getInstance()
-        }
+    val isOnline by networkMonitor
+        .isOnline
+        .collectAsState(initial = true)
+
+    // =========================================
+    // REPOSITORY
+    // =========================================
+
+    val authRepository = remember {
+        AuthRepository(RetrofitClient.authApi)
+    }
+
+    // =========================================
+    // VIEWMODEL
+    // =========================================
+
+    val perfilViewModel: PerfilViewModel = viewModel(
+        factory = PerfilViewModelFactory(authRepository)
+    )
+
+    val uiState = perfilViewModel.uiState
 
     var mostrarCambiarContrasena by remember {
         mutableStateOf(false)
     }
 
+    // =========================================
+    // CARGAR PERFIL
+    // =========================================
+
+    LaunchedEffect(correo, isOnline) {
+        if (isOnline && uiState.perfil == null) {
+            perfilViewModel.cargarPerfil(
+                correo = correo,
+                isOnline = true
+            )
+        }
+    }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(NegroTextil)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(24.dp)
     ) {
@@ -84,22 +110,86 @@ fun PantallaPerfil(
 
         Text(
             text = "MI PERFIL",
-            color = TurquesaTextil,
+            color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.headlineLarge
         )
 
+        Spacer(modifier = Modifier.height(18.dp))
+
+        // =====================================
+        // SELECTOR MODO CLARO / OSCURO
+        // =====================================
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(
+                    horizontal = 16.dp,
+                    vertical = 4.dp
+                )
+            ) {
+                Text(
+                    text = "APARIENCIA",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelLarge
+                )
+
+                SelectorTema()
+            }
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (cuenta == null) {
+        // =====================================
+        // CARGANDO
+        // =====================================
 
+        if (uiState.cargando && uiState.perfil == null) {
             Text(
                 text = "Cargando información...",
-                color = BlancoTextil
+                color = MaterialTheme.colorScheme.onBackground
             )
+        }
 
-        } else {
+        // =====================================
+        // ERROR
+        // =====================================
 
-            val usuario = cuenta!!
+        uiState.error
+            ?.takeIf { uiState.perfil == null }
+            ?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        perfilViewModel.cargarPerfil(
+                            correo = correo,
+                            isOnline = isOnline
+                        )
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Text("REINTENTAR")
+                }
+            }
+
+        // =====================================
+        // PERFIL
+        // =====================================
+
+        uiState.perfil?.let { usuario ->
 
             TarjetaDatoPerfil(
                 titulo = "Nombre",
@@ -148,47 +238,55 @@ fun PantallaPerfil(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // =================================
+            // ESTADO DE LA CUENTA
+            // =================================
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = TurquesaTextil
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "Cuenta activa",
-                        color = NegroTextil,
+                        text = "Estado: ${usuario.estado}",
+                        color = MaterialTheme.colorScheme.onPrimary,
                         style = MaterialTheme.typography.titleMedium
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "Tu cuenta se encuentra aprobada.",
-                        color = NegroTextil
+                        text = if (usuario.estado == "APROBADA") {
+                            "Tu cuenta se encuentra aprobada."
+                        } else {
+                            "Estado actual de tu cuenta: ${usuario.estado}"
+                        },
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-
-            // =========================
+            // =================================
             // CAMBIAR CONTRASEÑA
-            // =========================
+            // =================================
 
             Button(
                 onClick = {
+                    perfilViewModel.limpiarMensajes()
                     mostrarCambiarContrasena = true
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = TurquesaTextil,
-                    contentColor = NegroTextil
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 Icon(
@@ -201,21 +299,18 @@ fun PantallaPerfil(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
-            // =========================
+            // =================================
             // CERRAR SESIÓN
-            // =========================
+            // =================================
 
             Button(
-                onClick = {
-                    onCerrarSesion()
-                },
+                onClick = onCerrarSesion,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = RojoErrorTextil,
-                    contentColor = BlancoTextil
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
                 )
             ) {
                 Text(
@@ -228,21 +323,26 @@ fun PantallaPerfil(
         }
     }
 
-
-    // =========================
-    // VENTANA CAMBIAR CONTRASEÑA
-    // =========================
+    // =========================================
+    // CAMBIAR CONTRASEÑA
+    // =========================================
 
     if (mostrarCambiarContrasena) {
-        DialogoCambiarContrasena(
-            auth = auth,
+        DialogoCambiarContrasenaBackend(
+            correo = correo,
+            isOnline = isOnline,
+            perfilViewModel = perfilViewModel,
             onCerrar = {
+                perfilViewModel.limpiarMensajes()
                 mostrarCambiarContrasena = false
             }
         )
     }
 }
 
+// =========================================
+// TARJETA DATO DEL PERFIL
+// =========================================
 
 @Composable
 fun TarjetaDatoPerfil(
@@ -254,7 +354,7 @@ fun TarjetaDatoPerfil(
             .fillMaxWidth()
             .padding(bottom = 12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = BlancoTextil
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Column(
@@ -262,7 +362,7 @@ fun TarjetaDatoPerfil(
         ) {
             Text(
                 text = titulo,
-                color = TurquesaTextil,
+                color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelLarge
             )
 
@@ -270,19 +370,26 @@ fun TarjetaDatoPerfil(
 
             Text(
                 text = valor,
-                color = NegroTextil,
+                color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyLarge
             )
         }
     }
 }
 
+// =========================================
+// CAMBIAR CONTRASEÑA CON BACKEND
+// =========================================
 
 @Composable
-fun DialogoCambiarContrasena(
-    auth: FirebaseAuth,
+fun DialogoCambiarContrasenaBackend(
+    correo: String,
+    isOnline: Boolean,
+    perfilViewModel: PerfilViewModel,
     onCerrar: () -> Unit
 ) {
+
+    val uiState = perfilViewModel.uiState
 
     var contrasenaActual by remember {
         mutableStateOf("")
@@ -296,25 +403,15 @@ fun DialogoCambiarContrasena(
         mutableStateOf("")
     }
 
-    var mensajeError by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var mensajeExito by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var cambiando by remember {
-        mutableStateOf(false)
-    }
-
-
     AlertDialog(
         onDismissRequest = {
-            if (!cambiando) {
+            if (!uiState.cambiandoContrasena) {
                 onCerrar()
             }
         },
+        containerColor = MaterialTheme.colorScheme.surface,
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurface,
         title = {
             Text(text = "Cambiar contraseña")
         },
@@ -330,10 +427,12 @@ fun DialogoCambiarContrasena(
                     value = contrasenaActual,
                     onValueChange = {
                         contrasenaActual = it
-                        mensajeError = null
+                        perfilViewModel.limpiarMensajes()
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Contraseña actual") },
+                    label = {
+                        Text("Contraseña actual")
+                    },
                     visualTransformation = PasswordVisualTransformation(),
                     singleLine = true
                 )
@@ -344,10 +443,12 @@ fun DialogoCambiarContrasena(
                     value = nuevaContrasena,
                     onValueChange = {
                         nuevaContrasena = it
-                        mensajeError = null
+                        perfilViewModel.limpiarMensajes()
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Nueva contraseña") },
+                    label = {
+                        Text("Nueva contraseña")
+                    },
                     visualTransformation = PasswordVisualTransformation(),
                     singleLine = true
                 )
@@ -358,141 +459,69 @@ fun DialogoCambiarContrasena(
                     value = confirmarContrasena,
                     onValueChange = {
                         confirmarContrasena = it
-                        mensajeError = null
+                        perfilViewModel.limpiarMensajes()
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Confirmar nueva contraseña") },
+                    label = {
+                        Text("Confirmar nueva contraseña")
+                    },
                     visualTransformation = PasswordVisualTransformation(),
                     singleLine = true
                 )
 
-                mensajeError?.let {
+                uiState.error?.let {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = it,
-                        color = RojoErrorTextil
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
 
-                mensajeExito?.let {
+                uiState.mensaje?.let {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = it,
-                        color = TurquesaTextil
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
         },
         confirmButton = {
-            TextButton(
-                enabled = !cambiando,
-                onClick = {
-                    mensajeError = null
-                    mensajeExito = null
-
-                    if (
-                        contrasenaActual.isBlank() ||
-                        nuevaContrasena.isBlank() ||
-                        confirmarContrasena.isBlank()
-                    ) {
-                        mensajeError = "Debes completar todos los campos"
-                        return@TextButton
-                    }
-
-                    if (nuevaContrasena.length < 7) {
-                        mensajeError =
-                            "La nueva contraseña debe tener al menos 7 caracteres"
-                        return@TextButton
-                    }
-
-                    if (!nuevaContrasena.any { it.isLetter() }) {
-                        mensajeError =
-                            "La nueva contraseña debe contener una letra"
-                        return@TextButton
-                    }
-
-                    if (!nuevaContrasena.any { it.isDigit() }) {
-                        mensajeError =
-                            "La nueva contraseña debe contener un número"
-                        return@TextButton
-                    }
-
-                    if (nuevaContrasena.all { it.isLetterOrDigit() }) {
-                        mensajeError =
-                            "La nueva contraseña debe contener un carácter especial"
-                        return@TextButton
-                    }
-
-                    if (nuevaContrasena != confirmarContrasena) {
-                        mensajeError = "Las contraseñas no coinciden"
-                        return@TextButton
-                    }
-
-                    if (nuevaContrasena == contrasenaActual) {
-                        mensajeError =
-                            "La nueva contraseña debe ser diferente a la actual"
-                        return@TextButton
-                    }
-
-                    val usuario = auth.currentUser
-                    val correo = usuario?.email
-
-                    if (usuario == null || correo == null) {
-                        mensajeError = "No se encontró la sesión del usuario"
-                        return@TextButton
-                    }
-
-                    cambiando = true
-
-                    val credencial =
-                        EmailAuthProvider.getCredential(
-                            correo,
-                            contrasenaActual
-                        )
-
-                    usuario
-                        .reauthenticate(credencial)
-                        .addOnCompleteListener { reauthTask ->
-                            if (reauthTask.isSuccessful) {
-                                usuario
-                                    .updatePassword(nuevaContrasena)
-                                    .addOnCompleteListener { actualizarTask ->
-                                        cambiando = false
-
-                                        if (actualizarTask.isSuccessful) {
-                                            contrasenaActual = ""
-                                            nuevaContrasena = ""
-                                            confirmarContrasena = ""
-                                            mensajeExito =
-                                                "Contraseña actualizada correctamente"
-                                        } else {
-                                            mensajeError =
-                                                "No se pudo actualizar la contraseña. Inténtalo nuevamente."
-                                        }
-                                    }
-                            } else {
-                                cambiando = false
-                                mensajeError =
-                                    if (reauthTask.exception is FirebaseAuthInvalidCredentialsException) {
-                                        "La contraseña actual es incorrecta"
-                                    } else {
-                                        "No se pudo verificar tu contraseña actual"
-                                    }
-                            }
-                        }
+            if (uiState.mensaje != null) {
+                TextButton(onClick = onCerrar) {
+                    Text("CERRAR")
                 }
-            ) {
-                Text(
-                    text = if (cambiando) "GUARDANDO..." else "GUARDAR"
-                )
+            } else {
+                TextButton(
+                    enabled = !uiState.cambiandoContrasena,
+                    onClick = {
+                        perfilViewModel.cambiarContrasena(
+                            correo = correo,
+                            contrasenaActual = contrasenaActual,
+                            nuevaContrasena = nuevaContrasena,
+                            confirmarContrasena = confirmarContrasena,
+                            isOnline = isOnline
+                        )
+                    }
+                ) {
+                    Text(
+                        if (uiState.cambiandoContrasena) {
+                            "CAMBIANDO..."
+                        } else {
+                            "CAMBIAR"
+                        }
+                    )
+                }
             }
         },
         dismissButton = {
-            TextButton(
-                enabled = !cambiando,
-                onClick = onCerrar
-            ) {
-                Text(text = "CANCELAR")
+            if (uiState.mensaje == null) {
+                TextButton(
+                    enabled = !uiState.cambiandoContrasena,
+                    onClick = onCerrar
+                ) {
+                    Text("CANCELAR")
+                }
             }
         }
     )

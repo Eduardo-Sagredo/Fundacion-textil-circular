@@ -1,18 +1,12 @@
 package com.example.fundaciontextilcircular.view
 
 import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
-import androidx.compose.material3.AlertDialog
-import androidx.compose.runtime.DisposableEffect
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,6 +26,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -45,11 +40,12 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,55 +57,77 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.fundaciontextilcircular.data.local.TextilDatabase
-import com.example.fundaciontextilcircular.data.local.entities.EmprendedoraEntity
+import com.example.fundaciontextilcircular.data.remote.RetrofitClient
+import com.example.fundaciontextilcircular.data.repository.AuthRepository
 import com.example.fundaciontextilcircular.data.utils.LocationHelper.obtenerUbicacionSugerida
+import com.example.fundaciontextilcircular.data.utils.NetworkMonitor
 import com.example.fundaciontextilcircular.ui.theme.BlancoTextil
 import com.example.fundaciontextilcircular.ui.theme.NegroTextil
 import com.example.fundaciontextilcircular.ui.theme.RojoErrorTextil
 import com.example.fundaciontextilcircular.ui.theme.TurquesaTextil
 import com.example.fundaciontextilcircular.viewmodel.RegistroViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.google.firebase.auth.FirebaseAuthWeakPasswordException
-import kotlinx.coroutines.launch
+import com.example.fundaciontextilcircular.viewmodel.RegistroViewModelFactory
+
 
 @Composable
 fun PantallaRegistro(
     modifier: Modifier = Modifier,
     onRegistrar: (String) -> Unit = {},
-    onVolver: () -> Unit = {},
-    registroViewModel: RegistroViewModel = viewModel()
+    onVolver: () -> Unit = {}
 ) {
 
-    val context = LocalContext.current
+    val context =
+        LocalContext.current
 
-    val scope =
-        rememberCoroutineScope()
 
-    val dao =
-        remember(context) {
-
-            TextilDatabase
-                .getDatabase(context)
-                .emprendedoraDao()
-        }
-
-    val auth =
+    val networkMonitor =
         remember {
 
-            FirebaseAuth.getInstance()
+            NetworkMonitor(
+                context.applicationContext
+            )
         }
+
+
+    val isOnline by
+    networkMonitor
+        .isOnline
+        .collectAsState(
+            initial = true
+        )
+
+
+    val authRepository =
+        remember {
+
+            AuthRepository(
+                RetrofitClient.authApi
+            )
+        }
+
+
+    val registroViewModel:
+            RegistroViewModel =
+        viewModel(
+
+            factory =
+                RegistroViewModelFactory(
+                    authRepository
+                )
+        )
+
+
+    val uiState =
+        registroViewModel.uiState
 
 
     var errorRegistro by remember {
         mutableStateOf<String?>(null)
-    }
-
-    var registrando by remember {
-        mutableStateOf(false)
     }
 
 
@@ -117,76 +135,90 @@ fun PantallaRegistro(
         mutableStateOf("")
     }
 
+
     var rut by remember {
         mutableStateOf("")
     }
+
 
     var correo by remember {
         mutableStateOf("")
     }
 
+
     var contrasena by remember {
         mutableStateOf("")
     }
+
 
     var confirmarContrasena by remember {
         mutableStateOf("")
     }
 
+
     var nombreEmprendimiento by remember {
         mutableStateOf("")
     }
+
 
     var rubro by remember {
         mutableStateOf("")
     }
 
+
     var edad by remember {
         mutableStateOf("")
     }
+
 
     var genero by remember {
         mutableStateOf("")
     }
 
+
     var mostrarContrasena by remember {
         mutableStateOf(false)
     }
+
 
     var mostrarConfirmarContrasena by remember {
         mutableStateOf(false)
     }
 
-    var menuRegionAbierto by remember {
-        mutableStateOf(false)
-    }
-
-    var busquedaRegion by remember {
-        mutableStateOf("")
-    }
-
-    var menuComunaAbierto by remember {
-        mutableStateOf(false)
-    }
-
-    var busquedaComuna by remember {
-        mutableStateOf("")
-    }
 
     var menuGeneroAbierto by remember {
         mutableStateOf(false)
     }
 
+
     var intentoRegistro by remember {
         mutableStateOf(false)
     }
 
-    var regionGps by remember { mutableStateOf("") }
-    var comunaGps by remember { mutableStateOf("") }
-    var mostrarDialogoAjustes by remember { mutableStateOf(false) }
-    var estaBuscandoUbicacion by remember { mutableStateOf(true) }
-    var errorUbicacion by remember { mutableStateOf<String?>(null) }
 
+    var regionGps by remember {
+        mutableStateOf("")
+    }
+
+
+    var comunaGps by remember {
+        mutableStateOf("")
+    }
+
+
+    var mostrarDialogoAjustes by remember {
+        mutableStateOf(false)
+    }
+
+
+    var estaBuscandoUbicacion by remember {
+        mutableStateOf(true)
+    }
+
+
+    var errorUbicacion by remember {
+        mutableStateOf<String?>(null)
+    }
 
 
     val opcionesGenero =
@@ -197,152 +229,442 @@ fun PantallaRegistro(
             "Prefiero no responder"
         )
 
-    if (mostrarDialogoAjustes) {
+
+    LaunchedEffect(
+        uiState.resultado
+    ) {
+
+        val resultado =
+            uiState.resultado
+                ?: return@LaunchedEffect
+
+
+        errorRegistro =
+            null
+
+
+        onRegistrar(
+            resultado.correo
+        )
+
+
+        registroViewModel
+            .limpiarResultado()
+    }
+
+
+    if (
+        mostrarDialogoAjustes
+    ) {
+
         AlertDialog(
-            onDismissRequest = { mostrarDialogoAjustes = false },
-            title = {
-                Text("Permiso obligatorio", color = TurquesaTextil)
+
+            onDismissRequest = {
+
+                mostrarDialogoAjustes =
+                    false
             },
-            text = {
+
+            title = {
+
                 Text(
-                    "Para poder registrarte necesitamos acceder a tu ubicación. Por favor, actívala en los ajustes de la aplicación.",
-                    color = BlancoTextil
+                    text =
+                        "Permiso obligatorio",
+
+                    color =
+                        TurquesaTextil
                 )
             },
+
+            text = {
+
+                Text(
+                    text =
+                        "Para poder registrarte necesitamos acceder a tu ubicación. Por favor, actívala en los ajustes de la aplicación.",
+
+                    color =
+                        BlancoTextil
+                )
+            },
+
             confirmButton = {
+
                 TextButton(
                     onClick = {
-                        mostrarDialogoAjustes = false
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                            data = Uri.fromParts("package", context.packageName, null)
-                        }
-                        context.startActivity(intent)
+
+                        mostrarDialogoAjustes =
+                            false
+
+
+                        val intent =
+                            Intent(
+                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                            ).apply {
+
+                                data =
+                                    Uri.fromParts(
+                                        "package",
+                                        context.packageName,
+                                        null
+                                    )
+                            }
+
+
+                        context.startActivity(
+                            intent
+                        )
                     }
                 ) {
-                    Text("Acceder a ajustes", color = TurquesaTextil)
+
+                    Text(
+                        text =
+                            "Acceder a ajustes",
+
+                        color =
+                            TurquesaTextil
+                    )
                 }
             },
+
             dismissButton = {
-                TextButton(onClick = { mostrarDialogoAjustes = false }) {
-                    Text("Cancelar", color = Color.Gray)
+
+                TextButton(
+                    onClick = {
+
+                        mostrarDialogoAjustes =
+                            false
+                    }
+                ) {
+
+                    Text(
+                        text =
+                            "Cancelar",
+
+                        color =
+                            Color.Gray
+                    )
                 }
             },
-            containerColor = NegroTextil
+
+            containerColor =
+                NegroTextil
         )
     }
 
-    val lanzadorPermisos = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { permisos ->
-            val permisoOtorgado = permisos[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-                    permisos[Manifest.permission.ACCESS_COARSE_LOCATION] == true
 
-            if (permisoOtorgado) {
-                obtenerUbicacionSugerida(
-                    context = context,
-                    onResultado = { comunaEncontrada, regionEncontrada ->
-                        comunaGps = comunaEncontrada
-                        regionGps = regionEncontrada
-                        estaBuscandoUbicacion = false
-                    },
-                    onError = { mensaje ->
-                        errorUbicacion = mensaje
-                        estaBuscandoUbicacion = false
-                    }
-                )
-            } else {
-                errorUbicacion = "Permiso de ubicación denegado"
-                estaBuscandoUbicacion = false
-                mostrarDialogoAjustes = true
-            }
-        }
-    )
+    val lanzadorPermisos =
+        rememberLauncherForActivityResult(
 
-    LaunchedEffect(Unit) {
-        estaBuscandoUbicacion = true
-        errorUbicacion = null
+            contract =
+                ActivityResultContracts
+                    .RequestMultiplePermissions(),
 
-        val tienePermisoFino = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val tienePermisoGrueso = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            onResult = {
+                    permisos ->
 
-        if (tienePermisoFino || tienePermisoGrueso) {
-            obtenerUbicacionSugerida(
-                context = context,
-                onResultado = { comunaEncontrada, regionEncontrada ->
-                    comunaGps = comunaEncontrada
-                    regionGps = regionEncontrada
-                    estaBuscandoUbicacion = false
-                },
-                onError = { mensaje ->
-                    errorUbicacion = mensaje
-                    estaBuscandoUbicacion = false
-                }
-            )
-        } else {
-            lanzadorPermisos.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
-        }
-    }
 
-    val cicloDeVida = LocalLifecycleOwner.current
+                val permisoOtorgado =
 
-    DisposableEffect(cicloDeVida) {
-        val observador = LifecycleEventObserver { _, evento ->
-            if (evento == Lifecycle.Event.ON_RESUME) {
+                    permisos[
+                        Manifest.permission
+                            .ACCESS_FINE_LOCATION
+                    ] == true ||
 
-                val tienePermisoFino = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                val tienePermisoGrueso = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                            permisos[
+                                Manifest.permission
+                                    .ACCESS_COARSE_LOCATION
+                            ] == true
 
-                if (tienePermisoFino || tienePermisoGrueso) {
-                    estaBuscandoUbicacion = true
-                    errorUbicacion = null
+
+                if (
+                    permisoOtorgado
+                ) {
 
                     obtenerUbicacionSugerida(
-                        context = context,
-                        onResultado = { comunaEncontrada, regionEncontrada ->
-                            comunaGps = comunaEncontrada
-                            regionGps = regionEncontrada
-                            estaBuscandoUbicacion = false
+
+                        context =
+                            context,
+
+                        onResultado = {
+                                comunaEncontrada,
+                                regionEncontrada ->
+
+
+                            comunaGps =
+                                comunaEncontrada
+
+                            regionGps =
+                                regionEncontrada
+
+                            estaBuscandoUbicacion =
+                                false
                         },
-                        onError = { mensaje ->
-                            errorUbicacion = mensaje
-                            estaBuscandoUbicacion = false
+
+                        onError = {
+                                mensaje ->
+
+                            errorUbicacion =
+                                mensaje
+
+                            estaBuscandoUbicacion =
+                                false
                         }
                     )
+
+                } else {
+
+                    errorUbicacion =
+                        "Permiso de ubicación denegado"
+
+                    estaBuscandoUbicacion =
+                        false
+
+                    mostrarDialogoAjustes =
+                        true
                 }
             }
-        }
+        )
 
-        cicloDeVida.lifecycle.addObserver(observador)
 
-        onDispose {
-            cicloDeVida.lifecycle.removeObserver(observador)
+    LaunchedEffect(
+        Unit
+    ) {
+
+        estaBuscandoUbicacion =
+            true
+
+        errorUbicacion =
+            null
+
+
+        val tienePermisoFino =
+
+            ContextCompat
+                .checkSelfPermission(
+                    context,
+                    Manifest.permission
+                        .ACCESS_FINE_LOCATION
+                ) ==
+                    PackageManager
+                        .PERMISSION_GRANTED
+
+
+        val tienePermisoGrueso =
+
+            ContextCompat
+                .checkSelfPermission(
+                    context,
+                    Manifest.permission
+                        .ACCESS_COARSE_LOCATION
+                ) ==
+                    PackageManager
+                        .PERMISSION_GRANTED
+
+
+        if (
+            tienePermisoFino ||
+            tienePermisoGrueso
+        ) {
+
+            obtenerUbicacionSugerida(
+
+                context =
+                    context,
+
+                onResultado = {
+                        comunaEncontrada,
+                        regionEncontrada ->
+
+
+                    comunaGps =
+                        comunaEncontrada
+
+                    regionGps =
+                        regionEncontrada
+
+                    estaBuscandoUbicacion =
+                        false
+                },
+
+                onError = {
+                        mensaje ->
+
+                    errorUbicacion =
+                        mensaje
+
+                    estaBuscandoUbicacion =
+                        false
+                }
+            )
+
+        } else {
+
+            lanzadorPermisos
+                .launch(
+
+                    arrayOf(
+
+                        Manifest.permission
+                            .ACCESS_FINE_LOCATION,
+
+                        Manifest.permission
+                            .ACCESS_COARSE_LOCATION
+                    )
+                )
         }
     }
+
+
+    val cicloDeVida =
+        LocalLifecycleOwner.current
+
+
+    DisposableEffect(
+        cicloDeVida
+    ) {
+
+        val observador =
+
+            LifecycleEventObserver {
+                    _,
+                    evento ->
+
+
+                if (
+                    evento ==
+                    Lifecycle.Event.ON_RESUME
+                ) {
+
+                    val tienePermisoFino =
+
+                        ContextCompat
+                            .checkSelfPermission(
+                                context,
+                                Manifest.permission
+                                    .ACCESS_FINE_LOCATION
+                            ) ==
+                                PackageManager
+                                    .PERMISSION_GRANTED
+
+
+                    val tienePermisoGrueso =
+
+                        ContextCompat
+                            .checkSelfPermission(
+                                context,
+                                Manifest.permission
+                                    .ACCESS_COARSE_LOCATION
+                            ) ==
+                                PackageManager
+                                    .PERMISSION_GRANTED
+
+
+                    if (
+                        tienePermisoFino ||
+                        tienePermisoGrueso
+                    ) {
+
+                        estaBuscandoUbicacion =
+                            true
+
+                        errorUbicacion =
+                            null
+
+
+                        obtenerUbicacionSugerida(
+
+                            context =
+                                context,
+
+                            onResultado = {
+                                    comunaEncontrada,
+                                    regionEncontrada ->
+
+
+                                comunaGps =
+                                    comunaEncontrada
+
+                                regionGps =
+                                    regionEncontrada
+
+                                estaBuscandoUbicacion =
+                                    false
+                            },
+
+                            onError = {
+                                    mensaje ->
+
+                                errorUbicacion =
+                                    mensaje
+
+                                estaBuscandoUbicacion =
+                                    false
+                            }
+                        )
+                    }
+                }
+            }
+
+
+        cicloDeVida
+            .lifecycle
+            .addObserver(
+                observador
+            )
+
+
+        onDispose {
+
+            cicloDeVida
+                .lifecycle
+                .removeObserver(
+                    observador
+                )
+        }
+    }
+
 
     fun validarNuevamente() {
 
-        if (intentoRegistro) {
+        if (
+            intentoRegistro
+        ) {
 
             registroViewModel
                 .validarFormulario(
-                    nombre = nombre,
-                    rut = rut,
-                    correo = correo,
-                    contrasena = contrasena,
+
+                    nombre =
+                        nombre,
+
+                    rut =
+                        rut,
+
+                    correo =
+                        correo,
+
+                    contrasena =
+                        contrasena,
+
                     confirmarContrasena =
                         confirmarContrasena,
+
                     nombreEmprendimiento =
                         nombreEmprendimiento,
-                    rubro = rubro,
-                    region = regionGps,
-                    comuna = comunaGps,
-                    edad = edad,
-                    genero = genero
+
+                    rubro =
+                        rubro,
+
+                    region =
+                        regionGps,
+
+                    comuna =
+                        comunaGps,
+
+                    edad =
+                        edad,
+
+                    genero =
+                        genero
                 )
         }
     }
@@ -352,22 +674,32 @@ fun PantallaRegistro(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(NegroTextil)
+                .background(
+                    NegroTextil
+                )
                 .verticalScroll(
                     rememberScrollState()
                 )
-                .padding(24.dp)
+                .padding(
+                    24.dp
+                )
     ) {
 
         Spacer(
             modifier =
-                Modifier.height(50.dp)
+                Modifier.height(
+                    50.dp
+                )
         )
 
 
         Text(
-            text = "CREAR",
-            color = BlancoTextil,
+            text =
+                "CREAR",
+
+            color =
+                BlancoTextil,
+
             style =
                 MaterialTheme
                     .typography
@@ -376,8 +708,12 @@ fun PantallaRegistro(
 
 
         Text(
-            text = "CUENTA",
-            color = TurquesaTextil,
+            text =
+                "CUENTA",
+
+            color =
+                TurquesaTextil,
+
             style =
                 MaterialTheme
                     .typography
@@ -387,14 +723,19 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(16.dp)
+                Modifier.height(
+                    16.dp
+                )
         )
 
 
         Text(
             text =
                 "Completa tus datos para formar parte de la comunidad Textil Circular.",
-            color = BlancoTextil,
+
+            color =
+                BlancoTextil,
+
             style =
                 MaterialTheme
                     .typography
@@ -404,19 +745,19 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(32.dp)
+                Modifier.height(
+                    32.dp
+                )
         )
 
-
-        // =========================
-        // DATOS PERSONALES
-        // =========================
 
         Text(
             text =
                 "Datos personales",
+
             color =
                 TurquesaTextil,
+
             style =
                 MaterialTheme
                     .typography
@@ -426,13 +767,14 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(16.dp)
+                Modifier.height(
+                    16.dp
+                )
         )
 
 
-        // NOMBRE
-
         CampoRegistro(
+
             valor =
                 nombre,
 
@@ -443,6 +785,9 @@ fun PantallaRegistro(
 
                 errorRegistro =
                     null
+
+                registroViewModel
+                    .limpiarError()
 
                 validarNuevamente()
             },
@@ -458,18 +803,20 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(16.dp)
+                Modifier.height(
+                    16.dp
+                )
         )
 
 
-        // RUT
-
         OutlinedTextField(
+
             value =
                 rut,
 
             onValueChange = {
                     nuevoValor ->
+
 
                 rut =
                     nuevoValor
@@ -479,21 +826,28 @@ fun PantallaRegistro(
                             it.isDigit() ||
                                     it == 'K'
                         }
-                        .take(9)
+                        .take(
+                            9
+                        )
+
 
                 errorRegistro =
                     null
+
+                registroViewModel
+                    .limpiarError()
 
                 validarNuevamente()
             },
 
             modifier =
-                Modifier
-                    .fillMaxWidth(),
+                Modifier.fillMaxWidth(),
 
             label = {
 
-                Text("RUT")
+                Text(
+                    "RUT"
+                )
             },
 
             leadingIcon = {
@@ -543,13 +897,14 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(16.dp)
+                Modifier.height(
+                    16.dp
+                )
         )
 
 
-        // CORREO
-
         OutlinedTextField(
+
             value =
                 correo,
 
@@ -561,12 +916,14 @@ fun PantallaRegistro(
                 errorRegistro =
                     null
 
+                registroViewModel
+                    .limpiarError()
+
                 validarNuevamente()
             },
 
             modifier =
-                Modifier
-                    .fillMaxWidth(),
+                Modifier.fillMaxWidth(),
 
             label = {
 
@@ -619,13 +976,14 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(16.dp)
+                Modifier.height(
+                    16.dp
+                )
         )
 
 
-        // CONTRASEÑA
-
         OutlinedTextField(
+
             value =
                 contrasena,
 
@@ -637,12 +995,14 @@ fun PantallaRegistro(
                 errorRegistro =
                     null
 
+                registroViewModel
+                    .limpiarError()
+
                 validarNuevamente()
             },
 
             modifier =
-                Modifier
-                    .fillMaxWidth(),
+                Modifier.fillMaxWidth(),
 
             label = {
 
@@ -673,18 +1033,18 @@ fun PantallaRegistro(
                 ) {
 
                     Icon(
+
                         imageVector =
+
                             if (
                                 mostrarContrasena
                             ) {
 
-                                Icons.Default
-                                    .VisibilityOff
+                                Icons.Default.VisibilityOff
 
                             } else {
 
-                                Icons.Default
-                                    .Visibility
+                                Icons.Default.Visibility
                             },
 
                         contentDescription =
@@ -714,6 +1074,7 @@ fun PantallaRegistro(
             },
 
             visualTransformation =
+
                 if (
                     mostrarContrasena
                 ) {
@@ -738,13 +1099,14 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(16.dp)
+                Modifier.height(
+                    16.dp
+                )
         )
 
 
-        // CONFIRMAR CONTRASEÑA
-
         OutlinedTextField(
+
             value =
                 confirmarContrasena,
 
@@ -756,12 +1118,14 @@ fun PantallaRegistro(
                 errorRegistro =
                     null
 
+                registroViewModel
+                    .limpiarError()
+
                 validarNuevamente()
             },
 
             modifier =
-                Modifier
-                    .fillMaxWidth(),
+                Modifier.fillMaxWidth(),
 
             label = {
 
@@ -792,18 +1156,18 @@ fun PantallaRegistro(
                 ) {
 
                     Icon(
+
                         imageVector =
+
                             if (
                                 mostrarConfirmarContrasena
                             ) {
 
-                                Icons.Default
-                                    .VisibilityOff
+                                Icons.Default.VisibilityOff
 
                             } else {
 
-                                Icons.Default
-                                    .Visibility
+                                Icons.Default.Visibility
                             },
 
                         contentDescription =
@@ -817,8 +1181,7 @@ fun PantallaRegistro(
 
             isError =
                 registroViewModel
-                    .errorConfirmarContrasena !=
-                        null,
+                    .errorConfirmarContrasena != null,
 
             supportingText = {
 
@@ -834,6 +1197,7 @@ fun PantallaRegistro(
             },
 
             visualTransformation =
+
                 if (
                     mostrarConfirmarContrasena
                 ) {
@@ -858,13 +1222,11 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(28.dp)
+                Modifier.height(
+                    28.dp
+                )
         )
 
-
-        // =========================
-        // DATOS DEL EMPRENDIMIENTO
-        // =========================
 
         Text(
             text =
@@ -882,11 +1244,14 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(16.dp)
+                Modifier.height(
+                    16.dp
+                )
         )
 
 
         CampoRegistro(
+
             valor =
                 nombreEmprendimiento,
 
@@ -897,6 +1262,9 @@ fun PantallaRegistro(
 
                 errorRegistro =
                     null
+
+                registroViewModel
+                    .limpiarError()
 
                 validarNuevamente()
             },
@@ -912,11 +1280,14 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(16.dp)
+                Modifier.height(
+                    16.dp
+                )
         )
 
 
         CampoRegistro(
+
             valor =
                 rubro,
 
@@ -927,6 +1298,9 @@ fun PantallaRegistro(
 
                 errorRegistro =
                     null
+
+                registroViewModel
+                    .limpiarError()
 
                 validarNuevamente()
             },
@@ -942,50 +1316,158 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(16.dp)
+                Modifier.height(
+                    16.dp
+                )
         )
 
 
-        // REGIÓN
         OutlinedTextField(
-            value = if (estaBuscandoUbicacion) "Detectando región..." else if (regionGps.isEmpty()) "Región no detectada" else regionGps,
+
+            value =
+
+                if (
+                    estaBuscandoUbicacion
+                ) {
+
+                    "Detectando región..."
+
+                } else if (
+                    regionGps.isEmpty()
+                ) {
+
+                    "Región no detectada"
+
+                } else {
+
+                    regionGps
+                },
+
             onValueChange = {},
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Región (Automática)") },
-            readOnly = true,
-            enabled = false,
-            colors = coloresCampoRegistro()
+
+            modifier =
+                Modifier.fillMaxWidth(),
+
+            label = {
+
+                Text(
+                    "Región (Automática)"
+                )
+            },
+
+            readOnly =
+                true,
+
+            enabled =
+                false,
+
+            colors =
+                coloresCampoRegistro()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
 
-        // COMUNA
+        Spacer(
+            modifier =
+                Modifier.height(
+                    16.dp
+                )
+        )
+
+
         OutlinedTextField(
-            value = if (estaBuscandoUbicacion) "Detectando comuna..." else if (comunaGps.isEmpty()) "Comuna no detectada" else comunaGps,
+
+            value =
+
+                if (
+                    estaBuscandoUbicacion
+                ) {
+
+                    "Detectando comuna..."
+
+                } else if (
+                    comunaGps.isEmpty()
+                ) {
+
+                    "Comuna no detectada"
+
+                } else {
+
+                    comunaGps
+                },
+
             onValueChange = {},
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Comuna (Automática)") },
-            readOnly = true,
-            enabled = false,
-            colors = coloresCampoRegistro()
+
+            modifier =
+                Modifier.fillMaxWidth(),
+
+            label = {
+
+                Text(
+                    "Comuna (Automática)"
+                )
+            },
+
+            readOnly =
+                true,
+
+            enabled =
+                false,
+
+            colors =
+                coloresCampoRegistro()
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
 
-        // MENSAJE DE ADVERTENCIA
+        Spacer(
+            modifier =
+                Modifier.height(
+                    8.dp
+                )
+        )
+
+
         Text(
-            text = "* Si esta no es tu ubicación,continua con el proceso de crear la cuenta y posteriormente comunícate con un administrador.",
-            color = Color.LightGray,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(start = 4.dp)
+            text =
+                "* Si esta no es tu ubicación, continúa con el proceso de crear la cuenta y posteriormente comunícate con un administrador.",
+
+            color =
+                Color.LightGray,
+
+            style =
+                MaterialTheme
+                    .typography
+                    .bodySmall
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
+
+        errorUbicacion
+            ?.let {
+
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            8.dp
+                        )
+                )
 
 
-        // =========================
-        // INFORMACIÓN ESTADÍSTICA
-        // =========================
+                Text(
+                    text =
+                        it,
+
+                    color =
+                        RojoErrorTextil
+                )
+            }
+
+
+        Spacer(
+            modifier =
+                Modifier.height(
+                    28.dp
+                )
+        )
+
 
         Text(
             text =
@@ -1003,13 +1485,14 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(16.dp)
+                Modifier.height(
+                    16.dp
+                )
         )
 
 
-        // EDAD
-
         OutlinedTextField(
+
             value =
                 edad,
 
@@ -1022,21 +1505,28 @@ fun PantallaRegistro(
 
                             caracter.isDigit()
                         }
-                        .take(3)
+                        .take(
+                            3
+                        )
+
 
                 errorRegistro =
                     null
+
+                registroViewModel
+                    .limpiarError()
 
                 validarNuevamente()
             },
 
             modifier =
-                Modifier
-                    .fillMaxWidth(),
+                Modifier.fillMaxWidth(),
 
             label = {
 
-                Text("Edad")
+                Text(
+                    "Edad"
+                )
             },
 
             singleLine =
@@ -1072,13 +1562,14 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(24.dp)
+                Modifier.height(
+                    24.dp
+                )
         )
 
 
-        // GÉNERO
-
         SelectorGenero(
+
             generoSeleccionado =
                 genero,
 
@@ -1115,6 +1606,9 @@ fun PantallaRegistro(
                 errorRegistro =
                     null
 
+                registroViewModel
+                    .limpiarError()
+
                 validarNuevamente()
             }
         )
@@ -1122,15 +1616,18 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier.height(32.dp)
+                Modifier.height(
+                    32.dp
+                )
         )
 
 
-        // =========================
-        // ERROR DE REGISTRO
-        // =========================
+        val mensajeError =
+            errorRegistro
+                ?: uiState.error
 
-        errorRegistro
+
+        mensajeError
             ?.let {
 
                 Text(
@@ -1149,27 +1646,31 @@ fun PantallaRegistro(
 
                 Spacer(
                     modifier =
-                        Modifier
-                            .height(12.dp)
+                        Modifier.height(
+                            12.dp
+                        )
                 )
             }
 
 
-        // =========================
-        // CREAR CUENTA
-        // =========================
-
         Button(
+
             onClick = {
 
                 intentoRegistro =
                     true
 
+
                 errorRegistro =
                     null
 
 
+                registroViewModel
+                    .limpiarError()
+
+
                 val formularioValido =
+
                     registroViewModel
                         .validarFormulario(
 
@@ -1209,285 +1710,68 @@ fun PantallaRegistro(
 
 
                 if (
-                    formularioValido
+                    !formularioValido
                 ) {
-
-                    registrando =
-                        true
-
-
-                    scope.launch {
-
-
-                        val correoNormalizado =
-                            correo
-                                .trim()
-                                .lowercase()
-
-
-                        val rutNormalizado =
-                            rut
-                                .trim()
-                                .uppercase()
-
-
-                        // =========================
-                        // CORREO ADMIN RESERVADO
-                        // =========================
-
-                        if (
-                            correoNormalizado ==
-                            "admin@textilcircular.cl"
-                        ) {
-
-                            errorRegistro =
-                                "Este correo está reservado para el administrador"
-
-                            registrando =
-                                false
-
-                            return@launch
-                        }
-
-
-
-                        // =========================
-                        // VERIFICAR CORREO EN ROOM
-                        // =========================
-
-                        val correoExiste =
-                            dao.existeCorreo(
-                                correoNormalizado
-                            ) > 0
-
-
-                        if (
-                            correoExiste
-                        ) {
-
-                            errorRegistro =
-                                "No se puede crear la cuenta porque ya existe una cuenta registrada con ese correo"
-
-                            registrando =
-                                false
-
-                            return@launch
-                        }
-
-
-                        // =========================
-                        // VERIFICAR RUT EN ROOM
-                        // =========================
-
-                        val rutExiste =
-                            dao.existeRut(
-                                rutNormalizado
-                            ) > 0
-
-
-                        if (
-                            rutExiste
-                        ) {
-
-                            errorRegistro =
-                                "No se puede crear la cuenta porque ya existe una cuenta registrada con ese RUT"
-
-                            registrando =
-                                false
-
-                            return@launch
-                        }
-
-
-                        // =========================
-                        // CREAR CUENTA EN FIREBASE
-                        // =========================
-
-                        auth
-                            .createUserWithEmailAndPassword(
-                                correoNormalizado,
-                                contrasena
-                            )
-                            .addOnCompleteListener {
-                                    task ->
-
-
-                                if (
-                                    task.isSuccessful
-                                ) {
-
-
-                                    val usuarioFirebase =
-                                        auth.currentUser
-
-
-                                    scope.launch {
-
-                                        try {
-
-
-                                            // =========================
-                                            // GUARDAR DATOS EN ROOM
-                                            // =========================
-
-                                            val nuevaEmprendedora =
-                                                EmprendedoraEntity(
-
-                                                    rut =
-                                                        rutNormalizado,
-
-                                                    nombre =
-                                                        nombre
-                                                            .trim(),
-
-                                                    correo =
-                                                        correoNormalizado,
-
-
-                                                    // TEMPORAL:
-                                                    // SE MANTIENE HASTA
-                                                    // MIGRAR TODO EL LOGIN
-                                                    // A FIREBASE.
-
-                                                    contrasena =
-                                                        contrasena,
-
-                                                    nombreEmprendimiento =
-                                                        nombreEmprendimiento
-                                                            .trim(),
-
-                                                    rubro =
-                                                        rubro
-                                                            .trim(),
-
-                                                    region =
-                                                        regionGps,
-
-                                                    comuna =
-                                                        comunaGps,
-
-                                                    edad =
-                                                        edad
-                                                            .toInt(),
-
-                                                    genero =
-                                                        genero,
-
-                                                    rol =
-                                                        "EMPRENDEDORA",
-
-                                                    estado =
-                                                        "PENDIENTE",
-
-                                                    motivoRechazo =
-                                                        null
-                                                )
-
-
-                                            dao
-                                                .insertarEmprendedora(
-                                                    nuevaEmprendedora
-                                                )
-
-
-                                            // FIREBASE INICIA SESIÓN
-                                            // AUTOMÁTICAMENTE AL CREAR
-                                            // UNA CUENTA.
-                                            //
-                                            // COMO LA CUENTA ESTÁ
-                                            // PENDIENTE, LA CERRAMOS.
-
-                                            auth.signOut()
-
-
-                                            errorRegistro =
-                                                null
-
-                                            registrando =
-                                                false
-
-
-                                            // ENVIAMOS EL CORREO
-                                            // A MAINACTIVITY.
-
-                                            onRegistrar(
-                                                correoNormalizado
-                                            )
-
-
-                                        } catch (
-                                            e: Exception
-                                        ) {
-
-
-                                            // SI ROOM FALLA DESPUÉS
-                                            // DE CREAR FIREBASE,
-                                            // INTENTAMOS ELIMINAR
-                                            // LA CUENTA FIREBASE.
-
-                                            usuarioFirebase
-                                                ?.delete()
-                                                ?.addOnCompleteListener {
-
-                                                    auth.signOut()
-                                                }
-
-
-                                            registrando =
-                                                false
-
-
-                                            errorRegistro =
-                                                "No se pudo guardar la cuenta. Inténtalo nuevamente."
-                                        }
-                                    }
-
-
-                                } else {
-
-
-                                    registrando =
-                                        false
-
-
-                                    errorRegistro =
-                                        when (
-                                            task.exception
-                                        ) {
-
-
-                                            is FirebaseAuthUserCollisionException ->
-
-                                                "Ya existe una cuenta registrada con este correo"
-
-
-                                            is FirebaseAuthWeakPasswordException ->
-
-                                                "La contraseña no cumple los requisitos de seguridad"
-
-
-                                            is FirebaseAuthInvalidCredentialsException ->
-
-                                                "El correo electrónico no es válido"
-
-
-                                            else ->
-
-                                                "No se pudo crear la cuenta. Revisa tu conexión e inténtalo nuevamente."
-                                        }
-                                }
-                            }
-                    }
+                    return@Button
                 }
+
+
+                registroViewModel
+                    .registrar(
+
+                        nombre =
+                            nombre,
+
+                        rut =
+                            rut,
+
+                        correo =
+                            correo,
+
+                        contrasena =
+                            contrasena,
+
+                        nombreEmprendimiento =
+                            nombreEmprendimiento,
+
+                        rubro =
+                            rubro,
+
+                        region =
+                            regionGps,
+
+                        comuna =
+                            comunaGps,
+
+                        edad =
+                            edad,
+
+                        genero =
+                            genero,
+
+                        isOnline =
+                            isOnline
+                    )
             },
 
             enabled =
-                !registrando && !estaBuscandoUbicacion && errorUbicacion == null && regionGps.isNotBlank() && comunaGps.isNotBlank(),
+
+                !uiState.cargando &&
+
+                        !estaBuscandoUbicacion &&
+
+                        errorUbicacion == null &&
+
+                        regionGps.isNotBlank() &&
+
+                        comunaGps.isNotBlank(),
 
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(
+                        56.dp
+                    ),
 
             colors =
                 ButtonDefaults
@@ -1500,17 +1784,23 @@ fun PantallaRegistro(
                             NegroTextil,
 
                         disabledContainerColor =
-                            TurquesaTextil.copy(alpha = 0.4f),
+                            TurquesaTextil.copy(
+                                alpha = 0.4f
+                            ),
 
                         disabledContentColor =
-                            NegroTextil.copy(alpha = 0.6f)
+                            NegroTextil.copy(
+                                alpha = 0.6f
+                            )
                     )
         ) {
 
             Text(
+
                 text =
+
                     if (
-                        registrando
+                        uiState.cargando
                     ) {
 
                         "CREANDO CUENTA..."
@@ -1530,18 +1820,19 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier
-                    .height(12.dp)
+                Modifier.height(
+                    12.dp
+                )
         )
 
 
         TextButton(
+
             onClick =
                 onVolver,
 
             modifier =
-                Modifier
-                    .fillMaxWidth()
+                Modifier.fillMaxWidth()
         ) {
 
             Text(
@@ -1556,16 +1847,17 @@ fun PantallaRegistro(
 
         Spacer(
             modifier =
-                Modifier
-                    .height(30.dp)
+                Modifier.height(
+                    30.dp
+                )
         )
     }
 }
 
 
-// =========================
+// =========================================
 // CAMPO REGISTRO
-// =========================
+// =========================================
 
 @Composable
 fun CampoRegistro(
@@ -1576,6 +1868,7 @@ fun CampoRegistro(
 ) {
 
     OutlinedTextField(
+
         value =
             valor,
 
@@ -1583,8 +1876,7 @@ fun CampoRegistro(
             onValorCambio,
 
         modifier =
-            Modifier
-                .fillMaxWidth(),
+            Modifier.fillMaxWidth(),
 
         label = {
 
@@ -1628,9 +1920,9 @@ fun CampoRegistro(
 }
 
 
-// =========================
+// =========================================
 // SELECTOR REGIÓN
-// =========================
+// =========================================
 
 @Composable
 fun SelectorRegion(
@@ -1646,21 +1938,18 @@ fun SelectorRegion(
 ) {
 
     val regionesFiltradas =
-        regiones
-            .filter {
+        regiones.filter {
 
-                it.contains(
-                    busqueda,
-                    ignoreCase =
-                        true
-                )
-            }
+            it.contains(
+                busqueda,
+                ignoreCase = true
+            )
+        }
 
 
     Column(
         modifier =
-            Modifier
-                .fillMaxWidth()
+            Modifier.fillMaxWidth()
     ) {
 
         Text(
@@ -1679,24 +1968,24 @@ fun SelectorRegion(
 
         Spacer(
             modifier =
-                Modifier
-                    .height(8.dp)
+                Modifier.height(
+                    8.dp
+                )
         )
 
 
         Box(
             modifier =
-                Modifier
-                    .fillMaxWidth()
+                Modifier.fillMaxWidth()
         ) {
 
             OutlinedButton(
+
                 onClick =
                     onAbrirMenu,
 
                 modifier =
-                    Modifier
-                        .fillMaxWidth(),
+                    Modifier.fillMaxWidth(),
 
                 border =
                     BorderStroke(
@@ -1705,9 +1994,9 @@ fun SelectorRegion(
                             1.dp,
 
                         color =
+
                             if (
-                                error !=
-                                null
+                                error != null
                             ) {
 
                                 RojoErrorTextil
@@ -1720,10 +2009,11 @@ fun SelectorRegion(
             ) {
 
                 Text(
+
                     text =
+
                         if (
-                            regionSeleccionada
-                                .isEmpty()
+                            regionSeleccionada.isEmpty()
                         ) {
 
                             "Seleccionar región"
@@ -1740,6 +2030,7 @@ fun SelectorRegion(
 
 
             DropdownMenu(
+
                 expanded =
                     menuAbierto,
 
@@ -1748,7 +2039,9 @@ fun SelectorRegion(
 
                 modifier =
                     Modifier
-                        .fillMaxWidth(0.90f)
+                        .fillMaxWidth(
+                            0.90f
+                        )
                         .heightIn(
                             max =
                                 400.dp
@@ -1756,6 +2049,7 @@ fun SelectorRegion(
             ) {
 
                 OutlinedTextField(
+
                     value =
                         busqueda,
 
@@ -1765,7 +2059,9 @@ fun SelectorRegion(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(8.dp),
+                            .padding(
+                                8.dp
+                            ),
 
                     label = {
 
@@ -1784,6 +2080,7 @@ fun SelectorRegion(
                             region ->
 
                         DropdownMenuItem(
+
                             text = {
 
                                 Text(
@@ -1802,8 +2099,7 @@ fun SelectorRegion(
 
 
                 if (
-                    regionesFiltradas
-                        .isEmpty()
+                    regionesFiltradas.isEmpty()
                 ) {
 
                     Text(
@@ -1811,8 +2107,9 @@ fun SelectorRegion(
                             "No se encontraron regiones",
 
                         modifier =
-                            Modifier
-                                .padding(16.dp)
+                            Modifier.padding(
+                                16.dp
+                            )
                     )
                 }
             }
@@ -1829,29 +2126,23 @@ fun SelectorRegion(
                     color =
                         RojoErrorTextil,
 
-                    style =
-                        MaterialTheme
-                            .typography
-                            .bodyMedium,
-
                     modifier =
-                        Modifier
-                            .padding(
-                                start =
-                                    16.dp,
+                        Modifier.padding(
+                            start =
+                                16.dp,
 
-                                top =
-                                    4.dp
-                            )
+                            top =
+                                4.dp
+                        )
                 )
             }
     }
 }
 
 
-// =========================
+// =========================================
 // SELECTOR COMUNA
-// =========================
+// =========================================
 
 @Composable
 fun SelectorComuna(
@@ -1868,15 +2159,13 @@ fun SelectorComuna(
 ) {
 
     val comunasFiltradas =
-        comunas
-            .filter {
+        comunas.filter {
 
-                it.contains(
-                    busqueda,
-                    ignoreCase =
-                        true
-                )
-            }
+            it.contains(
+                busqueda,
+                ignoreCase = true
+            )
+        }
 
 
     val regionSeleccionadaValida =
@@ -1886,8 +2175,7 @@ fun SelectorComuna(
 
     Column(
         modifier =
-            Modifier
-                .fillMaxWidth()
+            Modifier.fillMaxWidth()
     ) {
 
         Text(
@@ -1906,18 +2194,19 @@ fun SelectorComuna(
 
         Spacer(
             modifier =
-                Modifier
-                    .height(8.dp)
+                Modifier.height(
+                    8.dp
+                )
         )
 
 
         Box(
             modifier =
-                Modifier
-                    .fillMaxWidth()
+                Modifier.fillMaxWidth()
         ) {
 
             OutlinedButton(
+
                 onClick =
                     onAbrirMenu,
 
@@ -1925,8 +2214,7 @@ fun SelectorComuna(
                     regionSeleccionadaValida,
 
                 modifier =
-                    Modifier
-                        .fillMaxWidth(),
+                    Modifier.fillMaxWidth(),
 
                 border =
                     BorderStroke(
@@ -1935,9 +2223,9 @@ fun SelectorComuna(
                             1.dp,
 
                         color =
+
                             if (
-                                error !=
-                                null
+                                error != null
                             ) {
 
                                 RojoErrorTextil
@@ -1950,19 +2238,18 @@ fun SelectorComuna(
             ) {
 
                 Text(
+
                     text =
+
                         when {
 
                             !regionSeleccionadaValida ->
 
                                 "Primero selecciona una región"
 
-
-                            comunaSeleccionada
-                                .isEmpty() ->
+                            comunaSeleccionada.isEmpty() ->
 
                                 "Seleccionar comuna"
-
 
                             else ->
 
@@ -1970,6 +2257,7 @@ fun SelectorComuna(
                         },
 
                     color =
+
                         if (
                             regionSeleccionadaValida
                         ) {
@@ -1985,6 +2273,7 @@ fun SelectorComuna(
 
 
             DropdownMenu(
+
                 expanded =
                     menuAbierto &&
                             regionSeleccionadaValida,
@@ -1994,7 +2283,9 @@ fun SelectorComuna(
 
                 modifier =
                     Modifier
-                        .fillMaxWidth(0.90f)
+                        .fillMaxWidth(
+                            0.90f
+                        )
                         .heightIn(
                             max =
                                 400.dp
@@ -2002,6 +2293,7 @@ fun SelectorComuna(
             ) {
 
                 OutlinedTextField(
+
                     value =
                         busqueda,
 
@@ -2011,7 +2303,9 @@ fun SelectorComuna(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(8.dp),
+                            .padding(
+                                8.dp
+                            ),
 
                     label = {
 
@@ -2030,6 +2324,7 @@ fun SelectorComuna(
                             comuna ->
 
                         DropdownMenuItem(
+
                             text = {
 
                                 Text(
@@ -2048,8 +2343,7 @@ fun SelectorComuna(
 
 
                 if (
-                    comunasFiltradas
-                        .isEmpty()
+                    comunasFiltradas.isEmpty()
                 ) {
 
                     Text(
@@ -2057,8 +2351,9 @@ fun SelectorComuna(
                             "No se encontraron comunas",
 
                         modifier =
-                            Modifier
-                                .padding(16.dp)
+                            Modifier.padding(
+                                16.dp
+                            )
                     )
                 }
             }
@@ -2075,29 +2370,23 @@ fun SelectorComuna(
                     color =
                         RojoErrorTextil,
 
-                    style =
-                        MaterialTheme
-                            .typography
-                            .bodyMedium,
-
                     modifier =
-                        Modifier
-                            .padding(
-                                start =
-                                    16.dp,
+                        Modifier.padding(
+                            start =
+                                16.dp,
 
-                                top =
-                                    4.dp
-                            )
+                            top =
+                                4.dp
+                        )
                 )
             }
     }
 }
 
 
-// =========================
+// =========================================
 // SELECTOR GÉNERO
-// =========================
+// =========================================
 
 @Composable
 fun SelectorGenero(
@@ -2112,8 +2401,7 @@ fun SelectorGenero(
 
     Column(
         modifier =
-            Modifier
-                .fillMaxWidth()
+            Modifier.fillMaxWidth()
     ) {
 
         Text(
@@ -2132,24 +2420,24 @@ fun SelectorGenero(
 
         Spacer(
             modifier =
-                Modifier
-                    .height(8.dp)
+                Modifier.height(
+                    8.dp
+                )
         )
 
 
         Box(
             modifier =
-                Modifier
-                    .fillMaxWidth()
+                Modifier.fillMaxWidth()
         ) {
 
             OutlinedButton(
+
                 onClick =
                     onAbrirMenu,
 
                 modifier =
-                    Modifier
-                        .fillMaxWidth(),
+                    Modifier.fillMaxWidth(),
 
                 border =
                     BorderStroke(
@@ -2158,9 +2446,9 @@ fun SelectorGenero(
                             1.dp,
 
                         color =
+
                             if (
-                                error !=
-                                null
+                                error != null
                             ) {
 
                                 RojoErrorTextil
@@ -2173,10 +2461,11 @@ fun SelectorGenero(
             ) {
 
                 Text(
+
                     text =
+
                         if (
-                            generoSeleccionado
-                                .isEmpty()
+                            generoSeleccionado.isEmpty()
                         ) {
 
                             "Seleccionar género"
@@ -2193,6 +2482,7 @@ fun SelectorGenero(
 
 
             DropdownMenu(
+
                 expanded =
                     menuAbierto,
 
@@ -2205,6 +2495,7 @@ fun SelectorGenero(
                             opcion ->
 
                         DropdownMenuItem(
+
                             text = {
 
                                 Text(
@@ -2234,32 +2525,27 @@ fun SelectorGenero(
                     color =
                         RojoErrorTextil,
 
-                    style =
-                        MaterialTheme
-                            .typography
-                            .bodyMedium,
-
                     modifier =
-                        Modifier
-                            .padding(
-                                start =
-                                    16.dp,
+                        Modifier.padding(
+                            start =
+                                16.dp,
 
-                                top =
-                                    4.dp
-                            )
+                            top =
+                                4.dp
+                        )
                 )
             }
     }
 }
 
 
-// =========================
-// COLORES DE CAMPOS
-// =========================
+// =========================================
+// COLORES
+// =========================================
 
 @Composable
 fun coloresCampoRegistro() =
+
     OutlinedTextFieldDefaults
         .colors(
 
@@ -2328,9 +2614,9 @@ fun coloresCampoRegistro() =
         )
 
 
-// =========================
-// FORMATO VISUAL DEL RUT
-// =========================
+// =========================================
+// RUT VISUAL
+// =========================================
 
 class RutVisualTransformation :
     VisualTransformation {
@@ -2344,8 +2630,7 @@ class RutVisualTransformation :
 
 
         if (
-            rut.length <
-            8
+            rut.length < 8
         ) {
 
             return TransformedText(
@@ -2362,7 +2647,9 @@ class RutVisualTransformation :
 
 
         val cuerpo =
-            rut.dropLast(1)
+            rut.dropLast(
+                1
+            )
 
 
         val digitoVerificador =
@@ -2378,6 +2665,7 @@ class RutVisualTransformation :
 
 
         val offsetMapping =
+
             object :
                 OffsetMapping {
 
@@ -2387,8 +2675,7 @@ class RutVisualTransformation :
                 ): Int {
 
                     return if (
-                        offset <
-                        posicionGuion
+                        offset < posicionGuion
                     ) {
 
                         offset
@@ -2405,8 +2692,7 @@ class RutVisualTransformation :
                 ): Int {
 
                     return if (
-                        offset <=
-                        posicionGuion
+                        offset <= posicionGuion
                     ) {
 
                         offset

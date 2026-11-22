@@ -1,14 +1,20 @@
 package com.example.fundaciontextilcircular
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -18,6 +24,7 @@ import com.example.fundaciontextilcircular.data.repository.ChatRepository
 import com.example.fundaciontextilcircular.data.repository.ProductoRepository
 import com.example.fundaciontextilcircular.data.utils.NetworkMonitor
 import com.example.fundaciontextilcircular.ui.theme.TextilCircularTheme
+import com.example.fundaciontextilcircular.ui.theme.ThemeManager
 import com.example.fundaciontextilcircular.ui.view.ChatScreen
 import com.example.fundaciontextilcircular.ui.viewmodel.ChatViewModel
 import com.example.fundaciontextilcircular.ui.viewmodel.ProductoViewModel
@@ -41,9 +48,55 @@ class MainActivity : ComponentActivity() {
             savedInstanceState
         )
 
+        // =========================================
+        // PERMISO RED LOCAL - ANDROID 17 / API 37
+        // =========================================
+
+        if (
+            Build.VERSION.SDK_INT >= 37 &&
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_LOCAL_NETWORK
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_LOCAL_NETWORK),
+                1001
+            )
+        }
+
+        // =========================================
+        // INTERFAZ
+        // =========================================
+
         setContent {
 
             TextilCircularTheme {
+
+                // =========================================
+                // MODO CLARO / OSCURO
+                // =========================================
+
+                val modoOscuro =
+                    ThemeManager.darkMode
+                        ?: isSystemInDarkTheme()
+
+                // =========================================
+                // BARRAS DEL SISTEMA
+                // =========================================
+
+                SideEffect {
+                    val controlador =
+                        WindowCompat
+                            .getInsetsController(
+                                window,
+                                window.decorView
+                            )
+
+                    controlador.isAppearanceLightStatusBars = !modoOscuro
+                    controlador.isAppearanceLightNavigationBars = !modoOscuro
+                }
 
                 // =========================================
                 // PANTALLA ACTUAL
@@ -70,31 +123,11 @@ class MainActivity : ComponentActivity() {
                 }
 
                 // =========================================
-                // CHAT SELECCIONADO POR EL ADMIN
+                // CHAT SELECCIONADO POR ADMIN
                 // =========================================
 
                 var chatSeleccionado by remember {
                     mutableStateOf("")
-                }
-
-                // =========================================
-                // BARRAS DEL SISTEMA
-                // =========================================
-
-                SideEffect {
-                    val pantallaClara =
-                        pantallaActual == "splash" ||
-                                pantallaActual == "principal"
-
-                    val controlador =
-                        WindowCompat
-                            .getInsetsController(
-                                window,
-                                window.decorView
-                            )
-
-                    controlador.isAppearanceLightStatusBars = pantallaClara
-                    controlador.isAppearanceLightNavigationBars = pantallaClara
                 }
 
                 // =========================================
@@ -104,7 +137,7 @@ class MainActivity : ComponentActivity() {
                 when (pantallaActual) {
 
                     // =====================================
-                    // SPLASH ANIMADO
+                    // SPLASH
                     // =====================================
 
                     "splash" -> {
@@ -217,25 +250,32 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // =====================================
-                    // CHAT DEL ADMINISTRADOR
+                    // CHAT ADMINISTRADOR
                     // =====================================
 
                     "chat_admin" -> {
                         val context = LocalContext.current
-                        val database = remember { TextilDatabase.getDatabase(context) }
-                        val repositorio = remember {
+                        val database = remember(context) {
+                            TextilDatabase.getDatabase(context)
+                        }
+                        val repositorio = remember(database) {
                             ChatRepository(
                                 mensajeDao = database.mensajeDao(),
                                 appContext = context.applicationContext
                             )
                         }
-                        val networkMonitor = remember { NetworkMonitor(context) }
+                        val networkMonitor = remember(context) {
+                            NetworkMonitor(context.applicationContext)
+                        }
 
                         val adminChatViewModel: ChatViewModel = viewModel(
                             factory = object : ViewModelProvider.Factory {
                                 @Suppress("UNCHECKED_CAST")
                                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                                    return ChatViewModel(repositorio, networkMonitor) as T
+                                    return ChatViewModel(
+                                        repository = repositorio,
+                                        networkMonitor = networkMonitor
+                                    ) as T
                                 }
                             }
                         )
@@ -259,17 +299,21 @@ class MainActivity : ComponentActivity() {
 
                     "principal" -> {
                         val context = LocalContext.current
-                        val database = remember { TextilDatabase.getDatabase(context) }
-                        val networkMonitor = remember { NetworkMonitor(context) }
+                        val database = remember(context) {
+                            TextilDatabase.getDatabase(context)
+                        }
+                        val networkMonitor = remember(context) {
+                            NetworkMonitor(context.applicationContext)
+                        }
 
-                        val chatRepository = remember {
+                        val chatRepository = remember(database) {
                             ChatRepository(
                                 mensajeDao = database.mensajeDao(),
                                 appContext = context.applicationContext
                             )
                         }
 
-                        val productoRepository = remember {
+                        val productoRepository = remember(database) {
                             ProductoRepository(
                                 productoDao = database.productoDao(),
                                 appContext = context.applicationContext
@@ -280,7 +324,10 @@ class MainActivity : ComponentActivity() {
                             factory = object : ViewModelProvider.Factory {
                                 @Suppress("UNCHECKED_CAST")
                                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                                    return ChatViewModel(chatRepository, networkMonitor) as T
+                                    return ChatViewModel(
+                                        repository = chatRepository,
+                                        networkMonitor = networkMonitor
+                                    ) as T
                                 }
                             }
                         )
@@ -289,7 +336,10 @@ class MainActivity : ComponentActivity() {
                             factory = object : ViewModelProvider.Factory {
                                 @Suppress("UNCHECKED_CAST")
                                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                                    return ProductoViewModel(productoRepository, networkMonitor) as T
+                                    return ProductoViewModel(
+                                        repository = productoRepository,
+                                        networkMonitor = networkMonitor
+                                    ) as T
                                 }
                             }
                         )
@@ -300,6 +350,9 @@ class MainActivity : ComponentActivity() {
                             correo = correoUsuarioActual,
                             productoViewModel = productoViewModel,
                             onCerrarSesion = {
+                                // =================================
+                                // CERRAR FIREBASE
+                                // =================================
                                 FirebaseAuth
                                     .getInstance()
                                     .signOut()
@@ -312,7 +365,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // =====================================
-                    // SEGURIDAD
+                    // SEGURIDAD / PANTALLA DESCONOCIDA
                     // =====================================
 
                     else -> {
