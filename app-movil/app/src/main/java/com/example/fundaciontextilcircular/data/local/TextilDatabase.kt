@@ -21,7 +21,7 @@ import com.example.fundaciontextilcircular.data.local.entities.ProductoEntity
         ProductoEntity::class,
         ChatEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class TextilDatabase : RoomDatabase() {
@@ -163,6 +163,17 @@ abstract class TextilDatabase : RoomDatabase() {
                 }
             }
 
+        private val MIGRATION_7_8 =
+            object : Migration(7, 8) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        """
+                ALTER TABLE mensajes ADD COLUMN remoteId INTEGER DEFAULT NULL
+                """.trimIndent()
+                    )
+                }
+            }
+
 
         fun getDatabase(
             context: Context
@@ -182,7 +193,8 @@ abstract class TextilDatabase : RoomDatabase() {
                                 MIGRATION_3_4,
                                 MIGRATION_4_5,
                                 MIGRATION_5_6,
-                                MIGRATION_6_7
+                                MIGRATION_6_7,
+                                MIGRATION_7_8
                             )
                             .build()
 

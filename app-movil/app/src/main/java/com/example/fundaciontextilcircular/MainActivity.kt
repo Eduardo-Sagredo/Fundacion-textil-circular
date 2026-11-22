@@ -359,7 +359,12 @@ class MainActivity : ComponentActivity() {
 
                         val context = LocalContext.current
                         val database = remember { TextilDatabase.getDatabase(context) }
-                        val repositorio = remember { ChatRepository(database.mensajeDao()) }
+                        val repositorio = remember {
+                            ChatRepository(
+                                mensajeDao = database.mensajeDao(),
+                                appContext = context.applicationContext
+                            )
+                        }
                         val networkMonitor = remember { NetworkMonitor(context) }
 
                         val userChatViewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
