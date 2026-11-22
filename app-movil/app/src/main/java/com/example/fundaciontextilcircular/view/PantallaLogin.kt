@@ -24,10 +24,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,15 +36,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.fundaciontextilcircular.data.local.TextilDatabase
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.fundaciontextilcircular.data.remote.RetrofitClient
+import com.example.fundaciontextilcircular.data.repository.AuthRepository
+import com.example.fundaciontextilcircular.data.utils.NetworkMonitor
 import com.example.fundaciontextilcircular.ui.theme.BlancoTextil
 import com.example.fundaciontextilcircular.ui.theme.NegroTextil
 import com.example.fundaciontextilcircular.ui.theme.RojoErrorTextil
 import com.example.fundaciontextilcircular.ui.theme.TurquesaTextil
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
-import kotlinx.coroutines.launch
+import com.example.fundaciontextilcircular.viewmodel.LoginViewModel
+import com.example.fundaciontextilcircular.viewmodel.LoginViewModelFactory
 
 @Composable
 fun PantallaLogin(
@@ -59,61 +61,150 @@ fun PantallaLogin(
     val context =
         LocalContext.current
 
-    val scope =
-        rememberCoroutineScope()
-
 
     // =========================
-    // ROOM
+    // CONEXIÓN A INTERNET
     // =========================
 
-    val dao =
-        remember(context) {
-
-            TextilDatabase
-                .getDatabase(context)
-                .emprendedoraDao()
-        }
-
-
-    // =========================
-    // FIREBASE
-    // =========================
-
-    val auth =
+    val networkMonitor =
         remember {
+            NetworkMonitor(
+                context.applicationContext
+            )
+        }
 
-            FirebaseAuth
-                .getInstance()
+    val isOnline by
+    networkMonitor
+        .isOnline
+        .collectAsState(
+            initial = true
+        )
+
+
+    // =========================
+    // REPOSITORY
+    // =========================
+
+    val authRepository =
+        remember {
+            AuthRepository(
+                RetrofitClient.authApi
+            )
         }
 
 
     // =========================
-    // ESTADOS
+    // VIEWMODEL
+    // =========================
+
+    val loginViewModel: LoginViewModel =
+        viewModel(
+            factory =
+                LoginViewModelFactory(
+                    authRepository
+                )
+        )
+
+    val uiState =
+        loginViewModel.uiState
+
+
+    // =========================
+    // ESTADOS DE PANTALLA
     // =========================
 
     var correo by remember {
         mutableStateOf("")
     }
 
-
     var contrasena by remember {
         mutableStateOf("")
     }
-
 
     var mostrarContrasena by remember {
         mutableStateOf(false)
     }
 
-
-    var mensajeError by remember {
+    var mensajeErrorLocal by remember {
         mutableStateOf<String?>(null)
     }
 
 
-    var iniciandoSesion by remember {
-        mutableStateOf(false)
+    // =========================
+    // RESPUESTA DEL BACKEND
+    // =========================
+
+    LaunchedEffect(
+        uiState.resultado
+    ) {
+
+        val resultado =
+            uiState.resultado
+                ?: return@LaunchedEffect
+
+
+        when (
+            resultado
+                .estado
+                .uppercase()
+        ) {
+
+            // =========================
+            // APROBADA
+            // =========================
+
+            "APROBADA" -> {
+
+                if (
+                    resultado.puedeIngresar
+                ) {
+
+                    onIngresarUsuario(
+                        resultado.correo
+                    )
+
+                } else {
+
+                    mensajeErrorLocal =
+                        "La cuenta no tiene autorización para ingresar"
+                }
+            }
+
+
+            // =========================
+            // PENDIENTE
+            // =========================
+
+            "PENDIENTE" -> {
+
+                onCuentaEnRevision(
+                    resultado.correo
+                )
+            }
+
+
+            // =========================
+            // RECHAZADA
+            // =========================
+
+            "RECHAZADA" -> {
+
+                onCuentaEnRevision(
+                    resultado.correo
+                )
+            }
+
+
+            else -> {
+
+                mensajeErrorLocal =
+                    "El estado de la cuenta no es válido"
+            }
+        }
+
+
+        loginViewModel
+            .limpiarResultado()
     }
 
 
@@ -187,8 +278,11 @@ fun PantallaLogin(
                 correo =
                     it
 
-                mensajeError =
+                mensajeErrorLocal =
                     null
+
+                loginViewModel
+                    .limpiarError()
             },
 
             modifier =
@@ -247,8 +341,11 @@ fun PantallaLogin(
                 contrasena =
                     it
 
-                mensajeError =
+                mensajeErrorLocal =
                     null
+
+                loginViewModel
+                    .limpiarError()
             },
 
             modifier =
@@ -371,6 +468,11 @@ fun PantallaLogin(
         // ERROR
         // =========================
 
+        val mensajeError =
+            mensajeErrorLocal
+                ?: uiState.error
+
+
         mensajeError
             ?.let {
 
@@ -403,8 +505,11 @@ fun PantallaLogin(
         Button(
             onClick = {
 
-                mensajeError =
+                mensajeErrorLocal =
                     null
+
+                loginViewModel
+                    .limpiarError()
 
 
                 val correoNormalizado =
@@ -413,6 +518,10 @@ fun PantallaLogin(
                         .lowercase()
 
 
+                // =========================
+                // VALIDACIÓN BÁSICA
+                // =========================
+
                 if (
                     correoNormalizado
                         .isBlank() ||
@@ -420,8 +529,21 @@ fun PantallaLogin(
                         .isBlank()
                 ) {
 
-                    mensajeError =
+                    mensajeErrorLocal =
                         "Debes ingresar correo y contraseña"
+
+                    return@Button
+                }
+
+
+                // =========================
+                // VALIDACIÓN INTERNET
+                // =========================
+
+                if (!isOnline) {
+
+                    mensajeErrorLocal =
+                        "No tienes conexión a internet"
 
                     return@Button
                 }
@@ -444,161 +566,25 @@ fun PantallaLogin(
                 }
 
 
-                iniciandoSesion =
-                    true
-
-
                 // =========================
-                // FIREBASE
+                // LOGIN SPRING BOOT
                 // =========================
 
-                auth
-                    .signInWithEmailAndPassword(
-                        correoNormalizado,
-                        contrasena
+                loginViewModel
+                    .iniciarSesion(
+                        correo =
+                            correoNormalizado,
+
+                        contrasena =
+                            contrasena,
+
+                        isOnline =
+                            isOnline
                     )
-                    .addOnCompleteListener {
-                            task ->
-
-
-                        if (
-                            task.isSuccessful
-                        ) {
-
-
-                            // =========================
-                            // BUSCAR DATOS EN ROOM
-                            // =========================
-
-                            scope.launch {
-
-                                val cuenta =
-                                    dao
-                                        .obtenerPorCorreo(
-                                            correoNormalizado
-                                        )
-
-
-                                if (
-                                    cuenta ==
-                                    null
-                                ) {
-
-                                    auth.signOut()
-
-                                    iniciandoSesion =
-                                        false
-
-                                    mensajeError =
-                                        "No se encontraron los datos de esta cuenta"
-
-                                    return@launch
-                                }
-
-
-                                when (
-                                    cuenta
-                                        .estado
-                                        .uppercase()
-                                ) {
-
-
-                                    // =========================
-                                    // APROBADA
-                                    // =========================
-
-                                    "APROBADA" -> {
-
-                                        iniciandoSesion =
-                                            false
-
-                                        onIngresarUsuario(
-                                            cuenta.correo
-                                        )
-                                    }
-
-
-                                    // =========================
-                                    // PENDIENTE
-                                    // =========================
-
-                                    "PENDIENTE" -> {
-
-                                        auth.signOut()
-
-                                        iniciandoSesion =
-                                            false
-
-                                        onCuentaEnRevision(
-                                            cuenta.correo
-                                        )
-                                    }
-
-
-                                    // =========================
-                                    // RECHAZADA
-                                    // =========================
-
-                                    "RECHAZADA" -> {
-
-                                        auth.signOut()
-
-                                        iniciandoSesion =
-                                            false
-
-                                        onCuentaEnRevision(
-                                            cuenta.correo
-                                        )
-                                    }
-
-
-                                    else -> {
-
-                                        auth.signOut()
-
-                                        iniciandoSesion =
-                                            false
-
-                                        mensajeError =
-                                            "El estado de la cuenta no es válido"
-                                    }
-                                }
-                            }
-
-
-                        } else {
-
-
-                            iniciandoSesion =
-                                false
-
-
-                            mensajeError =
-                                when (
-                                    task.exception
-                                ) {
-
-
-                                    is FirebaseAuthInvalidCredentialsException ->
-
-                                        "Correo o contraseña incorrectos"
-
-
-                                    is FirebaseAuthInvalidUserException ->
-
-                                        "No existe una cuenta registrada con este correo"
-
-
-                                    else ->
-
-                                        "No se pudo iniciar sesión. Revisa tus datos y tu conexión."
-                                }
-                        }
-                    }
             },
 
             enabled =
-                !iniciandoSesion,
+                !uiState.cargando,
 
             modifier =
                 Modifier
@@ -620,7 +606,7 @@ fun PantallaLogin(
             Text(
                 text =
                     if (
-                        iniciandoSesion
+                        uiState.cargando
                     ) {
 
                         "INGRESANDO..."
