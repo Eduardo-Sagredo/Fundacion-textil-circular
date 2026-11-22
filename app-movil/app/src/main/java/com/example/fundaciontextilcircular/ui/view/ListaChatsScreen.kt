@@ -188,12 +188,16 @@ fun ListaChatsScreen(
                 )
             } else {
                 // LISTA DE CHATS
+                val conversacionesUnicas = remember(conversaciones) {
+                    conversaciones.distinctBy { chat -> chat.chatId.trim().lowercase() }
+                }
+
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(
-                        items = conversaciones,
-                        key = { chat -> chat.chatId }
+                        items = conversacionesUnicas,
+                        key = { chat -> chat.chatId.trim().lowercase() }
                     ) { chat ->
                         val mensajesNoLeidos by mensajeDao
                             .observarCantidadNoLeidos(chat.chatId)
@@ -221,7 +225,9 @@ fun ListaChatsScreen(
                             ) {
                                 // FOTO / INICIAL
                                 Surface(
-                                    modifier = Modifier.width(48.dp).height(48.dp),
+                                    modifier = Modifier
+                                        .width(48.dp)
+                                        .height(48.dp),
                                     shape = CircleShape,
                                     color = Color(0xFF00A6A6)
                                 ) {
@@ -295,15 +301,24 @@ fun ListaChatsScreen(
                 onDismissRequest = { mostrarAlertaTicket = false },
                 containerColor = Color.White,
                 title = {
-                    Text("Ticket en proceso", color = Color(0xFF00A6A6), fontWeight = FontWeight.Bold)
+                    Text(
+                        "Ticket en proceso",
+                        color = Color(0xFF00A6A6),
+                        fontWeight = FontWeight.Bold
+                    )
                 },
                 text = {
-                    Text("Ya tienes un chat de soporte técnico abierto. Por favor, ingresa a él directamente a través de tu lista de 'Mis conversaciones'.", color = Color.DarkGray)
+                    Text(
+                        "Ya tienes un chat de soporte técnico abierto. Por favor, ingresa a él directamente a través de tu lista de 'Mis conversaciones'.",
+                        color = Color.DarkGray
+                    )
                 },
                 confirmButton = {
                     Button(
                         onClick = { mostrarAlertaTicket = false },
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF00A6A6))
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF00A6A6)
+                        )
                     ) {
                         Text("Entendido", color = Color.White)
                     }

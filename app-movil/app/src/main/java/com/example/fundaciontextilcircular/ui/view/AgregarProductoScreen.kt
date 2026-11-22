@@ -46,6 +46,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.fundaciontextilcircular.data.local.TextilDatabase
+import com.example.fundaciontextilcircular.data.remote.RetrofitClient
+import com.example.fundaciontextilcircular.data.repository.AuthRepository
 import com.example.fundaciontextilcircular.data.utils.ImageCompressor
 import com.example.fundaciontextilcircular.ui.viewmodel.ProductoViewModel
 import kotlinx.coroutines.launch
@@ -67,6 +69,10 @@ fun AgregarProductoScreen(
 
     val emprendedoraDao = remember(database) {
         database.emprendedoraDao()
+    }
+
+    val authRepository = remember {
+        AuthRepository(RetrofitClient.authApi)
     }
 
 
@@ -453,12 +459,23 @@ fun AgregarProductoScreen(
                         guardando = true
 
                         scope.launch {
-                            val emprendedora =
-                                emprendedoraDao.obtenerPorCorreo(
-                                    correoUsuario.trim().lowercase()
-                                )
+                            val correoNormalizado = correoUsuario.trim().lowercase()
+                            val emprendedoraLocal =
+                                emprendedoraDao.obtenerPorCorreo(correoNormalizado)
 
-                            if (emprendedora == null) {
+                            var correoFinal = emprendedoraLocal?.correo
+                            var emprendimientoFinal = emprendedoraLocal?.nombreEmprendimiento
+
+                            if (correoFinal == null || emprendimientoFinal == null) {
+                                val perfilRemoto = authRepository
+                                    .obtenerPerfil(correoNormalizado)
+                                    .getOrNull()
+
+                                correoFinal = perfilRemoto?.correo
+                                emprendimientoFinal = perfilRemoto?.nombreEmprendimiento
+                            }
+
+                            if (correoFinal.isNullOrBlank() || emprendimientoFinal.isNullOrBlank()) {
                                 mensajeError =
                                     "No se encontraron los datos de la emprendedora."
                                 guardando = false
@@ -471,8 +488,8 @@ fun AgregarProductoScreen(
                                 precio = precioNumero,
                                 tipo = tipo,
                                 imagenRuta = rutaFinalImagen,
-                                correoEmprendedora = emprendedora.correo,
-                                nombreEmprendimiento = emprendedora.nombreEmprendimiento
+                                correoEmprendedora = correoFinal,
+                                nombreEmprendimiento = emprendimientoFinal
                             )
 
                             guardando = false
