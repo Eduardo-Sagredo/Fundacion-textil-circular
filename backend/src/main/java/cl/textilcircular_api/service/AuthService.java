@@ -1,7 +1,9 @@
 package cl.textilcircular_api.service;
 
+import cl.textilcircular_api.dto.CambiarContrasenaRequestDTO;
 import cl.textilcircular_api.dto.LoginRequestDTO;
 import cl.textilcircular_api.dto.LoginResponseDTO;
+import cl.textilcircular_api.dto.PerfilResponseDTO;
 import cl.textilcircular_api.dto.RegistroRequestDTO;
 
 import cl.textilcircular_api.model.Emprendedora;
@@ -33,6 +35,10 @@ public class AuthService {
                 passwordEncoder;
     }
 
+
+    // =========================================
+    // REGISTRO
+    // =========================================
 
     public Emprendedora registrar(
             RegistroRequestDTO request
@@ -99,8 +105,6 @@ public class AuthService {
         );
 
 
-        // La contraseña NO se guarda directamente.
-        // Primero se encripta mediante BCrypt.
         emprendedora.setContrasena(
 
                 passwordEncoder.encode(
@@ -170,6 +174,10 @@ public class AuthService {
     }
 
 
+    // =========================================
+    // LOGIN
+    // =========================================
+
     public LoginResponseDTO login(
             LoginRequestDTO request
     ) {
@@ -194,8 +202,6 @@ public class AuthService {
                         );
 
 
-        // BCrypt compara la contraseña enviada
-        // con la contraseña encriptada de Oracle.
         boolean contrasenaCorrecta =
                 passwordEncoder.matches(
 
@@ -205,7 +211,9 @@ public class AuthService {
                 );
 
 
-        if (!contrasenaCorrecta) {
+        if (
+                !contrasenaCorrecta
+        ) {
 
             throw new IllegalArgumentException(
                     "Correo o contraseña incorrectos"
@@ -261,6 +269,148 @@ public class AuthService {
                 emprendedora.getMotivoRechazo(),
 
                 puedeIngresar
+        );
+    }
+
+
+    // =========================================
+    // PERFIL
+    // =========================================
+
+    public PerfilResponseDTO obtenerPerfil(
+            String correo
+    ) {
+
+        String correoNormalizado =
+                correo
+                        .trim()
+                        .toLowerCase();
+
+
+        Emprendedora emprendedora =
+                emprendedoraRepository
+                        .findByCorreo(
+                                correoNormalizado
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Usuario no encontrado"
+                                        )
+                        );
+
+
+        return new PerfilResponseDTO(
+
+                emprendedora.getId(),
+
+                emprendedora.getRut(),
+
+                emprendedora.getNombre(),
+
+                emprendedora.getCorreo(),
+
+                emprendedora
+                        .getNombreEmprendimiento(),
+
+                emprendedora.getRubro(),
+
+                emprendedora.getRegion(),
+
+                emprendedora.getComuna(),
+
+                emprendedora.getEdad(),
+
+                emprendedora.getGenero(),
+
+                emprendedora.getRol(),
+
+                emprendedora.getEstado(),
+
+                emprendedora.getMotivoRechazo()
+        );
+    }
+
+
+    // =========================================
+    // CAMBIAR CONTRASEÑA
+    // =========================================
+
+    public void cambiarContrasena(
+            CambiarContrasenaRequestDTO request
+    ) {
+
+        String correo =
+                request
+                        .getCorreo()
+                        .trim()
+                        .toLowerCase();
+
+
+        Emprendedora emprendedora =
+                emprendedoraRepository
+                        .findByCorreo(
+                                correo
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Usuario no encontrado"
+                                        )
+                        );
+
+
+        boolean contrasenaActualCorrecta =
+                passwordEncoder.matches(
+
+                        request.getContrasenaActual(),
+
+                        emprendedora.getContrasena()
+                );
+
+
+        if (
+                !contrasenaActualCorrecta
+        ) {
+
+            throw new IllegalArgumentException(
+                    "La contraseña actual es incorrecta"
+            );
+        }
+
+
+        boolean mismaContrasena =
+                passwordEncoder.matches(
+
+                        request.getNuevaContrasena(),
+
+                        emprendedora.getContrasena()
+                );
+
+
+        if (
+                mismaContrasena
+        ) {
+
+            throw new IllegalArgumentException(
+                    "La nueva contraseña debe ser diferente a la actual"
+            );
+        }
+
+
+        String nuevaContrasenaEncriptada =
+                passwordEncoder.encode(
+                        request.getNuevaContrasena()
+                );
+
+
+        emprendedora.setContrasena(
+                nuevaContrasenaEncriptada
+        );
+
+
+        emprendedoraRepository.save(
+                emprendedora
         );
     }
 }
