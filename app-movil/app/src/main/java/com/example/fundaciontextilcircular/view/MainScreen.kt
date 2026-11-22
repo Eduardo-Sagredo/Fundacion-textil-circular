@@ -24,7 +24,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -37,6 +36,7 @@ import com.example.fundaciontextilcircular.ui.view.ChatScreen
 import com.example.fundaciontextilcircular.ui.view.ListaChatsScreen
 import com.example.fundaciontextilcircular.ui.viewmodel.ChatViewModel
 
+
 @Composable
 fun MainScreen(
     correo: String,
@@ -46,10 +46,6 @@ fun MainScreen(
     val context =
         LocalContext.current
 
-
-    // =============================================
-    // BASE DE DATOS
-    // =============================================
 
     val database =
         remember(context) {
@@ -69,10 +65,6 @@ fun MainScreen(
         }
 
 
-    // =============================================
-    // MENSAJES NO LEÍDOS
-    // =============================================
-
     val totalMensajesNoLeidos by
     mensajeDao
         .observarTotalNoLeidos()
@@ -81,31 +73,23 @@ fun MainScreen(
         )
 
 
-    // =============================================
-    // PESTAÑA ACTUAL
-    // =============================================
-
     var opcionSeleccionada by
     remember {
 
-        mutableIntStateOf(0)
+        mutableIntStateOf(
+            0
+        )
     }
 
-
-    // =============================================
-    // CATÁLOGO
-    // =============================================
 
     var mostrarAgregarProducto by
     remember {
 
-        mutableStateOf(false)
+        mutableStateOf(
+            false
+        )
     }
 
-
-    // =============================================
-    // CHAT
-    // =============================================
 
     var chatIdSeleccionado by
     remember {
@@ -137,10 +121,6 @@ fun MainScreen(
         }
 
 
-    // =============================================
-    // NETWORK MONITOR
-    // =============================================
-
     val networkMonitor =
         remember(
             context
@@ -151,10 +131,6 @@ fun MainScreen(
             )
         }
 
-
-    // =============================================
-    // CHAT VIEWMODEL FACTORY
-    // =============================================
 
     val chatViewModelFactory =
         remember(
@@ -176,7 +152,9 @@ fun MainScreen(
                             )
                     ) {
 
-                        @Suppress("UNCHECKED_CAST")
+                        @Suppress(
+                            "UNCHECKED_CAST"
+                        )
 
                         return ChatViewModel(
 
@@ -198,10 +176,6 @@ fun MainScreen(
         }
 
 
-    // =============================================
-    // CHAT VIEWMODEL
-    // =============================================
-
     val chatViewModel:
             ChatViewModel =
 
@@ -211,11 +185,12 @@ fun MainScreen(
         )
 
 
-    // =============================================
-    // SCAFFOLD
-    // =============================================
-
     Scaffold(
+
+        containerColor =
+            MaterialTheme
+                .colorScheme
+                .background,
 
         bottomBar = {
 
@@ -224,14 +199,9 @@ fun MainScreen(
                 containerColor =
                     MaterialTheme
                         .colorScheme
-                        .background
+                        .surface
 
             ) {
-
-
-                // =================================
-                // INICIO
-                // =================================
 
                 NavigationBarItem(
 
@@ -270,10 +240,6 @@ fun MainScreen(
                 )
 
 
-                // =================================
-                // CATÁLOGO
-                // =================================
-
                 NavigationBarItem(
 
                     selected =
@@ -311,10 +277,6 @@ fun MainScreen(
                 )
 
 
-                // =================================
-                // MENSAJES
-                // =================================
-
                 NavigationBarItem(
 
                     selected =
@@ -348,18 +310,20 @@ fun MainScreen(
                                     Badge(
 
                                         containerColor =
-                                            Color(
-                                                0xFFFFC107
-                                            ),
+                                            MaterialTheme
+                                                .colorScheme
+                                                .secondary,
 
                                         contentColor =
-                                            Color.Black
-
+                                            MaterialTheme
+                                                .colorScheme
+                                                .onSecondary
                                     ) {
 
                                         Text(
 
                                             text =
+
                                                 if (
                                                     totalMensajesNoLeidos > 99
                                                 ) {
@@ -375,7 +339,6 @@ fun MainScreen(
                                     }
                                 }
                             }
-
                         ) {
 
                             Icon(
@@ -399,10 +362,6 @@ fun MainScreen(
                         coloresNavegacion()
                 )
 
-
-                // =================================
-                // PERFIL
-                // =================================
 
                 NavigationBarItem(
 
@@ -442,34 +401,25 @@ fun MainScreen(
             }
         }
 
-    ) { paddingValues ->
+    ) {
+            paddingValues ->
 
 
         when (
             opcionSeleccionada
         ) {
 
-
-            // =====================================
-            // INICIO
-            // =====================================
-
             0 -> {
 
                 PantallaInicio(
 
                     modifier =
-                        Modifier
-                            .padding(
-                                paddingValues
-                            )
+                        Modifier.padding(
+                            paddingValues
+                        )
                 )
             }
 
-
-            // =====================================
-            // CATÁLOGO
-            // =====================================
 
             1 -> {
 
@@ -477,18 +427,12 @@ fun MainScreen(
                     mostrarAgregarProducto
                 ) {
 
-                    // =============================
-                    // NUEVA PUBLICACIÓN
-                    // =============================
-
                     Box(
 
                         modifier =
-                            Modifier
-                                .padding(
-                                    paddingValues
-                                )
-
+                            Modifier.padding(
+                                paddingValues
+                            )
                     ) {
 
                         AgregarProductoScreen(
@@ -512,20 +456,15 @@ fun MainScreen(
 
                 } else {
 
-                    // =============================
-                    // CATÁLOGO PRINCIPAL
-                    // =============================
-
                     PantallaCatalogo(
 
                         correoUsuario =
                             correo,
 
                         modifier =
-                            Modifier
-                                .padding(
-                                    paddingValues
-                                ),
+                            Modifier.padding(
+                                paddingValues
+                            ),
 
                         onAgregarProducto = {
 
@@ -537,29 +476,19 @@ fun MainScreen(
             }
 
 
-            // =====================================
-            // MENSAJES
-            // =====================================
-
             2 -> {
 
                 Box(
 
                     modifier =
-                        Modifier
-                            .padding(
-                                paddingValues
-                            )
-
+                        Modifier.padding(
+                            paddingValues
+                        )
                 ) {
 
                     if (
                         chatIdSeleccionado == null
                     ) {
-
-                        // =============================
-                        // LISTA DE CONVERSACIONES
-                        // =============================
 
                         ListaChatsScreen(
 
@@ -581,10 +510,6 @@ fun MainScreen(
                         )
 
                     } else {
-
-                        // =============================
-                        // CHAT
-                        // =============================
 
                         ChatScreen(
 
@@ -611,10 +536,6 @@ fun MainScreen(
             }
 
 
-            // =====================================
-            // PERFIL
-            // =====================================
-
             3 -> {
 
                 PantallaPerfil(
@@ -628,20 +549,15 @@ fun MainScreen(
                     },
 
                     modifier =
-                        Modifier
-                            .padding(
-                                paddingValues
-                            )
+                        Modifier.padding(
+                            paddingValues
+                        )
                 )
             }
         }
     }
 }
 
-
-// =============================================
-// COLORES DE NAVEGACIÓN
-// =============================================
 
 @Composable
 private fun coloresNavegacion() =
@@ -667,10 +583,10 @@ private fun coloresNavegacion() =
             unselectedIconColor =
                 MaterialTheme
                     .colorScheme
-                    .onBackground,
+                    .onSurface,
 
             unselectedTextColor =
                 MaterialTheme
                     .colorScheme
-                    .onBackground
+                    .onSurface
         )
