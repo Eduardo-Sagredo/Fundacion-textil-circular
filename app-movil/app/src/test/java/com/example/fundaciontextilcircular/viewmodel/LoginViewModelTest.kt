@@ -13,7 +13,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -443,11 +442,144 @@ class LoginViewModelTest {
                 viewModel.uiState.resultado
             )
         }
+
+
+    // =========================================
+    // 6. LIMPIAR RESULTADO
+    // =========================================
+
+    @Test
+    fun `limpiar resultado elimina usuario del estado`() =
+        runTest(
+            mainDispatcherRule.testDispatcher
+        ) {
+
+            val respuesta =
+                LoginResponseDTO(
+
+                    exito =
+                        true,
+
+                    mensaje =
+                        "Inicio de sesión correcto",
+
+                    id =
+                        1L,
+
+                    nombre =
+                        "Usuario Prueba",
+
+                    correo =
+                        "prueba@correo.cl",
+
+                    rol =
+                        "EMPRENDEDORA",
+
+                    estado =
+                        "APROBADA",
+
+                    motivoRechazo =
+                        null,
+
+                    puedeIngresar =
+                        true
+                )
+
+
+            coEvery {
+
+                authRepository.login(
+                    "prueba@correo.cl",
+                    "Clave123!"
+                )
+
+            } returns
+                    Result.success(
+                        respuesta
+                    )
+
+
+            val viewModel =
+                LoginViewModel(
+                    authRepository
+                )
+
+
+            viewModel.iniciarSesion(
+
+                correo =
+                    "prueba@correo.cl",
+
+                contrasena =
+                    "Clave123!",
+
+                isOnline =
+                    true
+            )
+
+
+            advanceUntilIdle()
+
+
+            assertEquals(
+                respuesta,
+                viewModel.uiState.resultado
+            )
+
+
+            viewModel.limpiarResultado()
+
+
+            assertNull(
+                viewModel.uiState.resultado
+            )
+        }
+
+
+    // =========================================
+    // 7. LIMPIAR ERROR
+    // =========================================
+
+    @Test
+    fun `limpiar error elimina mensaje de error`() {
+
+        val viewModel =
+            LoginViewModel(
+                authRepository
+            )
+
+
+        viewModel.iniciarSesion(
+
+            correo =
+                "",
+
+            contrasena =
+                "",
+
+            isOnline =
+                true
+        )
+
+
+        assertEquals(
+            "Debes ingresar correo y contraseña",
+            viewModel.uiState.error
+        )
+
+
+        viewModel.limpiarError()
+
+
+        assertNull(
+            viewModel.uiState.error
+        )
+    }
 }
 
 
 // =========================================
-// REGLA PARA DISPATCHERS.MAIN
+// REGLA PARA DISPATCHERS MAIN
 // =========================================
 
 @OptIn(ExperimentalCoroutinesApi::class)
