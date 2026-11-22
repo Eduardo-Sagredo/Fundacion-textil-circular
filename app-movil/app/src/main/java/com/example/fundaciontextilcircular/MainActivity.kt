@@ -481,6 +481,15 @@ class MainActivity : ComponentActivity() {
 
                     "principal" -> {
 
+                        val context = LocalContext.current
+                        val database = remember { TextilDatabase.getDatabase(context) }
+                        val repositorio = remember {
+                            ChatRepository(
+                                mensajeDao = database.mensajeDao(),
+                                appContext = context.applicationContext
+                            )
+                        }
+                        val networkMonitor = remember { NetworkMonitor(context) }
                         val context =
                             LocalContext.current
 
