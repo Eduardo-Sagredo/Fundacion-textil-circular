@@ -1,19 +1,29 @@
 package com.example.fundaciontextilcircular
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fundaciontextilcircular.data.local.TextilDatabase
 import com.example.fundaciontextilcircular.data.repository.ChatRepository
 import com.example.fundaciontextilcircular.data.utils.NetworkMonitor
 import com.example.fundaciontextilcircular.ui.theme.TextilCircularTheme
+import com.example.fundaciontextilcircular.ui.theme.ThemeManager
 import com.example.fundaciontextilcircular.ui.view.ChatScreen
 import com.example.fundaciontextilcircular.ui.viewmodel.ChatViewModel
 import com.example.fundaciontextilcircular.view.MainScreen
@@ -26,6 +36,7 @@ import com.example.fundaciontextilcircular.view.PantallaRegistro
 import com.example.fundaciontextilcircular.view.PantallaSplash
 import com.google.firebase.auth.FirebaseAuth
 
+
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(
@@ -37,16 +48,86 @@ class MainActivity : ComponentActivity() {
         )
 
 
+        // =========================================
+        // PERMISO RED LOCAL - ANDROID 17 / API 37
+        // =========================================
+
+        if (
+            Build.VERSION.SDK_INT >= 37 &&
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_LOCAL_NETWORK
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+
+            ActivityCompat.requestPermissions(
+
+                this,
+
+                arrayOf(
+                    Manifest.permission.ACCESS_LOCAL_NETWORK
+                ),
+
+                1001
+            )
+        }
+
+
+        // =========================================
+        // INTERFAZ
+        // =========================================
+
         setContent {
 
             TextilCircularTheme {
 
 
                 // =========================================
+                // MODO CLARO / OSCURO
+                // =========================================
+
+                val modoOscuro =
+                    ThemeManager.darkMode
+                        ?: isSystemInDarkTheme()
+
+
+                // =========================================
+                // BARRAS DEL SISTEMA
+                // =========================================
+
+                SideEffect {
+
+                    val controlador =
+                        WindowCompat
+                            .getInsetsController(
+                                window,
+                                window.decorView
+                            )
+
+
+                    // MODO CLARO:
+                    // iconos oscuros
+                    //
+                    // MODO OSCURO:
+                    // iconos claros
+
+                    controlador
+                        .isAppearanceLightStatusBars =
+                        !modoOscuro
+
+
+                    controlador
+                        .isAppearanceLightNavigationBars =
+                        !modoOscuro
+                }
+
+
+                // =========================================
                 // PANTALLA ACTUAL
                 // =========================================
 
-                var pantallaActual by remember {
+                var pantallaActual by
+                remember {
 
                     mutableStateOf(
                         "splash"
@@ -58,7 +139,8 @@ class MainActivity : ComponentActivity() {
                 // CORREO CUENTA EN REVISIÓN
                 // =========================================
 
-                var correoEnRevision by remember {
+                var correoEnRevision by
+                remember {
 
                     mutableStateOf("")
                 }
@@ -68,58 +150,21 @@ class MainActivity : ComponentActivity() {
                 // CORREO USUARIO ACTUAL
                 // =========================================
 
-                var correoUsuarioActual by remember {
+                var correoUsuarioActual by
+                remember {
 
                     mutableStateOf("")
                 }
 
+
                 // =========================================
-                // CHAT SELECCIONADO POR EL ADMIN
+                // CHAT SELECCIONADO POR ADMIN
                 // =========================================
 
-                var chatSeleccionado by remember {
+                var chatSeleccionado by
+                remember {
+
                     mutableStateOf("")
-                }
-
-
-                // =========================================
-                // BARRAS DEL SISTEMA
-                // =========================================
-
-                SideEffect {
-
-                    /*
-                     * Splash:
-                     * fondo crema → iconos oscuros.
-                     *
-                     * Principal:
-                     * fondo claro → iconos oscuros.
-                     *
-                     * Login y demás pantallas oscuras:
-                     * iconos blancos.
-                     */
-
-                    val pantallaClara =
-                        pantallaActual == "splash" ||
-                                pantallaActual == "principal"
-
-
-                    val controlador =
-                        WindowCompat
-                            .getInsetsController(
-                                window,
-                                window.decorView
-                            )
-
-
-                    controlador
-                        .isAppearanceLightStatusBars =
-                        pantallaClara
-
-
-                    controlador
-                        .isAppearanceLightNavigationBars =
-                        pantallaClara
                 }
 
 
@@ -133,7 +178,7 @@ class MainActivity : ComponentActivity() {
 
 
                     // =====================================
-                    // SPLASH ANIMADO
+                    // SPLASH
                     // =====================================
 
                     "splash" -> {
@@ -312,40 +357,119 @@ class MainActivity : ComponentActivity() {
                                     "login"
                             },
 
-                            onVerChat = { idDelChat ->
-                                chatSeleccionado = idDelChat
-                                pantallaActual = "chat_admin"
-                            }
 
+                            onVerChat = {
+                                    idDelChat ->
+
+                                chatSeleccionado =
+                                    idDelChat
+
+                                pantallaActual =
+                                    "chat_admin"
+                            }
                         )
                     }
 
+
                     // =====================================
-                    // CHAT DEL ADMINISTRADOR
+                    // CHAT ADMINISTRADOR
                     // =====================================
+
                     "chat_admin" -> {
-                        val context = LocalContext.current
-                        val database = remember { TextilDatabase.getDatabase(context) }
-                        val repositorio = remember { ChatRepository(database.mensajeDao()) }
-                        val networkMonitor = remember { NetworkMonitor(context) }
 
-                        val adminChatViewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-                            factory = object : androidx.lifecycle.ViewModelProvider.Factory {
-                                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                                    return ChatViewModel(repositorio, networkMonitor) as T
-                                }
+                        val context =
+                            LocalContext.current
+
+
+                        val database =
+                            remember(
+                                context
+                            ) {
+
+                                TextilDatabase
+                                    .getDatabase(
+                                        context
+                                    )
                             }
-                        )
 
-                        adminChatViewModel.esAdmin = true
+
+                        val repositorio =
+                            remember(
+                                database
+                            ) {
+
+                                ChatRepository(
+                                    database
+                                        .mensajeDao()
+                                )
+                            }
+
+
+                        val networkMonitor =
+                            remember(
+                                context
+                            ) {
+
+                                NetworkMonitor(
+                                    context.applicationContext
+                                )
+                            }
+
+
+                        val adminChatViewModel:
+                                ChatViewModel =
+
+                            viewModel(
+
+                                factory =
+
+                                    object :
+                                        ViewModelProvider.Factory {
+
+                                        override fun <T : ViewModel> create(
+                                            modelClass: Class<T>
+                                        ): T {
+
+                                            @Suppress(
+                                                "UNCHECKED_CAST"
+                                            )
+
+                                            return ChatViewModel(
+
+                                                repository =
+                                                    repositorio,
+
+                                                networkMonitor =
+                                                    networkMonitor
+
+                                            ) as T
+                                        }
+                                    }
+                            )
+
+
+                        adminChatViewModel.esAdmin =
+                            true
+
 
                         ChatScreen(
-                            chatId = chatSeleccionado,
-                            nombreChat = "Soporte Técnico (Ticket)",
-                            viewModel = adminChatViewModel,
+
+                            chatId =
+                                chatSeleccionado,
+
+                            nombreChat =
+                                "Soporte Técnico (Ticket)",
+
+                            viewModel =
+                                adminChatViewModel,
+
                             onVolver = {
-                                pantallaActual = "admin"
-                                chatSeleccionado = ""
+
+                                pantallaActual =
+                                    "admin"
+
+                                chatSeleccionado =
+                                    ""
                             }
                         )
                     }
@@ -357,20 +481,80 @@ class MainActivity : ComponentActivity() {
 
                     "principal" -> {
 
-                        val context = LocalContext.current
-                        val database = remember { TextilDatabase.getDatabase(context) }
-                        val repositorio = remember { ChatRepository(database.mensajeDao()) }
-                        val networkMonitor = remember { NetworkMonitor(context) }
+                        val context =
+                            LocalContext.current
 
-                        val userChatViewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-                            factory = object : androidx.lifecycle.ViewModelProvider.Factory {
-                                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                                    return ChatViewModel(repositorio, networkMonitor) as T
-                                }
+
+                        val database =
+                            remember(
+                                context
+                            ) {
+
+                                TextilDatabase
+                                    .getDatabase(
+                                        context
+                                    )
                             }
-                        )
 
-                        userChatViewModel.esAdmin = false
+
+                        val repositorio =
+                            remember(
+                                database
+                            ) {
+
+                                ChatRepository(
+                                    database
+                                        .mensajeDao()
+                                )
+                            }
+
+
+                        val networkMonitor =
+                            remember(
+                                context
+                            ) {
+
+                                NetworkMonitor(
+                                    context.applicationContext
+                                )
+                            }
+
+
+                        val userChatViewModel:
+                                ChatViewModel =
+
+                            viewModel(
+
+                                factory =
+
+                                    object :
+                                        ViewModelProvider.Factory {
+
+                                        override fun <T : ViewModel> create(
+                                            modelClass: Class<T>
+                                        ): T {
+
+                                            @Suppress(
+                                                "UNCHECKED_CAST"
+                                            )
+
+                                            return ChatViewModel(
+
+                                                repository =
+                                                    repositorio,
+
+                                                networkMonitor =
+                                                    networkMonitor
+
+                                            ) as T
+                                        }
+                                    }
+                            )
+
+
+                        userChatViewModel.esAdmin =
+                            false
+
 
                         MainScreen(
 
@@ -379,6 +563,7 @@ class MainActivity : ComponentActivity() {
 
 
                             onCerrarSesion = {
+
 
                                 // =================================
                                 // CERRAR FIREBASE
@@ -412,7 +597,7 @@ class MainActivity : ComponentActivity() {
 
 
                     // =====================================
-                    // SEGURIDAD
+                    // SEGURIDAD / PANTALLA DESCONOCIDA
                     // =====================================
 
                     else -> {
