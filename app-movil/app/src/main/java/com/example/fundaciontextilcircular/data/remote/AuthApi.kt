@@ -3,9 +3,12 @@ package com.example.fundaciontextilcircular.data.remote
 import com.example.fundaciontextilcircular.data.remote.dto.CambiarContrasenaRequestDTO
 import com.example.fundaciontextilcircular.data.remote.dto.LoginRequestDTO
 import com.example.fundaciontextilcircular.data.remote.dto.LoginResponseDTO
+import com.example.fundaciontextilcircular.data.remote.dto.OlvideContrasenaRequestDTO
 import com.example.fundaciontextilcircular.data.remote.dto.PerfilResponseDTO
 import com.example.fundaciontextilcircular.data.remote.dto.RegistroRequestDTO
 import com.example.fundaciontextilcircular.data.remote.dto.RegistroResponseDTO
+import com.example.fundaciontextilcircular.data.remote.dto.RestablecerContrasenaRequestDTO
+
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -36,7 +39,26 @@ interface AuthApi {
 
     @PUT("api/auth/cambiar-contrasena")
     suspend fun cambiarContrasena(
-        @Body
-        request: CambiarContrasenaRequestDTO
+        @Body request: CambiarContrasenaRequestDTO
+    ): Response<Map<String, String>>
+
+
+    // =========================================
+    // OLVIDÉ MI CONTRASEÑA
+    // =========================================
+
+    @POST("api/auth/olvide-contrasena")
+    suspend fun olvideContrasena(
+        @Body request: OlvideContrasenaRequestDTO
+    ): Response<Map<String, String>>
+
+
+    // =========================================
+    // RESTABLECER CONTRASEÑA
+    // =========================================
+
+    @POST("api/auth/restablecer-contrasena")
+    suspend fun restablecerContrasena(
+        @Body request: RestablecerContrasenaRequestDTO
     ): Response<Map<String, String>>
 }
