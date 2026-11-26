@@ -64,6 +64,39 @@ public class AdminService {
     }
 
 
+    public List<AdminSolicitudDTO> buscarUsuariosPorNombre(
+            String nombre
+    ) {
+
+        String filtro =
+                nombre == null ? "" : nombre.trim().toLowerCase();
+
+        return emprendedoraRepository
+                .findAll()
+                .stream()
+                .filter(e -> !"ADMIN".equalsIgnoreCase(e.getRol()))
+                .filter(e -> filtro.isEmpty() ||
+                        (e.getNombre() != null &&
+                                e.getNombre().toLowerCase().contains(filtro)))
+                .map(this::convertirADTO)
+                .toList();
+    }
+
+    public void eliminarUsuario(Long id) {
+
+        Emprendedora emprendedora =
+                buscarPorId(id);
+
+        if ("ADMIN".equalsIgnoreCase(emprendedora.getRol())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No se puede eliminar una cuenta de administrador"
+            );
+        }
+
+        emprendedoraRepository.delete(emprendedora);
+    }
+
     private Emprendedora buscarPorId(Long id) {
 
         return emprendedoraRepository
@@ -71,11 +104,10 @@ public class AdminService {
                 .orElseThrow(
                         () -> new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
-                                "Solicitud no encontrada"
+                                "Usuario no encontrado"
                         )
                 );
     }
-
 
     private AdminSolicitudDTO convertirADTO(
             Emprendedora emprendedora

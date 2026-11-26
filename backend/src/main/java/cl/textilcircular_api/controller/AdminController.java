@@ -9,13 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -66,5 +60,26 @@ public class AdminController {
                         request.getMotivo()
                 )
         );
+    }
+
+    @GetMapping("/usuarios")
+    public ResponseEntity<List<AdminSolicitudDTO>>
+    buscarUsuarios(
+            @RequestParam(defaultValue = "") String nombre
+    ) {
+
+        return ResponseEntity.ok(
+                adminService.buscarUsuariosPorNombre(nombre)
+        );
+    }
+
+    @DeleteMapping("/usuarios/{id}")
+    public ResponseEntity<Void>
+    eliminarUsuario(
+            @PathVariable Long id
+    ) {
+
+        adminService.eliminarUsuario(id);
+        return ResponseEntity.noContent().build();
     }
 }
