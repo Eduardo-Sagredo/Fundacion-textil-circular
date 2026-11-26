@@ -46,13 +46,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.fundaciontextilcircular.data.local.TextilDatabase
-import com.example.fundaciontextilcircular.data.local.entities.ProductoEntity
+import com.example.fundaciontextilcircular.data.remote.RetrofitClient
+import com.example.fundaciontextilcircular.data.repository.AuthRepository
 import com.example.fundaciontextilcircular.data.utils.ImageCompressor
+import com.example.fundaciontextilcircular.ui.viewmodel.ProductoViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun AgregarProductoScreen(
     correoUsuario: String,
+    productoViewModel: ProductoViewModel,
     onProductoPublicado: () -> Unit,
     onVolver: () -> Unit
 ) {
@@ -64,12 +67,12 @@ fun AgregarProductoScreen(
         TextilDatabase.getDatabase(context)
     }
 
-    val productoDao = remember(database) {
-        database.productoDao()
-    }
-
     val emprendedoraDao = remember(database) {
         database.emprendedoraDao()
+    }
+
+    val authRepository = remember {
+        AuthRepository(RetrofitClient.authApi)
     }
 
 
@@ -116,12 +119,9 @@ fun AgregarProductoScreen(
 
     val galeriaLauncher =
         rememberLauncherForActivityResult(
-            contract =
-                ActivityResultContracts.PickVisualMedia()
+            contract = ActivityResultContracts.PickVisualMedia()
         ) { uri ->
-
             if (uri != null) {
-
                 rutaFinalImagen =
                     ImageCompressor.comprimirYGuardar(
                         context,
@@ -129,8 +129,7 @@ fun AgregarProductoScreen(
                     )
 
                 if (rutaFinalImagen == null) {
-                    mensajeError =
-                        "No se pudo procesar la imagen."
+                    mensajeError = "No se pudo procesar la imagen."
                 }
             }
         }
@@ -142,15 +141,9 @@ fun AgregarProductoScreen(
 
     val camaraLauncher =
         rememberLauncherForActivityResult(
-            contract =
-                ActivityResultContracts.TakePicture()
+            contract = ActivityResultContracts.TakePicture()
         ) { exitoso ->
-
-            if (
-                exitoso &&
-                tempCamaraUri != null
-            ) {
-
+            if (exitoso && tempCamaraUri != null) {
                 rutaFinalImagen =
                     ImageCompressor.comprimirYGuardar(
                         context,
@@ -158,8 +151,7 @@ fun AgregarProductoScreen(
                     )
 
                 if (rutaFinalImagen == null) {
-                    mensajeError =
-                        "No se pudo procesar la fotografía."
+                    mensajeError = "No se pudo procesar la fotografía."
                 }
             }
         }
@@ -171,26 +163,16 @@ fun AgregarProductoScreen(
 
     val permisoCamaraLauncher =
         rememberLauncherForActivityResult(
-            contract =
-                ActivityResultContracts.RequestPermission()
+            contract = ActivityResultContracts.RequestPermission()
         ) { concedido ->
-
             if (concedido) {
-
                 val uri =
-                    ImageCompressor
-                        .crearUriTemporalParaCamara(
-                            context
-                        )
+                    ImageCompressor.crearUriTemporalParaCamara(context)
 
                 tempCamaraUri = uri
-
                 camaraLauncher.launch(uri)
-
             } else {
-
-                mensajeError =
-                    "Necesitas permitir el acceso a la cámara."
+                mensajeError = "Necesitas permitir el acceso a la cámara."
             }
         }
 
@@ -201,9 +183,7 @@ fun AgregarProductoScreen(
 
     val bitmap =
         remember(rutaFinalImagen) {
-
             rutaFinalImagen?.let { ruta ->
-
                 BitmapFactory
                     .decodeFile(ruta)
                     ?.asImageBitmap()
@@ -214,44 +194,25 @@ fun AgregarProductoScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(
-                rememberScrollState()
-            )
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
 
-        Spacer(
-            modifier =
-                Modifier.height(20.dp)
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "Nueva publicación",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
         )
 
         Text(
-            text =
-                "Nueva publicación",
-            style =
-                MaterialTheme
-                    .typography
-                    .headlineMedium,
-            fontWeight =
-                FontWeight.Bold
+            text = "Publica un producto o servicio en el catálogo.",
+            color = Color.Gray,
+            style = MaterialTheme.typography.bodyMedium
         )
 
-        Text(
-            text =
-                "Publica un producto o servicio en el catálogo.",
-            color =
-                Color.Gray,
-            style =
-                MaterialTheme
-                    .typography
-                    .bodyMedium
-        )
-
-
-        Spacer(
-            modifier =
-                Modifier.height(20.dp)
-        )
+        Spacer(modifier = Modifier.height(20.dp))
 
 
         // =========================
@@ -260,29 +221,14 @@ fun AgregarProductoScreen(
 
         OutlinedTextField(
             value = nombre,
-            onValueChange = {
-                nombre = it
-            },
-            modifier =
-                Modifier.fillMaxWidth(),
-            label = {
-                Text(
-                    "Nombre"
-                )
-            },
-            placeholder = {
-                Text(
-                    "Ej: Bolso reciclado"
-                )
-            },
+            onValueChange = { nombre = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Nombre") },
+            placeholder = { Text("Ej: Bolso reciclado") },
             singleLine = true
         )
 
-
-        Spacer(
-            modifier =
-                Modifier.height(12.dp)
-        )
+        Spacer(modifier = Modifier.height(12.dp))
 
 
         // =========================
@@ -290,85 +236,47 @@ fun AgregarProductoScreen(
         // =========================
 
         Text(
-            text =
-                "Tipo de publicación",
-            fontWeight =
-                FontWeight.SemiBold
+            text = "Tipo de publicación",
+            fontWeight = FontWeight.SemiBold
         )
 
-        Spacer(
-            modifier =
-                Modifier.height(8.dp)
-        )
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
-            modifier =
-                Modifier.fillMaxWidth(),
-            horizontalArrangement =
-                Arrangement.spacedBy(
-                    10.dp
-                )
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
             Button(
-                onClick = {
-                    tipo = "PRODUCTO"
-                },
-                modifier =
-                    Modifier.weight(1f),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor =
-                            if (
-                                tipo == "PRODUCTO"
-                            ) {
-                                Color(
-                                    0xFF00A6A6
-                                )
-                            } else {
-                                Color.Gray
-                            }
-                    )
-            ) {
-
-                Text(
-                    "Producto"
+                onClick = { tipo = "PRODUCTO" },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (tipo == "PRODUCTO") {
+                        Color(0xFF00A6A6)
+                    } else {
+                        Color.Gray
+                    }
                 )
+            ) {
+                Text("Producto")
             }
 
-
             Button(
-                onClick = {
-                    tipo = "SERVICIO"
-                },
-                modifier =
-                    Modifier.weight(1f),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor =
-                            if (
-                                tipo == "SERVICIO"
-                            ) {
-                                Color(
-                                    0xFF00A6A6
-                                )
-                            } else {
-                                Color.Gray
-                            }
-                    )
-            ) {
-
-                Text(
-                    "Servicio"
+                onClick = { tipo = "SERVICIO" },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (tipo == "SERVICIO") {
+                        Color(0xFF00A6A6)
+                    } else {
+                        Color.Gray
+                    }
                 )
+            ) {
+                Text("Servicio")
             }
         }
 
-
-        Spacer(
-            modifier =
-                Modifier.height(12.dp)
-        )
+        Spacer(modifier = Modifier.height(12.dp))
 
 
         // =========================
@@ -376,32 +284,16 @@ fun AgregarProductoScreen(
         // =========================
 
         OutlinedTextField(
-            value =
-                descripcion,
-            onValueChange = {
-                descripcion = it
-            },
-            modifier =
-                Modifier.fillMaxWidth(),
-            label = {
-                Text(
-                    "Descripción"
-                )
-            },
-            placeholder = {
-                Text(
-                    "Describe tu producto o servicio"
-                )
-            },
+            value = descripcion,
+            onValueChange = { descripcion = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Descripción") },
+            placeholder = { Text("Describe tu producto o servicio") },
             minLines = 3,
             maxLines = 5
         )
 
-
-        Spacer(
-            modifier =
-                Modifier.height(12.dp)
-        )
+        Spacer(modifier = Modifier.height(12.dp))
 
 
         // =========================
@@ -409,43 +301,22 @@ fun AgregarProductoScreen(
         // =========================
 
         OutlinedTextField(
-            value =
-                precio,
+            value = precio,
             onValueChange = { nuevoValor ->
-
-                if (
-                    nuevoValor.all {
-                        it.isDigit()
-                    }
-                ) {
+                if (nuevoValor.all { it.isDigit() }) {
                     precio = nuevoValor
                 }
             },
-            modifier =
-                Modifier.fillMaxWidth(),
-            label = {
-                Text(
-                    "Precio"
-                )
-            },
-            prefix = {
-                Text(
-                    "$"
-                )
-            },
-            keyboardOptions =
-                KeyboardOptions(
-                    keyboardType =
-                        KeyboardType.Number
-                ),
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Precio") },
+            prefix = { Text("$") },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ),
             singleLine = true
         )
 
-
-        Spacer(
-            modifier =
-                Modifier.height(18.dp)
-        )
+        Spacer(modifier = Modifier.height(18.dp))
 
 
         // =========================
@@ -453,96 +324,54 @@ fun AgregarProductoScreen(
         // =========================
 
         Text(
-            text =
-                "Imagen",
-            style =
-                MaterialTheme
-                    .typography
-                    .titleMedium,
-            fontWeight =
-                FontWeight.Bold
+            text = "Imagen",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
         )
 
-        Spacer(
-            modifier =
-                Modifier.height(8.dp)
-        )
-
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
-            modifier =
-                Modifier.fillMaxWidth(),
-            horizontalArrangement =
-                Arrangement.spacedBy(
-                    10.dp
-                )
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
             OutlinedButton(
                 onClick = {
-
                     galeriaLauncher.launch(
                         PickVisualMediaRequest(
-                            ActivityResultContracts
-                                .PickVisualMedia
-                                .ImageOnly
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
                         )
                     )
                 },
-                modifier =
-                    Modifier.weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
-
-                Text(
-                    "Galería"
-                )
+                Text("Galería")
             }
-
 
             OutlinedButton(
                 onClick = {
-
                     val permisoConcedido =
-
-                        ContextCompat
-                            .checkSelfPermission(
-                                context,
-                                Manifest.permission.CAMERA
-                            ) ==
-                                PackageManager.PERMISSION_GRANTED
-
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.CAMERA
+                        ) == PackageManager.PERMISSION_GRANTED
 
                     if (permisoConcedido) {
-
                         val uri =
-                            ImageCompressor
-                                .crearUriTemporalParaCamara(
-                                    context
-                                )
+                            ImageCompressor.crearUriTemporalParaCamara(context)
 
-                        tempCamaraUri =
-                            uri
-
-                        camaraLauncher
-                            .launch(
-                                uri
-                            )
-
+                        tempCamaraUri = uri
+                        camaraLauncher.launch(uri)
                     } else {
-
-                        permisoCamaraLauncher
-                            .launch(
-                                Manifest.permission.CAMERA
-                            )
+                        permisoCamaraLauncher.launch(
+                            Manifest.permission.CAMERA
+                        )
                     }
                 },
-                modifier =
-                    Modifier.weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
-
-                Text(
-                    "Cámara"
-                )
+                Text("Cámara")
             }
         }
 
@@ -552,67 +381,32 @@ fun AgregarProductoScreen(
         // =========================
 
         bitmap?.let { imagen ->
-
-            Spacer(
-                modifier =
-                    Modifier.height(16.dp)
-            )
+            Spacer(modifier = Modifier.height(16.dp))
 
             Card(
-                modifier =
-                    Modifier.fillMaxWidth(),
-                shape =
-                    RoundedCornerShape(
-                        16.dp
-                    ),
-                elevation =
-                    CardDefaults
-                        .cardElevation(
-                            defaultElevation =
-                                3.dp
-                        )
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
             ) {
-
                 Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                12.dp
-                            ),
-                    horizontalAlignment =
-                        Alignment.CenterHorizontally
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
                     Image(
-                        bitmap =
-                            imagen,
-                        contentDescription =
-                            "Imagen seleccionada",
-                        modifier =
-                            Modifier
-                                .size(
-                                    220.dp
-                                )
-                                .clip(
-                                    RoundedCornerShape(
-                                        12.dp
-                                    )
-                                )
+                        bitmap = imagen,
+                        contentDescription = "Imagen seleccionada",
+                        modifier = Modifier
+                            .size(220.dp)
+                            .clip(RoundedCornerShape(12.dp))
                     )
 
-                    Spacer(
-                        modifier =
-                            Modifier.height(
-                                8.dp
-                            )
-                    )
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text =
-                            "Imagen seleccionada",
-                        color =
-                            Color.Gray
+                        text = "Imagen seleccionada",
+                        color = Color.Gray
                     )
                 }
             }
@@ -624,31 +418,15 @@ fun AgregarProductoScreen(
         // =========================
 
         mensajeError?.let { error ->
-
-            Spacer(
-                modifier =
-                    Modifier.height(
-                        12.dp
-                    )
-            )
+            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text =
-                    error,
-                color =
-                    MaterialTheme
-                        .colorScheme
-                        .error
+                text = error,
+                color = MaterialTheme.colorScheme.error
             )
         }
 
-
-        Spacer(
-            modifier =
-                Modifier.height(
-                    24.dp
-                )
-        )
+        Spacer(modifier = Modifier.height(24.dp))
 
 
         // =========================
@@ -657,174 +435,92 @@ fun AgregarProductoScreen(
 
         Button(
             onClick = {
-
-                mensajeError =
-                    null
-
-                val precioNumero =
-                    precio.toIntOrNull()
-
+                mensajeError = null
+                val precioNumero = precio.toIntOrNull()
 
                 when {
-
                     nombre.isBlank() -> {
-
-                        mensajeError =
-                            "Debes ingresar un nombre."
+                        mensajeError = "Debes ingresar un nombre."
                     }
-
 
                     descripcion.isBlank() -> {
-
-                        mensajeError =
-                            "Debes ingresar una descripción."
+                        mensajeError = "Debes ingresar una descripción."
                     }
 
-
-                    precioNumero == null ||
-                            precioNumero <= 0 -> {
-
-                        mensajeError =
-                            "Debes ingresar un precio válido."
+                    precioNumero == null || precioNumero <= 0 -> {
+                        mensajeError = "Debes ingresar un precio válido."
                     }
-
 
                     rutaFinalImagen == null -> {
-
-                        mensajeError =
-                            "Debes seleccionar o tomar una imagen."
+                        mensajeError = "Debes seleccionar o tomar una imagen."
                     }
 
-
                     else -> {
-
-                        guardando =
-                            true
+                        guardando = true
 
                         scope.launch {
+                            val correoNormalizado = correoUsuario.trim().lowercase()
+                            val emprendedoraLocal =
+                                emprendedoraDao.obtenerPorCorreo(correoNormalizado)
 
-                            val emprendedora =
-                                emprendedoraDao
-                                    .obtenerPorCorreo(
-                                        correoUsuario
-                                            .trim()
-                                            .lowercase()
-                                    )
+                            var correoFinal = emprendedoraLocal?.correo
+                            var emprendimientoFinal = emprendedoraLocal?.nombreEmprendimiento
 
+                            if (correoFinal == null || emprendimientoFinal == null) {
+                                val perfilRemoto = authRepository
+                                    .obtenerPerfil(correoNormalizado)
+                                    .getOrNull()
 
-                            if (
-                                emprendedora == null
-                            ) {
+                                correoFinal = perfilRemoto?.correo
+                                emprendimientoFinal = perfilRemoto?.nombreEmprendimiento
+                            }
 
+                            if (correoFinal.isNullOrBlank() || emprendimientoFinal.isNullOrBlank()) {
                                 mensajeError =
                                     "No se encontraron los datos de la emprendedora."
-
-                                guardando =
-                                    false
-
+                                guardando = false
                                 return@launch
                             }
 
+                            productoViewModel.crearProducto(
+                                nombre = nombre.trim(),
+                                descripcion = descripcion.trim(),
+                                precio = precioNumero,
+                                tipo = tipo,
+                                imagenRuta = rutaFinalImagen,
+                                correoEmprendedora = correoFinal,
+                                nombreEmprendimiento = emprendimientoFinal
+                            )
 
-                            val nuevaPublicacion =
-                                ProductoEntity(
-
-                                    nombre =
-                                        nombre.trim(),
-
-                                    descripcion =
-                                        descripcion.trim(),
-
-                                    precio =
-                                        precioNumero,
-
-                                    tipo =
-                                        tipo,
-
-                                    imagenRuta =
-                                        rutaFinalImagen,
-
-                                    correoEmprendedora =
-                                        emprendedora.correo,
-
-                                    nombreEmprendimiento =
-                                        emprendedora
-                                            .nombreEmprendimiento
-                                )
-
-
-                            productoDao
-                                .insertarProducto(
-                                    nuevaPublicacion
-                                )
-
-
-                            guardando =
-                                false
-
+                            guardando = false
                             onProductoPublicado()
                         }
                     }
                 }
             },
-            enabled =
-                !guardando,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(
-                        55.dp
-                    ),
-            colors =
-                ButtonDefaults
-                    .buttonColors(
-                        containerColor =
-                            Color(
-                                0xFF00A6A6
-                            )
-                    )
+            enabled = !guardando,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF00A6A6)
+            )
         ) {
-
             Text(
-                text =
-                    if (guardando) {
-                        "PUBLICANDO..."
-                    } else {
-                        "PUBLICAR"
-                    },
-                fontWeight =
-                    FontWeight.Bold
+                text = if (guardando) "PUBLICANDO..." else "PUBLICAR",
+                fontWeight = FontWeight.Bold
             )
         }
 
-
-        Spacer(
-            modifier =
-                Modifier.height(
-                    10.dp
-                )
-        )
-
+        Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedButton(
-            onClick =
-                onVolver,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
+            onClick = onVolver,
+            modifier = Modifier.fillMaxWidth()
         ) {
-
-            Text(
-                "Cancelar"
-            )
+            Text("Cancelar")
         }
 
-
-        Spacer(
-            modifier =
-                Modifier.height(
-                    30.dp
-                )
-        )
+        Spacer(modifier = Modifier.height(30.dp))
     }
 }

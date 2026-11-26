@@ -21,11 +21,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fundaciontextilcircular.data.local.TextilDatabase
 import com.example.fundaciontextilcircular.data.repository.ChatRepository
+import com.example.fundaciontextilcircular.data.repository.ProductoRepository
 import com.example.fundaciontextilcircular.data.utils.NetworkMonitor
 import com.example.fundaciontextilcircular.ui.theme.TextilCircularTheme
 import com.example.fundaciontextilcircular.ui.theme.ThemeManager
 import com.example.fundaciontextilcircular.ui.view.ChatScreen
 import com.example.fundaciontextilcircular.ui.viewmodel.ChatViewModel
+import com.example.fundaciontextilcircular.ui.viewmodel.ProductoViewModel
 import com.example.fundaciontextilcircular.view.MainScreen
 import com.example.fundaciontextilcircular.view.PantallaAdmin
 import com.example.fundaciontextilcircular.view.PantallaBienvenida
@@ -36,7 +38,6 @@ import com.example.fundaciontextilcircular.view.PantallaRegistro
 import com.example.fundaciontextilcircular.view.PantallaSplash
 import com.google.firebase.auth.FirebaseAuth
 
-
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(
@@ -46,7 +47,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(
             savedInstanceState
         )
-
 
         // =========================================
         // PERMISO RED LOCAL - ANDROID 17 / API 37
@@ -59,19 +59,12 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.ACCESS_LOCAL_NETWORK
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-
             ActivityCompat.requestPermissions(
-
                 this,
-
-                arrayOf(
-                    Manifest.permission.ACCESS_LOCAL_NETWORK
-                ),
-
+                arrayOf(Manifest.permission.ACCESS_LOCAL_NETWORK),
                 1001
             )
         }
-
 
         // =========================================
         // INTERFAZ
@@ -81,7 +74,6 @@ class MainActivity : ComponentActivity() {
 
             TextilCircularTheme {
 
-
                 // =========================================
                 // MODO CLARO / OSCURO
                 // =========================================
@@ -90,13 +82,11 @@ class MainActivity : ComponentActivity() {
                     ThemeManager.darkMode
                         ?: isSystemInDarkTheme()
 
-
                 // =========================================
                 // BARRAS DEL SISTEMA
                 // =========================================
 
                 SideEffect {
-
                     val controlador =
                         WindowCompat
                             .getInsetsController(
@@ -104,516 +94,287 @@ class MainActivity : ComponentActivity() {
                                 window.decorView
                             )
 
-
-                    // MODO CLARO:
-                    // iconos oscuros
-                    //
-                    // MODO OSCURO:
-                    // iconos claros
-
-                    controlador
-                        .isAppearanceLightStatusBars =
-                        !modoOscuro
-
-
-                    controlador
-                        .isAppearanceLightNavigationBars =
-                        !modoOscuro
+                    controlador.isAppearanceLightStatusBars = !modoOscuro
+                    controlador.isAppearanceLightNavigationBars = !modoOscuro
                 }
-
 
                 // =========================================
                 // PANTALLA ACTUAL
                 // =========================================
 
-                var pantallaActual by
-                remember {
-
-                    mutableStateOf(
-                        "splash"
-                    )
+                var pantallaActual by remember {
+                    mutableStateOf("splash")
                 }
-
 
                 // =========================================
                 // CORREO CUENTA EN REVISIÓN
                 // =========================================
 
-                var correoEnRevision by
-                remember {
-
+                var correoEnRevision by remember {
                     mutableStateOf("")
                 }
-
 
                 // =========================================
                 // CORREO USUARIO ACTUAL
                 // =========================================
 
-                var correoUsuarioActual by
-                remember {
-
+                var correoUsuarioActual by remember {
                     mutableStateOf("")
                 }
-
 
                 // =========================================
                 // CHAT SELECCIONADO POR ADMIN
                 // =========================================
 
-                var chatSeleccionado by
-                remember {
-
+                var chatSeleccionado by remember {
                     mutableStateOf("")
                 }
-
 
                 // =========================================
                 // NAVEGACIÓN
                 // =========================================
 
-                when (
-                    pantallaActual
-                ) {
-
+                when (pantallaActual) {
 
                     // =====================================
                     // SPLASH
                     // =====================================
 
                     "splash" -> {
-
                         PantallaSplash(
-
                             onFinalizar = {
-
-                                pantallaActual =
-                                    "bienvenida"
+                                pantallaActual = "bienvenida"
                             }
                         )
                     }
-
 
                     // =====================================
                     // BIENVENIDA
                     // =====================================
 
                     "bienvenida" -> {
-
                         PantallaBienvenida(
-
                             onIniciarSesion = {
-
-                                pantallaActual =
-                                    "login"
+                                pantallaActual = "login"
                             },
-
                             onCrearCuenta = {
-
-                                pantallaActual =
-                                    "registro"
+                                pantallaActual = "registro"
                             }
                         )
                     }
-
 
                     // =====================================
                     // LOGIN
                     // =====================================
 
                     "login" -> {
-
                         PantallaLogin(
-
                             onIngresarAdmin = {
-
-                                pantallaActual =
-                                    "admin"
+                                pantallaActual = "admin"
                             },
-
-
-                            onIngresarUsuario = {
-                                    correo ->
-
-                                correoUsuarioActual =
-                                    correo
-
-                                pantallaActual =
-                                    "principal"
+                            onIngresarUsuario = { correo ->
+                                correoUsuarioActual = correo
+                                pantallaActual = "principal"
                             },
-
-
-                            onCuentaEnRevision = {
-                                    correo ->
-
-                                correoEnRevision =
-                                    correo
-
-                                pantallaActual =
-                                    "revision"
+                            onCuentaEnRevision = { correo ->
+                                correoEnRevision = correo
+                                pantallaActual = "revision"
                             },
-
-
                             onCrearCuenta = {
-
-                                pantallaActual =
-                                    "registro"
+                                pantallaActual = "registro"
                             },
-
-
                             onOlvideContrasena = {
-
-                                pantallaActual =
-                                    "recuperarContrasena"
+                                pantallaActual = "recuperarContrasena"
                             },
-
-
                             onVolver = {
-
-                                pantallaActual =
-                                    "bienvenida"
+                                pantallaActual = "bienvenida"
                             }
                         )
                     }
-
 
                     // =====================================
                     // RECUPERAR CONTRASEÑA
                     // =====================================
 
                     "recuperarContrasena" -> {
-
                         PantallaRecuperarContrasena(
-
                             onVolver = {
-
-                                pantallaActual =
-                                    "login"
+                                pantallaActual = "login"
                             }
                         )
                     }
-
 
                     // =====================================
                     // REGISTRO
                     // =====================================
 
                     "registro" -> {
-
                         PantallaRegistro(
-
-                            onRegistrar = {
-                                    correo ->
-
-                                correoEnRevision =
-                                    correo
-
-                                pantallaActual =
-                                    "revision"
+                            onRegistrar = { correo ->
+                                correoEnRevision = correo
+                                pantallaActual = "revision"
                             },
-
-
                             onVolver = {
-
-                                pantallaActual =
-                                    "bienvenida"
+                                pantallaActual = "bienvenida"
                             }
                         )
                     }
-
 
                     // =====================================
                     // CUENTA EN REVISIÓN
                     // =====================================
 
                     "revision" -> {
-
                         PantallaCuentaEnRevision(
-
-                            correo =
-                                correoEnRevision,
-
-
+                            correo = correoEnRevision,
                             onVolverInicioSesion = {
-
-                                pantallaActual =
-                                    "login"
+                                pantallaActual = "login"
                             }
                         )
                     }
-
 
                     // =====================================
                     // ADMINISTRADOR
                     // =====================================
 
                     "admin" -> {
-
                         PantallaAdmin(
-
                             onCerrarSesion = {
-
-                                pantallaActual =
-                                    "login"
+                                pantallaActual = "login"
                             },
-
-
-                            onVerChat = {
-                                    idDelChat ->
-
-                                chatSeleccionado =
-                                    idDelChat
-
-                                pantallaActual =
-                                    "chat_admin"
+                            onVerChat = { idDelChat ->
+                                chatSeleccionado = idDelChat
+                                pantallaActual = "chat_admin"
                             }
                         )
                     }
-
 
                     // =====================================
                     // CHAT ADMINISTRADOR
                     // =====================================
 
                     "chat_admin" -> {
-
-                        val context =
-                            LocalContext.current
-
-
-                        val database =
-                            remember(
-                                context
-                            ) {
-
-                                TextilDatabase
-                                    .getDatabase(
-                                        context
-                                    )
-                            }
-
-
-                        val repositorio =
-                            remember(
-                                database
-                            ) {
-
-                                ChatRepository(
-                                    database
-                                        .mensajeDao()
-                                )
-                            }
-
-
-                        val networkMonitor =
-                            remember(
-                                context
-                            ) {
-
-                                NetworkMonitor(
-                                    context.applicationContext
-                                )
-                            }
-
-
-                        val adminChatViewModel:
-                                ChatViewModel =
-
-                            viewModel(
-
-                                factory =
-
-                                    object :
-                                        ViewModelProvider.Factory {
-
-                                        override fun <T : ViewModel> create(
-                                            modelClass: Class<T>
-                                        ): T {
-
-                                            @Suppress(
-                                                "UNCHECKED_CAST"
-                                            )
-
-                                            return ChatViewModel(
-
-                                                repository =
-                                                    repositorio,
-
-                                                networkMonitor =
-                                                    networkMonitor
-
-                                            ) as T
-                                        }
-                                    }
+                        val context = LocalContext.current
+                        val database = remember(context) {
+                            TextilDatabase.getDatabase(context)
+                        }
+                        val repositorio = remember(database) {
+                            ChatRepository(
+                                mensajeDao = database.mensajeDao(),
+                                appContext = context.applicationContext
                             )
+                        }
+                        val networkMonitor = remember(context) {
+                            NetworkMonitor(context.applicationContext)
+                        }
 
+                        val adminChatViewModel: ChatViewModel = viewModel(
+                            factory = object : ViewModelProvider.Factory {
+                                @Suppress("UNCHECKED_CAST")
+                                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                    return ChatViewModel(
+                                        repository = repositorio,
+                                        networkMonitor = networkMonitor
+                                    ) as T
+                                }
+                            }
+                        )
 
-                        adminChatViewModel.esAdmin =
-                            true
-
+                        adminChatViewModel.esAdmin = true
 
                         ChatScreen(
-
-                            chatId =
-                                chatSeleccionado,
-
-                            nombreChat =
-                                "Soporte Técnico (Ticket)",
-
-                            viewModel =
-                                adminChatViewModel,
-
+                            chatId = chatSeleccionado,
+                            nombreChat = "Soporte Técnico (Ticket)",
+                            viewModel = adminChatViewModel,
                             onVolver = {
-
-                                pantallaActual =
-                                    "admin"
-
-                                chatSeleccionado =
-                                    ""
+                                pantallaActual = "admin"
+                                chatSeleccionado = ""
                             }
                         )
                     }
-
 
                     // =====================================
                     // USUARIO PRINCIPAL
                     // =====================================
 
                     "principal" -> {
+                        val context = LocalContext.current
+                        val database = remember(context) {
+                            TextilDatabase.getDatabase(context)
+                        }
+                        val networkMonitor = remember(context) {
+                            NetworkMonitor(context.applicationContext)
+                        }
 
-                        val context =
-                            LocalContext.current
-
-
-                        val database =
-                            remember(
-                                context
-                            ) {
-
-                                TextilDatabase
-                                    .getDatabase(
-                                        context
-                                    )
-                            }
-
-
-                        val repositorio =
-                            remember(
-                                database
-                            ) {
-
-                                ChatRepository(
-                                    database
-                                        .mensajeDao()
-                                )
-                            }
-
-
-                        val networkMonitor =
-                            remember(
-                                context
-                            ) {
-
-                                NetworkMonitor(
-                                    context.applicationContext
-                                )
-                            }
-
-
-                        val userChatViewModel:
-                                ChatViewModel =
-
-                            viewModel(
-
-                                factory =
-
-                                    object :
-                                        ViewModelProvider.Factory {
-
-                                        override fun <T : ViewModel> create(
-                                            modelClass: Class<T>
-                                        ): T {
-
-                                            @Suppress(
-                                                "UNCHECKED_CAST"
-                                            )
-
-                                            return ChatViewModel(
-
-                                                repository =
-                                                    repositorio,
-
-                                                networkMonitor =
-                                                    networkMonitor
-
-                                            ) as T
-                                        }
-                                    }
+                        val chatRepository = remember(database) {
+                            ChatRepository(
+                                mensajeDao = database.mensajeDao(),
+                                appContext = context.applicationContext
                             )
+                        }
 
+                        val productoRepository = remember(database) {
+                            ProductoRepository(
+                                productoDao = database.productoDao(),
+                                appContext = context.applicationContext
+                            )
+                        }
 
-                        userChatViewModel.esAdmin =
-                            false
+                        val userChatViewModel: ChatViewModel = viewModel(
+                            factory = object : ViewModelProvider.Factory {
+                                @Suppress("UNCHECKED_CAST")
+                                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                    return ChatViewModel(
+                                        repository = chatRepository,
+                                        networkMonitor = networkMonitor
+                                    ) as T
+                                }
+                            }
+                        )
 
+                        val productoViewModel: ProductoViewModel = viewModel(
+                            factory = object : ViewModelProvider.Factory {
+                                @Suppress("UNCHECKED_CAST")
+                                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                    return ProductoViewModel(
+                                        repository = productoRepository,
+                                        networkMonitor = networkMonitor
+                                    ) as T
+                                }
+                            }
+                        )
+
+                        userChatViewModel.esAdmin = false
 
                         MainScreen(
-
-                            correo =
-                                correoUsuarioActual,
-
-
+                            correo = correoUsuarioActual,
+                            productoViewModel = productoViewModel,
                             onCerrarSesion = {
-
-
                                 // =================================
                                 // CERRAR FIREBASE
                                 // =================================
-
                                 FirebaseAuth
                                     .getInstance()
                                     .signOut()
 
-
-                                // =================================
-                                // LIMPIAR SESIÓN
-                                // =================================
-
-                                correoUsuarioActual =
-                                    ""
-
-                                correoEnRevision =
-                                    ""
-
-
-                                // =================================
-                                // VOLVER AL LOGIN
-                                // =================================
-
-                                pantallaActual =
-                                    "login"
+                                correoUsuarioActual = ""
+                                correoEnRevision = ""
+                                pantallaActual = "login"
                             }
                         )
                     }
-
 
                     // =====================================
                     // SEGURIDAD / PANTALLA DESCONOCIDA
                     // =====================================
 
                     else -> {
-
                         PantallaBienvenida(
-
                             onIniciarSesion = {
-
-                                pantallaActual =
-                                    "login"
+                                pantallaActual = "login"
                             },
-
                             onCrearCuenta = {
-
-                                pantallaActual =
-                                    "registro"
+                                pantallaActual = "registro"
                             }
                         )
                     }

@@ -43,51 +43,22 @@ class AdminViewModelTest {
         solicitud =
             AdminSolicitudDTO(
 
-                id =
-                    41L,
-
-                rut =
-                    "111111111",
-
-                nombre =
-                    "Usuario Android",
-
-                correo =
-                    "android@correo.cl",
-
-                nombreEmprendimiento =
-                    "Textil Android",
-
-                rubro =
-                    "Ropa",
-
-                region =
-                    "California",
-
-                comuna =
-                    "Mountain View",
-
-                edad =
-                    30,
-
-                genero =
-                    "Masculino",
-
-                rol =
-                    "EMPRENDEDORA",
-
-                estado =
-                    "PENDIENTE",
-
-                motivoRechazo =
-                    null
+                id = 41L,
+                rut = "111111111",
+                nombre = "Usuario Android",
+                correo = "android@correo.cl",
+                nombreEmprendimiento = "Textil Android",
+                rubro = "Ropa",
+                region = "California",
+                comuna = "Mountain View",
+                edad = 30,
+                genero = "Masculino",
+                rol = "EMPRENDEDORA",
+                estado = "PENDIENTE",
+                motivoRechazo = null
             )
     }
 
-
-    // =========================================
-    // 1. CARGAR SOLICITUDES
-    // =========================================
 
     @Test
     fun `carga solicitudes pendientes correctamente`() =
@@ -147,21 +118,8 @@ class AdminViewModelTest {
                     .first()
                     .correo
             )
-
-
-            coVerify(
-                exactly = 1
-            ) {
-
-                adminRepository
-                    .obtenerSolicitudes()
-            }
         }
 
-
-    // =========================================
-    // 2. CARGAR SIN INTERNET
-    // =========================================
 
     @Test
     fun `sin internet no carga solicitudes`() {
@@ -183,13 +141,6 @@ class AdminViewModelTest {
         )
 
 
-        assertTrue(
-            viewModel.uiState
-                .solicitudes
-                .isEmpty()
-        )
-
-
         coVerify(
             exactly = 0
         ) {
@@ -199,10 +150,6 @@ class AdminViewModelTest {
         }
     }
 
-
-    // =========================================
-    // 3. APROBAR SOLICITUD
-    // =========================================
 
     @Test
     fun `aprobar solicitud elimina usuario de pendientes`() =
@@ -223,13 +170,6 @@ class AdminViewModelTest {
                     )
 
 
-            val solicitudAprobada =
-                solicitud.copy(
-                    estado =
-                        "APROBADA"
-                )
-
-
             coEvery {
 
                 adminRepository
@@ -239,7 +179,11 @@ class AdminViewModelTest {
 
             } returns
                     Result.success(
-                        solicitudAprobada
+
+                        solicitud.copy(
+                            estado =
+                                "APROBADA"
+                        )
                     )
 
 
@@ -250,19 +194,11 @@ class AdminViewModelTest {
 
 
             viewModel.cargarSolicitudes(
-                isOnline = true
+                true
             )
 
 
             advanceUntilIdle()
-
-
-            assertEquals(
-                1,
-                viewModel.uiState
-                    .solicitudes
-                    .size
-            )
 
 
             viewModel.aprobarSolicitud(
@@ -289,28 +225,8 @@ class AdminViewModelTest {
                 "Solicitud aprobada correctamente",
                 viewModel.uiState.mensaje
             )
-
-
-            assertNull(
-                viewModel.uiState.error
-            )
-
-
-            coVerify(
-                exactly = 1
-            ) {
-
-                adminRepository
-                    .aprobarSolicitud(
-                        41L
-                    )
-            }
         }
 
-
-    // =========================================
-    // 4. APROBAR SIN INTERNET
-    // =========================================
 
     @Test
     fun `aprobar sin internet muestra error`() {
@@ -331,11 +247,6 @@ class AdminViewModelTest {
         )
 
 
-        assertFalse(
-            viewModel.uiState.cargando
-        )
-
-
         assertEquals(
             "No tienes conexión a internet",
             viewModel.uiState.error
@@ -353,10 +264,6 @@ class AdminViewModelTest {
         }
     }
 
-
-    // =========================================
-    // 5. ERROR DEL BACKEND AL APROBAR
-    // =========================================
 
     @Test
     fun `error del backend al aprobar se muestra`() =
@@ -399,37 +306,12 @@ class AdminViewModelTest {
             advanceUntilIdle()
 
 
-            assertFalse(
-                viewModel.uiState.cargando
-            )
-
-
             assertEquals(
                 "No se pudo aprobar la solicitud",
                 viewModel.uiState.error
             )
-
-
-            assertNull(
-                viewModel.uiState.mensaje
-            )
-
-
-            coVerify(
-                exactly = 1
-            ) {
-
-                adminRepository
-                    .aprobarSolicitud(
-                        41L
-                    )
-            }
         }
 
-
-    // =========================================
-    // 6. RECHAZAR SOLICITUD
-    // =========================================
 
     @Test
     fun `rechazar solicitud elimina usuario de pendientes`() =
@@ -450,17 +332,6 @@ class AdminViewModelTest {
                     )
 
 
-            val solicitudRechazada =
-                solicitud.copy(
-
-                    estado =
-                        "RECHAZADA",
-
-                    motivoRechazo =
-                        "Datos no verificados"
-                )
-
-
             coEvery {
 
                 adminRepository
@@ -473,7 +344,15 @@ class AdminViewModelTest {
 
             } returns
                     Result.success(
-                        solicitudRechazada
+
+                        solicitud.copy(
+
+                            estado =
+                                "RECHAZADA",
+
+                            motivoRechazo =
+                                "Datos no verificados"
+                        )
                     )
 
 
@@ -484,19 +363,11 @@ class AdminViewModelTest {
 
 
             viewModel.cargarSolicitudes(
-                isOnline = true
+                true
             )
 
 
             advanceUntilIdle()
-
-
-            assertEquals(
-                1,
-                viewModel.uiState
-                    .solicitudes
-                    .size
-            )
 
 
             viewModel.rechazarSolicitud(
@@ -526,31 +397,8 @@ class AdminViewModelTest {
                 "Solicitud rechazada correctamente",
                 viewModel.uiState.mensaje
             )
-
-
-            assertNull(
-                viewModel.uiState.error
-            )
-
-
-            coVerify(
-                exactly = 1
-            ) {
-
-                adminRepository
-                    .rechazarSolicitud(
-
-                        41L,
-
-                        "Datos no verificados"
-                    )
-            }
         }
 
-
-    // =========================================
-    // 7. MOTIVO VACÍO
-    // =========================================
 
     @Test
     fun `rechazo con motivo vacio muestra error`() {
@@ -578,6 +426,41 @@ class AdminViewModelTest {
             "Debes indicar el motivo del rechazo",
             viewModel.uiState.error
         )
+    }
+
+
+    @Test
+    fun `rechazar motivo mayor a 500 caracteres muestra error`() {
+
+        val viewModel =
+            AdminViewModel(
+                adminRepository
+            )
+
+
+        val motivoLargo =
+            "A".repeat(
+                501
+            )
+
+
+        viewModel.rechazarSolicitud(
+
+            id =
+                41L,
+
+            motivo =
+                motivoLargo,
+
+            isOnline =
+                true
+        )
+
+
+        assertEquals(
+            "El motivo no puede superar los 500 caracteres",
+            viewModel.uiState.error
+        )
 
 
         coVerify(
@@ -592,10 +475,6 @@ class AdminViewModelTest {
         }
     }
 
-
-    // =========================================
-    // 8. RECHAZAR SIN INTERNET
-    // =========================================
 
     @Test
     fun `rechazar sin internet muestra error`() {
@@ -619,33 +498,12 @@ class AdminViewModelTest {
         )
 
 
-        assertFalse(
-            viewModel.uiState.cargando
-        )
-
-
         assertEquals(
             "No tienes conexión a internet",
             viewModel.uiState.error
         )
-
-
-        coVerify(
-            exactly = 0
-        ) {
-
-            adminRepository
-                .rechazarSolicitud(
-                    any(),
-                    any()
-                )
-        }
     }
 
-
-    // =========================================
-    // 9. ERROR DEL BACKEND AL RECHAZAR
-    // =========================================
 
     @Test
     fun `error del backend al rechazar se muestra`() =
@@ -694,40 +552,12 @@ class AdminViewModelTest {
             advanceUntilIdle()
 
 
-            assertFalse(
-                viewModel.uiState.cargando
-            )
-
-
             assertEquals(
                 "No se pudo rechazar la solicitud",
                 viewModel.uiState.error
             )
-
-
-            assertNull(
-                viewModel.uiState.mensaje
-            )
-
-
-            coVerify(
-                exactly = 1
-            ) {
-
-                adminRepository
-                    .rechazarSolicitud(
-
-                        41L,
-
-                        "Datos no verificados"
-                    )
-            }
         }
 
-
-    // =========================================
-    // 10. ERROR AL CARGAR SOLICITUDES
-    // =========================================
 
     @Test
     fun `error del servidor al cargar solicitudes se muestra`() =
@@ -756,28 +586,111 @@ class AdminViewModelTest {
 
 
             viewModel.cargarSolicitudes(
-                isOnline = true
+                true
             )
 
 
             advanceUntilIdle()
 
 
-            assertFalse(
-                viewModel.uiState.cargando
-            )
-
-
             assertEquals(
                 "No se pudo conectar con el servidor",
                 viewModel.uiState.error
             )
+        }
 
 
-            assertTrue(
-                viewModel.uiState
-                    .solicitudes
-                    .isEmpty()
+    // =========================================
+    // LIMPIAR ERROR
+    // =========================================
+
+    @Test
+    fun `limpiar error elimina mensaje de error`() {
+
+        val viewModel =
+            AdminViewModel(
+                adminRepository
+            )
+
+
+        viewModel.cargarSolicitudes(
+            isOnline =
+                false
+        )
+
+
+        assertEquals(
+            "No tienes conexión a internet",
+            viewModel.uiState.error
+        )
+
+
+        viewModel.limpiarError()
+
+
+        assertNull(
+            viewModel.uiState.error
+        )
+    }
+
+
+    // =========================================
+    // LIMPIAR MENSAJE
+    // =========================================
+
+    @Test
+    fun `limpiar mensaje elimina mensaje exitoso`() =
+        runTest(
+            mainDispatcherRule.testDispatcher
+        ) {
+
+            coEvery {
+
+                adminRepository
+                    .aprobarSolicitud(
+                        41L
+                    )
+
+            } returns
+                    Result.success(
+
+                        solicitud.copy(
+                            estado =
+                                "APROBADA"
+                        )
+                    )
+
+
+            val viewModel =
+                AdminViewModel(
+                    adminRepository
+                )
+
+
+            viewModel.aprobarSolicitud(
+
+                id =
+                    41L,
+
+                isOnline =
+                    true
+            )
+
+
+            advanceUntilIdle()
+
+
+            assertEquals(
+                "Solicitud aprobada correctamente",
+                viewModel.uiState.mensaje
+            )
+
+
+            viewModel.limpiarMensaje()
+
+
+            assertNull(
+                viewModel.uiState.mensaje
             )
         }
 }

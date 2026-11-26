@@ -23,68 +23,33 @@ class ChatViewModel(
     // =========================
     // CHAT ACTUAL
     // =========================
-
-    private val _chatIdActual =
-        MutableStateFlow(
-            "general"
-        )
-
-    val chatIdActual:
-            StateFlow<String> =
-        _chatIdActual
-
+    private val _chatIdActual = MutableStateFlow("general")
+    val chatIdActual: StateFlow<String> = _chatIdActual
 
     // =========================
     // HISTORIAL
     // =========================
-
-    val historial:
-            StateFlow<List<MensajeEntity>> =
-
+    val historial: StateFlow<List<MensajeEntity>> =
         _chatIdActual
-            .flatMapLatest {
-                    chatId ->
-
-                repository
-                    .obtenerHistorialChat(
-                        chatId
-                    )
+            .flatMapLatest { chatId ->
+                repository.obtenerHistorialChat(chatId)
             }
             .stateIn(
-                scope =
-                    viewModelScope,
-
-                started =
-                    SharingStarted
-                        .WhileSubscribed(
-                            5000
-                        ),
-
-                initialValue =
-                    emptyList()
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
             )
-
 
     // =========================
     // INTERNET
     // =========================
-
-    val isOnline =
+    val isOnline: StateFlow<Boolean> =
         networkMonitor
             .isOnline
             .stateIn(
-
-                scope =
-                    viewModelScope,
-
-                started =
-                    SharingStarted
-                        .WhileSubscribed(
-                            5000
-                        ),
-
-                initialValue =
-                    false
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false
             )
 
     // =========================
@@ -119,97 +84,73 @@ class ChatViewModel(
         }
     }
 
-
     // =========================
-    // CUANDO VUELVE INTERNET
+    // CUANDO VUELVE INTERNET (SUBIDA Y BAJADA)
     // =========================
-
     init {
-
         viewModelScope.launch {
-
             networkMonitor
                 .isOnline
-                .collect {
-                        online ->
-
+                .collect { online ->
                     if (online) {
-
-                        repository
-                            .sincronizarPendientes()
+                        repository.sincronizarPendientes()
+                        if (esAdmin) {
+                            repository.refrescarTodosLosChats()
+                        }
+                        if (_chatIdActual.value.isNotBlank()) {
+                            repository.refrescarMensajesChat(_chatIdActual.value)
+                        }
                     }
                 }
         }
     }
 
-
     // =========================
-    // SELECCIONAR CHAT
+    // SELECCIONAR CHAT Y DESCARGAR MENSAJES NUEVOS
     // =========================
-
-    fun seleccionarChat(
-        chatId: String
-    ) {
-
-        _chatIdActual.value =
-            chatId
+    fun seleccionarChat(chatId: String) {
+        _chatIdActual.value = chatId
+        viewModelScope.launch {
+            repository.refrescarMensajesChat(chatId)
+        }
     }
 
-
     // =========================
-    // ENVIAR MENSAJE
+    // REFRESCOS MANUALES DESDE LA UI
     // =========================
-
-    fun enviarMensaje(
-        texto: String
-    ) {
-
-        if (
-            texto.isBlank()
-        ) {
-
-            return
+    fun refrescarBandejaAdmin() {
+        viewModelScope.launch {
+            repository.refrescarTodosLosChats()
         }
+    }
+
+    fun refrescarHistorialActual() {
+        viewModelScope.launch {
+            repository.refrescarMensajesChat(_chatIdActual.value)
+        }
+    }
+
+    // =========================
+    // ENVIAR MENSAJE (USUARIO O ADMIN)
+    // =========================
+    fun enviarMensaje(texto: String) {
+        if (texto.isBlank()) return
 
         viewModelScope.launch {
-
-            repository
-                .guardarMensajeLocal(
-
-                    chatId =
-                        _chatIdActual.value,
-
-                    contenido =
-                        texto.trim(),
-
-                    esDeUsuario = !esAdmin
-                )
-
-            if (
-                (isOnline.value && !esAdmin)
-            ) {
-
-                repository
-                    .sincronizarPendientes()
-            }
+            repository.guardarMensajeLocal(
+                chatId = _chatIdActual.value,
+                contenido = texto.trim(),
+                esDeUsuario = !esAdmin
+            )
         }
     }
-
 
     // =========================
     // MARCAR COMO LEÍDO
     // =========================
-
-    fun marcarChatComoLeido(
-        chatId: String
-    ) {
-
+    fun marcarChatComoLeido(chatId: String) {
         viewModelScope.launch {
-
-            repository
-                .marcarChatComoLeido(
-                    chatId
-                )
+            repository.marcarChatComoLeido(chatId)
         }
     }
 }

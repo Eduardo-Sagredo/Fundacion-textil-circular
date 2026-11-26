@@ -6,11 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="c653f0cb-c844-41c4-bd3b-0a4d8529d7ce" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cl/textilcircular_api/TextilCircularApiApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cl/textilcircular_api/TextilCircularApiApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cl/textilcircular_api/model/Mensaje.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cl/textilcircular_api/model/Mensaje.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,61 +44,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.3959130146035215E-11" />
-      <entry key="MS500" value="0.006744843865005682" />
-      <entry key="S2" value="0.2943043817163205" />
-      <entry key="S5" value="0.7495444142133172" />
-      <entry key="S10" value="1.1569301829378396" />
-      <entry key="S30" value="1.6431598865144827" />
-      <entry key="S60" value="1.8095503789644891" />
-      <entry key="M2" value="1.90164217694088" />
-      <entry key="M5" value="2.1531198377769236" />
-      <entry key="M10" value="7.188148208197997" />
-      <entry key="M15" value="19.845035467471337" />
-      <entry key="M30" value="67.76350282307418" />
-      <entry key="H1" value="131.77696152192067" />
-      <entry key="H2" value="185.60450103123182" />
-      <entry key="H4" value="220.77739758243476" />
-      <entry key="D1" value="255.4144841352159" />
-      <entry key="W1" value="261.90208063088085" />
+      <entry key="MS100" value="1.0000000172929058" />
+      <entry key="MS500" value="1.048502971139201" />
+      <entry key="S2" value="1.7890748869180917" />
+      <entry key="S5" value="2.4226060680870423" />
+      <entry key="S10" value="3.1772258063285155" />
+      <entry key="S30" value="6.265367498376309" />
+      <entry key="S60" value="8.82033781054404" />
+      <entry key="M2" value="10.937687896039005" />
+      <entry key="M5" value="15.560105490427555" />
+      <entry key="M10" value="36.36720664607975" />
+      <entry key="M15" value="63.93901380345937" />
+      <entry key="M30" value="141.17052496697949" />
+      <entry key="H1" value="248.5257860995059" />
+      <entry key="H2" value="354.7460584928801" />
+      <entry key="H4" value="433.41169403726514" />
+      <entry key="D1" value="518.3810636443271" />
+      <entry key="W1" value="535.1377512293192" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0000014840796978" />
-      <entry key="S2" value="1.0349031244671922" />
-      <entry key="S5" value="1.261303798142101" />
-      <entry key="S10" value="1.5111788318603392" />
-      <entry key="S30" value="1.7995720794153829" />
-      <entry key="S60" value="1.8941921909756811" />
-      <entry key="M2" value="1.9485297477045815" />
-      <entry key="M5" value="2.162398537616114" />
-      <entry key="M10" value="4.994449296817789" />
-      <entry key="M15" value="13.38180365103578" />
-      <entry key="M30" value="50.14180454662697" />
-      <entry key="H1" value="103.72811098955665" />
-      <entry key="H2" value="150.67661004852152" />
-      <entry key="H4" value="181.96119313669115" />
-      <entry key="D1" value="213.13178835650746" />
-      <entry key="W1" value="219.00503250312647" />
+      <entry key="MS100" value="1.0560604107586916E-46" />
+      <entry key="MS500" value="6.378781888473613E-10" />
+      <entry key="S2" value="0.005025562089005305" />
+      <entry key="S5" value="0.12083653777824574" />
+      <entry key="S10" value="0.38416948682720164" />
+      <entry key="S30" value="1.6386878337218895" />
+      <entry key="S60" value="3.1419349203062206" />
+      <entry key="M2" value="4.623011574530527" />
+      <entry key="M5" value="8.703601875150122" />
+      <entry key="M10" value="25.541063839122224" />
+      <entry key="M15" value="45.27201345854442" />
+      <entry key="M30" value="96.81052036848828" />
+      <entry key="H1" value="171.03250674321694" />
+      <entry key="H2" value="249.06244987569252" />
+      <entry key="H4" value="309.0632347213017" />
+      <entry key="D1" value="375.46918498783594" />
+      <entry key="W1" value="388.72994624907005" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="5.276716499681791E-5" />
-      <entry key="MS500" value="0.13947190974639997" />
-      <entry key="S2" value="0.6773289407920656" />
-      <entry key="S5" value="1.4279111504584168" />
-      <entry key="S10" value="2.238489431148132" />
-      <entry key="S30" value="3.2502410422918495" />
-      <entry key="S60" value="3.5996286861311373" />
-      <entry key="M2" value="3.795969683261976" />
-      <entry key="M5" value="4.292670986384545" />
-      <entry key="M10" value="12.16434646974619" />
-      <entry key="M15" value="33.20093926671879" />
-      <entry key="M30" value="117.8624031688496" />
-      <entry key="H1" value="235.4619146686865" />
-      <entry key="H2" value="336.2500568863759" />
-      <entry key="H4" value="402.7199124824887" />
-      <entry key="D1" value="468.5426367849865" />
-      <entry key="W1" value="480.9065796869988" />
+      <entry key="MS100" value="2.5141889511719865E-5" />
+      <entry key="MS500" value="0.15880898565732926" />
+      <entry key="S2" value="1.3349480100512834" />
+      <entry key="S5" value="2.306290312361373" />
+      <entry key="S10" value="3.4018218166659335" />
+      <entry key="S30" value="7.717089805013853" />
+      <entry key="S60" value="11.76864386821346" />
+      <entry key="M2" value="15.412037623454752" />
+      <entry key="M5" value="24.17202862336646" />
+      <entry key="M10" value="61.81698074373167" />
+      <entry key="M15" value="109.11492832280949" />
+      <entry key="M30" value="237.8871049547379" />
+      <entry key="H1" value="419.47915694927417" />
+      <entry key="H2" value="603.7523972633896" />
+      <entry key="H4" value="742.4405826911727" />
+      <entry key="D1" value="893.8433714545394" />
+      <entry key="W1" value="923.8666822413193" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -115,27 +110,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "Spring Boot.TextilCircularApiApplication.executor": "Run",
-    "git-widget-placeholder": "feature/mensaje-productos",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.jshint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.jshint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.TextilCircularApiApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/mensaje-productos&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\eduar\IdeaProjects\Fundacion-textil-circular\backend\src\main\resources" />

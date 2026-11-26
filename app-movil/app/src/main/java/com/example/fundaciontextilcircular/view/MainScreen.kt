@@ -17,6 +17,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -35,16 +36,26 @@ import com.example.fundaciontextilcircular.ui.view.AgregarProductoScreen
 import com.example.fundaciontextilcircular.ui.view.ChatScreen
 import com.example.fundaciontextilcircular.ui.view.ListaChatsScreen
 import com.example.fundaciontextilcircular.ui.viewmodel.ChatViewModel
+import com.example.fundaciontextilcircular.ui.viewmodel.ProductoViewModel
 
 
 @Composable
 fun MainScreen(
     correo: String,
+    productoViewModel: ProductoViewModel,
     onCerrarSesion: () -> Unit = {}
 ) {
 
     val context =
         LocalContext.current
+
+    // =============================================
+    // SINCRONIZACIÓN INICIAL DEL CATÁLOGO
+    // =============================================
+
+    LaunchedEffect(Unit) {
+        productoViewModel.refrescarCatalogo()
+    }
 
 
     val database =
@@ -107,14 +118,16 @@ fun MainScreen(
     }
 
 
+    // =============================================
+    // CHAT REPOSITORY
+    // =============================================
     val chatRepository =
         remember(
-            mensajeDao
+            key1 = mensajeDao
         ) {
-
             ChatRepository(
-                mensajeDao =
-                    mensajeDao
+                mensajeDao = mensajeDao,
+                appContext = context.applicationContext
             )
         }
 
@@ -438,6 +451,9 @@ fun MainScreen(
                             correoUsuario =
                                 correo,
 
+                            productoViewModel =
+                                productoViewModel,
+
                             onProductoPublicado = {
 
                                 mostrarAgregarProducto =
@@ -458,6 +474,9 @@ fun MainScreen(
 
                         correoUsuario =
                             correo,
+
+                        productoViewModel =
+                            productoViewModel,
 
                         modifier =
                             Modifier.padding(
@@ -540,6 +559,9 @@ fun MainScreen(
 
                     correo =
                         correo,
+
+                    productoViewModel =
+                        productoViewModel,
 
                     onCerrarSesion = {
 
