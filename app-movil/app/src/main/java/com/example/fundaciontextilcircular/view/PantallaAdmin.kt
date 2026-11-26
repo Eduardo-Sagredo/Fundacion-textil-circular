@@ -60,7 +60,8 @@ private val FondoAdmin =
 fun PantallaAdmin(
     modifier: Modifier = Modifier,
     onCerrarSesion: () -> Unit = {},
-    onVerChat: (String) -> Unit = {}
+    onVerChat: (String) -> Unit = {},
+    onIrAEliminarUsuarios: () -> Unit = {}
 ) {
 
     val context =
@@ -271,6 +272,19 @@ fun PantallaAdmin(
                     .typography
                     .titleMedium
         )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        Button(
+            onClick = onIrAEliminarUsuarios,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = RojoErrorTextil,
+                contentColor = BlancoTextil
+            )
+        ) {
+            Text(text = "BUSCAR Y ELIMINAR USUARIOS")
+        }
 
 
         // =====================================

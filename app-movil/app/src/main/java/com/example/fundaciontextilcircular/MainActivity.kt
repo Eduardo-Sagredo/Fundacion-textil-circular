@@ -32,6 +32,7 @@ import com.example.fundaciontextilcircular.view.MainScreen
 import com.example.fundaciontextilcircular.view.PantallaAdmin
 import com.example.fundaciontextilcircular.view.PantallaBienvenida
 import com.example.fundaciontextilcircular.view.PantallaCuentaEnRevision
+import com.example.fundaciontextilcircular.view.PantallaEliminarUsuarios
 import com.example.fundaciontextilcircular.view.PantallaLogin
 import com.example.fundaciontextilcircular.view.PantallaRecuperarContrasena
 import com.example.fundaciontextilcircular.view.PantallaRegistro
@@ -245,6 +246,17 @@ class MainActivity : ComponentActivity() {
                             onVerChat = { idDelChat ->
                                 chatSeleccionado = idDelChat
                                 pantallaActual = "chat_admin"
+                            },
+                            onIrAEliminarUsuarios = {
+                                pantallaActual = "eliminar_usuarios"
+                            }
+                        )
+                    }
+
+                    "eliminar_usuarios" -> {
+                        PantallaEliminarUsuarios (
+                            onVolver = {
+                                pantallaActual = "admin"
                             }
                         )
                     }

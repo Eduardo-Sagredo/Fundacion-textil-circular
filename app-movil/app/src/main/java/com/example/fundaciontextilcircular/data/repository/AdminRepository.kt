@@ -8,6 +8,7 @@ class AdminRepository(
     private val adminApi: AdminApi
 ) {
 
+
     suspend fun obtenerSolicitudes():
             Result<List<AdminSolicitudDTO>> {
 
@@ -123,6 +124,46 @@ class AdminRepository(
                     "No se pudo conectar con el servidor",
                     e
                 )
+            )
+        }
+    }
+
+    suspend fun buscarUsuarios(
+        nombre: String = ""
+    ): Result<List<AdminSolicitudDTO>> {
+        return try {
+            val response = adminApi.buscarUsuarios(nombre.trim())
+
+            if (response.isSuccessful) {
+                Result.success(response.body() ?: emptyList())
+            } else {
+                Result.failure(
+                    Exception("No se pudieron buscar los usuarios")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(
+                Exception("No se pudo conectar con el servidor", e)
+            )
+        }
+    }
+
+    suspend fun eliminarUsuario(
+        id: Long
+    ): Result<Unit> {
+        return try {
+            val response = adminApi.eliminarUsuario(id)
+
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(
+                    Exception("No se pudo eliminar la cuenta del usuario")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(
+                Exception("No se pudo conectar con el servidor", e)
             )
         }
     }
