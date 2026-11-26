@@ -3,15 +3,24 @@ package cl.textilcircular_api.service;
 import cl.textilcircular_api.dto.CambiarContrasenaRequestDTO;
 import cl.textilcircular_api.dto.LoginRequestDTO;
 import cl.textilcircular_api.dto.LoginResponseDTO;
+import cl.textilcircular_api.dto.OlvideContrasenaRequestDTO;
 import cl.textilcircular_api.dto.PerfilResponseDTO;
 import cl.textilcircular_api.dto.RegistroRequestDTO;
+import cl.textilcircular_api.dto.RestablecerContrasenaRequestDTO;
 
 import cl.textilcircular_api.model.Emprendedora;
+import cl.textilcircular_api.model.PasswordResetToken;
 
 import cl.textilcircular_api.repository.EmprendedoraRepository;
+import cl.textilcircular_api.repository.PasswordResetTokenRepository;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class AuthService {
@@ -22,10 +31,22 @@ public class AuthService {
     private final PasswordEncoder
             passwordEncoder;
 
+    private final PasswordResetTokenRepository
+            passwordResetTokenRepository;
+
+    private final EmailService
+            emailService;
+
+    private final SecureRandom
+            secureRandom =
+            new SecureRandom();
+
 
     public AuthService(
             EmprendedoraRepository emprendedoraRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            PasswordResetTokenRepository passwordResetTokenRepository,
+            EmailService emailService
     ) {
 
         this.emprendedoraRepository =
@@ -33,6 +54,12 @@ public class AuthService {
 
         this.passwordEncoder =
                 passwordEncoder;
+
+        this.passwordResetTokenRepository =
+                passwordResetTokenRepository;
+
+        this.emailService =
+                emailService;
     }
 
 
@@ -106,7 +133,6 @@ public class AuthService {
 
 
         emprendedora.setContrasena(
-
                 passwordEncoder.encode(
                         request.getContrasena()
                 )
@@ -204,9 +230,7 @@ public class AuthService {
 
         boolean contrasenaCorrecta =
                 passwordEncoder.matches(
-
                         request.getContrasena(),
-
                         emprendedora.getContrasena()
                 );
 
@@ -362,9 +386,7 @@ public class AuthService {
 
         boolean contrasenaActualCorrecta =
                 passwordEncoder.matches(
-
                         request.getContrasenaActual(),
-
                         emprendedora.getContrasena()
                 );
 
@@ -381,9 +403,7 @@ public class AuthService {
 
         boolean mismaContrasena =
                 passwordEncoder.matches(
-
                         request.getNuevaContrasena(),
-
                         emprendedora.getContrasena()
                 );
 
@@ -411,6 +431,248 @@ public class AuthService {
 
         emprendedoraRepository.save(
                 emprendedora
+        );
+    }
+
+
+    // =========================================
+    // OLVIDÉ MI CONTRASEÑA
+    // =========================================
+
+    @Transactional
+    public void olvideContrasena(
+            OlvideContrasenaRequestDTO request
+    ) {
+
+        String correo =
+                request
+                        .getEmail()
+                        .trim()
+                        .toLowerCase();
+
+
+        Emprendedora emprendedora =
+                emprendedoraRepository
+                        .findByCorreo(
+                                correo
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Usuario no encontrado"
+                                        )
+                        );
+
+
+        // =====================================
+        // INVALIDAR CÓDIGOS ANTERIORES
+        // =====================================
+
+        List<PasswordResetToken> tokensAnteriores =
+                passwordResetTokenRepository
+                        .findByEmailAndUsado(
+                                emprendedora.getCorreo(),
+                                0
+                        );
+
+
+        for (
+                PasswordResetToken tokenAnterior
+                : tokensAnteriores
+        ) {
+
+            tokenAnterior.setUsado(
+                    1
+            );
+        }
+
+
+        passwordResetTokenRepository.saveAll(
+                tokensAnteriores
+        );
+
+
+        // =====================================
+        // GENERAR NUEVO CÓDIGO DE 6 DÍGITOS
+        // =====================================
+
+        int numero =
+                secureRandom.nextInt(
+                        900000
+                ) + 100000;
+
+
+        String token =
+                String.valueOf(
+                        numero
+                );
+
+
+        LocalDateTime fechaExpiracion =
+                LocalDateTime
+                        .now()
+                        .plusMinutes(
+                                15
+                        );
+
+
+        PasswordResetToken passwordResetToken =
+                new PasswordResetToken();
+
+
+        passwordResetToken.setEmail(
+                emprendedora.getCorreo()
+        );
+
+
+        passwordResetToken.setToken(
+                token
+        );
+
+
+        passwordResetToken.setFechaExpiracion(
+                fechaExpiracion
+        );
+
+
+        passwordResetToken.setUsado(
+                0
+        );
+
+
+        passwordResetTokenRepository.save(
+                passwordResetToken
+        );
+
+
+        // =====================================
+        // ENVIAR CORREO
+        // =====================================
+
+        emailService.enviarCorreoRecuperacion(
+                emprendedora.getCorreo(),
+                token
+        );
+    }
+
+
+    // =========================================
+    // RESTABLECER CONTRASEÑA
+    // =========================================
+
+    @Transactional
+    public void restablecerContrasena(
+            RestablecerContrasenaRequestDTO request
+    ) {
+
+        PasswordResetToken passwordResetToken =
+                passwordResetTokenRepository
+                        .findByToken(
+                                request.getToken()
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Código inválido"
+                                        )
+                        );
+
+
+        if (
+                passwordResetToken.getUsado() == 1
+        ) {
+
+            throw new IllegalArgumentException(
+                    "El código ya fue utilizado"
+            );
+        }
+
+
+        if (
+                passwordResetToken
+                        .getFechaExpiracion()
+                        .isBefore(
+                                LocalDateTime.now()
+                        )
+        ) {
+
+            throw new IllegalArgumentException(
+                    "El código ha expirado"
+            );
+        }
+
+
+        Emprendedora emprendedora =
+                emprendedoraRepository
+                        .findByCorreo(
+                                passwordResetToken.getEmail()
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Usuario no encontrado"
+                                        )
+                        );
+
+
+        boolean mismaContrasena =
+                passwordEncoder.matches(
+                        request.getNuevaContrasena(),
+                        emprendedora.getContrasena()
+                );
+
+
+        if (
+                mismaContrasena
+        ) {
+
+            throw new IllegalArgumentException(
+                    "La nueva contraseña debe ser diferente a la anterior"
+            );
+        }
+
+
+        String nuevaContrasenaEncriptada =
+                passwordEncoder.encode(
+                        request.getNuevaContrasena()
+                );
+
+
+        emprendedora.setContrasena(
+                nuevaContrasenaEncriptada
+        );
+
+
+        emprendedoraRepository.save(
+                emprendedora
+        );
+
+
+        // =====================================
+        // INVALIDAR TODOS LOS CÓDIGOS ACTIVOS
+        // =====================================
+
+        List<PasswordResetToken> tokensActivos =
+                passwordResetTokenRepository
+                        .findByEmailAndUsado(
+                                emprendedora.getCorreo(),
+                                0
+                        );
+
+
+        for (
+                PasswordResetToken tokenActivo
+                : tokensActivos
+        ) {
+
+            tokenActivo.setUsado(
+                    1
+            );
+        }
+
+
+        passwordResetTokenRepository.saveAll(
+                tokensActivos
         );
     }
 }
