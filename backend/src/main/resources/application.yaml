@@ -34,11 +34,18 @@ spring:
 
     properties:
       mail:
+        debug: false
         smtp:
           auth: true
           starttls:
             enable: true
             required: true
+          ssl:
+            trust: smtp.gmail.com
+            protocols: TLSv1.2
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
 
 server:
   port: 8081

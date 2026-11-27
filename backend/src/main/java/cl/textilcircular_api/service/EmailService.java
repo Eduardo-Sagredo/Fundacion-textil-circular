@@ -3,41 +3,49 @@ package cl.textilcircular_api.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 public class EmailService {
 
     private final JavaMailSender mailSender;
 
+    @Value("${spring.mail.username}")
+    private String remitente;
+
     public EmailService(
             JavaMailSender mailSender
     ) {
-
-        this.mailSender =
-                mailSender;
+        this.mailSender = mailSender;
     }
 
-
+    @Async
     public void enviarCorreoRecuperacion(
             String destinatario,
             String token
     ) {
-
         try {
-
             MimeMessage mensaje =
                     mailSender.createMimeMessage();
 
             MimeMessageHelper helper =
                     new MimeMessageHelper(
                             mensaje,
-                            true,
+                            MimeMessageHelper.MULTIPART_MODE_RELATED,
                             "UTF-8"
                     );
+
+            helper.setFrom(
+                    remitente
+            );
 
             helper.setTo(
                     destinatario
@@ -46,7 +54,6 @@ public class EmailService {
             helper.setSubject(
                     "Recuperación de contraseña - Textil Circular"
             );
-
 
             String html = """
                     <!DOCTYPE html>
@@ -203,35 +210,32 @@ public class EmailService {
                     </html>
                     """.formatted(token);
 
-
             helper.setText(
                     html,
                     true
             );
 
-
-            ClassPathResource logo =
+            ClassPathResource logoResource =
                     new ClassPathResource(
                             "static/images/logo_textil_circular.png"
                     );
 
+            byte[] logoBytes =
+                    logoResource.getInputStream().readAllBytes();
 
             helper.addInline(
                     "logoTextilCircular",
-                    logo,
+                    new ByteArrayResource(logoBytes),
                     "image/png"
             );
-
 
             mailSender.send(
                     mensaje
             );
 
-
         } catch (
-                MessagingException e
+                MessagingException | IOException e
         ) {
-
             throw new RuntimeException(
                     "Error al crear el correo de recuperación",
                     e
