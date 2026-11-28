@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c653f0cb-c844-41c4-bd3b-0a4d8529d7ce" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cl/textilcircular_api/TextilCircularApiApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cl/textilcircular_api/TextilCircularApiApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cl/textilcircular_api/service/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cl/textilcircular_api/service/EmailService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yaml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Eduardo-Sagredo&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Eduardo-Sagredo/Fundacion-textil-circular.git&quot;,
+    &quot;accountId&quot;: &quot;debf901e-13c8-4fc0-a958-9bfe77c68c2e&quot;
+  }
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0000000000000253" />
+      <entry key="S60" value="1.0000005433560475" />
+      <entry key="M2" value="1.0025711824469363" />
+      <entry key="M5" value="1.4990082412094" />
+      <entry key="M10" value="6.813082173348375" />
+      <entry key="M15" value="19.431464462755144" />
+      <entry key="M30" value="80.29308750824768" />
+      <entry key="H1" value="203.34843500155438" />
+      <entry key="H2" value="354.6933943571241" />
+      <entry key="H4" value="482.31444592368365" />
+      <entry key="D1" value="633.3192907575698" />
+      <entry key="W1" value="664.6075836935656" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="8.839336173889934E-190" />
+      <entry key="S10" value="2.9731022131266824E-95" />
+      <entry key="S30" value="3.120474977932878E-32" />
+      <entry key="S60" value="2.1287180255109025E-16" />
+      <entry key="M2" value="2.9101922497639384E-8" />
+      <entry key="M5" value="0.004283971128467513" />
+      <entry key="M10" value="0.5443989950880906" />
+      <entry key="M15" value="3.4551292282545547" />
+      <entry key="M30" value="26.69630753151226" />
+      <entry key="H1" value="89.85665284011836" />
+      <entry key="H2" value="180.717291821742" />
+      <entry key="H4" value="263.5857711227825" />
+      <entry key="D1" value="366.41583837620044" />
+      <entry key="W1" value="388.2258532120802" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.9138314502294005" />
+      <entry key="MS500" value="0.9821395952633915" />
+      <entry key="S2" value="0.995504677670617" />
+      <entry key="S5" value="0.9981994402866303" />
+      <entry key="S10" value="0.9990993145261537" />
+      <entry key="S30" value="0.9996996813264662" />
+      <entry key="S60" value="0.999850371629944" />
+      <entry key="M2" value="1.0024932443848504" />
+      <entry key="M5" value="1.5030140340577436" />
+      <entry key="M10" value="7.354834649124885" />
+      <entry key="M15" value="22.878268707701537" />
+      <entry key="M30" value="106.96231059001639" />
+      <entry key="H1" value="293.1625548056766" />
+      <entry key="H2" value="535.3693553146152" />
+      <entry key="H4" value="745.8705733203968" />
+      <entry key="D1" value="999.7283523761176" />
+      <entry key="W1" value="1052.8324134628397" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3M7a3qVSX0T8AAfLPBX9R9q10cP" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.TextilCircularApiApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\eduar\IdeaProjects\Fundacion-textil-circular\backend\src\main\resources" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="TextilCircularApiApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="textil-circular-api" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="cl.textilcircular_api.TextilCircularApiApplication" />
+      <option name="VM_PARAMETERS" value="-Djava.net.preferIPv4Stack=true" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-ac68fc9d2b05-intellij.indexing.shared.core-IU-263.7307.200" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c653f0cb-c844-41c4-bd3b-0a4d8529d7ce" name="Changes" comment="" />
+      <created>1794703864283</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1794703864283</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName=".env" />
+  </component>
+</project>
